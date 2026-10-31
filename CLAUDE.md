@@ -1,5 +1,16 @@
 # CLAUDE.md
 
+## This fork (Mike's trainer app)
+
+Mike is a personal trainer turning openGym into a coaching app (trainer + clients). Status and
+decisions: `PLAN.md`. Features and permissions in plain English: `SPEC.md`.
+- One phase per session. Show UI as inline mock-ups first; build only when Mike says "build".
+- Ask Mike before paying for anything, before pushing, and before any store upload.
+- Never ship `catalogue/media` (Gym visual licence, NOTICE.md) in a build of this fork.
+- Keep upstream code paths intact where possible so upstream fixes can be merged.
+
+The rest of this file is upstream's guide.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 For people, the same map with diagrams is [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
