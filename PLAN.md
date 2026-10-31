@@ -16,6 +16,16 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 - **Reuse:** openGym already has invites (`/api/admin/invites`), roles (`/api/admin/user/role`), web push, measurements (`lib/measurements.js`) and media uploads.
 - **Hosting:** Mike's PC (Docker) while it's only him. Pick a host before clients join (a small VPS at about $5/mo, or a free tier). Ask Mike before paying.
 
+## Staying in sync with upstream openGym
+openGym ships fixes often. Keep merges cheap:
+- `main` mirrors upstream untouched. Our work lives on `trainer`. To update: `git fetch origin`, `git switch main`, `git merge --ff-only origin/main`, `git switch trainer`, `git merge main`, then run the tests.
+- **New features go in new files** (views, components, `lib/` helpers, API modules). Add only small hooks into upstream files: a route, a menu entry, a `routes[...]` key.
+- **Don't rewrite upstream files.** Wrap or extend them. If an upstream file needs changing, keep the edit small and mark it `// trainer-fork:` so it's easy to find during a merge.
+- **Name from one config file.** Don't find-and-replace "openGym" across the code. Rename only what users see: title, icon, splash, store listing, Capacitor `appId` / `appName`.
+- **Brand colors in our own theme file** that loads after `frontend/src/index.css` and overrides its tokens. Don't edit their CSS.
+- **Licensed media:** the release build strips `catalogue/media` (and any media an update adds) every time.
+- **Upstream trainer role:** their roadmap lists one for v1.4.10 (about February). When it lands, compare it with ours and decide whether to adopt, keep ours, or merge the two.
+
 ## Phases (one per session)
 0. Fork and run ✅
 1. Design: mock-ups, name and brand
