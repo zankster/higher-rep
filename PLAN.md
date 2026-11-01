@@ -14,7 +14,7 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 - **Exercise media:** Gym visual's animations may **not** be used outside openGym itself. Before store release, remove `catalogue/media` and use Mike's own videos instead. openGym already supports photo and video uploads for custom exercises (`api/media.js`). Exercise text is fine to keep (check the catalogue's license in `NOTICE.md`).
 - **Architecture:** see "Architecture" below. Keep openGym and add a coaching module; no rewrite.
 - **Reuse:** openGym already has invites (`/api/admin/invites`), roles (`/api/admin/user/role`), web push, measurements (`lib/measurements.js`), media uploads, the offline queue (`lib/queue.js`) and the sync merge (`api/sync-stamps.js`).
-- **Hosting:** Mike's PC (Docker) while it's only him. Before clients join: a small VPS (about $5/mo) plus a domain (about $12/yr), with HTTPS and encrypted nightly backups of `data/`. Ask Mike before paying.
+- **Hosting:** Mike's PC (Docker) while it's only him. Before clients join: a small VPS (about $5/mo) on higherrep.com (registered), with HTTPS and encrypted nightly backups of `data/`. Ask Mike before paying.
 
 ## Architecture (reviewed and approved)
 - **One app everywhere.** openGym's React app is the website, the iPhone app and the Android app (Capacitor). The screens Mike and clients see depend on their role. Mike can build programs in a desktop browser. The store builds point at Mike's server, so clients never enter a server address.
@@ -45,9 +45,9 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
   - Recheck on real devices before release.
 - **Name: Higher Rep. Chosen 2026-10-31.** Store listing: "Higher Rep: Fitness Coaching".
   - Web searches found no app, gym, business or trademark using it. The nearest names are different (Reps Health, Better Reps, 12REPS, Repply, FITHERO).
-  - higherrep.com, .app and .co had no DNS records, so they look unregistered (not bought yet). higherreps.com looks taken.
+  - **higherrep.com registered at Porkbun (2026-10-31).** .app and .co looked unregistered (not bought). higherreps.com looks taken.
   - "Higher rep" is a common training phrase, so the logo and subtitle carry the brand.
-  - Before release: register higherrep.com, claim the Instagram and TikTok handles, search both stores, and have a trademark attorney clear classes 9, 41 and 44. Ask Mike before paying for any of it.
+  - Before release: claim the Instagram and TikTok handles, search both stores, and have a trademark attorney clear classes 9, 41 and 44. Ask Mike before paying for any of it.
 - **Trainer dashboard:** the "Needs you first" layout (B), revised. **Approved (v3).**
   - Small date and greeting line, then "Search clients" under the header.
   - Three metrics, each with its period: compliance (last 7 days, = scheduled workouts completed), workouts done today (x of y scheduled), unread messages.
@@ -101,7 +101,8 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 
 ## Staying in sync with upstream openGym
 openGym ships fixes often. Keep merges cheap:
-- `main` mirrors upstream untouched. Our work lives on `trainer`. To update: `git fetch origin`, `git switch main`, `git merge --ff-only origin/main`, `git switch trainer`, `git merge main`, then run the tests.
+- Remotes: `origin` is our public fork (github.com/zankster/higher-rep, AGPL source), `upstream` is openGym (push disabled).
+- `main` mirrors upstream untouched. Our work lives on `trainer`. To update: `git fetch upstream`, `git switch main`, `git merge --ff-only upstream/main`, `git switch trainer`, `git merge main`, run the tests, then push both to `origin` (Mike's OK).
 - **New features go in new files** (views, components, `lib/` helpers, API modules). Add only small hooks into upstream files: a route, a menu entry, a `routes[...]` key.
 - **Don't rewrite upstream files.** Wrap or extend them. If an upstream file needs changing, keep the edit small and mark it `// trainer-fork:` so it's easy to find during a merge.
 - **Name from one config file.** Don't find-and-replace "openGym" across the code. Rename only what users see: title, icon, splash, store listing, Capacitor `appId` / `appName`.
