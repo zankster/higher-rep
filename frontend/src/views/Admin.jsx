@@ -10,6 +10,7 @@ import { confirmSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import AdminCoach from './AdminCoach.jsx'
+import TrainerRoleButton from '../components/TrainerRoleButton.jsx' // trainer-fork
 import '../admin.css'
 
 // Admin-only operator dashboard (owner passkey + admin flag; guarded again server-side).
@@ -130,6 +131,7 @@ function UserDetail({ id, viewerOwner, onChanged, close }) {
     <h3 className="capitalize">{u.name}</h3>
     <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '8px 0 12px' }}>
       {u.owner ? <span className="adm-pill acc">owner</span> : u.admin && <span className="adm-pill acc">admin</span>}
+      {u.trainer && <span className="adm-pill acc">trainer</span>}{/* trainer-fork */}
       {u.disabled && <span className="adm-pill bad">disabled</span>}
       {u.invitedBy && <span className="adm-pill">invite {u.invitedBy}</span>}
       {u.password && <span className="adm-pill">password</span>}
@@ -158,6 +160,8 @@ function UserDetail({ id, viewerOwner, onChanged, close }) {
         <div className="adm-hint">There is one owner. Handing it over makes you a regular admin.</div>
       </>}
     </>}
+    {/* trainer-fork: the Trainer switch */}
+    <TrainerRoleButton u={u} viewerOwner={viewerOwner} onChanged={onChanged} close={close} />
     {!u.admin && <>
       <button className={'btn ' + (u.disabled ? 'primary' : 'danger')} style={{ margin: '12px 0 4px' }}
         onClick={() => u.disabled ? setDisabled(false)
