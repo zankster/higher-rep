@@ -4,6 +4,8 @@
 
 Mike is a personal trainer turning openGym into a coaching app (trainer + clients). Status and
 decisions: `PLAN.md`. Features and permissions in plain English: `SPEC.md`.
+What is built and where (code map): `docs/trainer/PHASE2.md`. Coaching code lives in `api/coaching/`
+and `frontend/src/lib/coaching.js`; small edits to upstream files are marked `// trainer-fork:`.
 - One phase per session. Show UI as inline mock-ups first; build only when Mike says "build".
 - Ask Mike before paying for anything, before pushing, and before any store upload.
 - Never ship `catalogue/media` (Gym visual licence, NOTICE.md) in a build of this fork.

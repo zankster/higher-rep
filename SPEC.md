@@ -1,6 +1,6 @@
 # Trainer app: features
 
-Inspired by Everfit, Trainerize, FitPros, QuickCoach, Hevy Coach, Kahunas and CoachRx. ✅ means openGym already has it.
+Inspired by Everfit, Trainerize, FitPros, QuickCoach, Hevy Coach, Kahunas and CoachRx. ✅ means it exists: from openGym, or built in Phase 2 (`docs/trainer/PHASE2.md`).
 
 ## People
 - **Trainer** (Mike): manages clients, builds and assigns programs, reviews workouts, chats.
@@ -86,10 +86,12 @@ No automatic word or image filters: they would flag legitimate progress photos a
 - Trainer feed of completed workouts, with comments, PRs, effort ratings, and compliance % per client.
 
 **Clients and onboarding**
-- Intake form at sign-up: goals, training history, injuries, schedule, equipment.
-- Health questionnaire (PAR-Q+) and a waiver the client signs in the app, stored with a date.
+- ✅ Invite link, roster, pause, remove, and end coaching from either side.
+- ✅ Intake form at sign-up: goals, training history, injuries, schedule, equipment (a form the trainer builds in the document library).
+- ✅ Health questionnaire and a waiver the client signs in the app, stored with the exact version, date and device, with a guardian for 13 to 17.
 - Assessments and fitness tests (e.g. 1RM, push-ups, plank, timed mile, movement screen), with a retest reminder every 4–8 weeks and results charted over time.
-- Private trainer notes and tags on each client (e.g. "knee: no deep lunges", "athlete", "online").
+- ✅ Private trainer notes and tags on each client (e.g. "knee: no deep lunges", "athlete", "online").
+- ✅ Trainer branding (logo, colour, contact details) on the invite page, emails and the client's trainer card.
 
 **Communication**
 - One chat thread per client: text, photos, voice notes, and form-check videos. Plus comments on a workout.
