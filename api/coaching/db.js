@@ -43,7 +43,25 @@ export const MIGRATIONS = [
      autonomy TEXT NOT NULL DEFAULT '{}',
      notify TEXT NOT NULL DEFAULT '{}',
      updated_at INTEGER NOT NULL
-   );`
+   );`,
+  // 2. Phase 2b: invites. `code` is also an openGym invite code in db.json, so an invite-only
+  // instance lets the invited person sign up with it. Expiry is read from expires_at, never
+  // stored as a status.
+  `CREATE TABLE invites (
+     id INTEGER PRIMARY KEY,
+     trainer_id TEXT NOT NULL,
+     code TEXT NOT NULL UNIQUE,
+     first_name TEXT NOT NULL,
+     email TEXT,
+     note TEXT,
+     created_at INTEGER NOT NULL,
+     expires_at INTEGER NOT NULL,
+     opened_at INTEGER,
+     status TEXT NOT NULL CHECK (status IN ('pending', 'joined', 'revoked')),
+     client_id TEXT,
+     link_id INTEGER REFERENCES links (id)
+   );
+   CREATE INDEX invites_trainer ON invites (trainer_id, status);`
 ];
 
 export function openCoachingDb(dataDir, { file = 'coaching.sqlite' } = {}) {

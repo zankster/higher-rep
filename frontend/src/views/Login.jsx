@@ -13,11 +13,12 @@ import { passwordOn, PasswordRegisterForm, openPasswordSignIn } from '../compone
 import { openDeviceLinkRedeem } from '../components/Passkeys.jsx'
 import { openLostAccess } from '../components/LostAccess.jsx'
 
-function RegisterSheet({ close }) {
+// trainer-fork: exported, with initialCode, for the coaching invite page (views/JoinInvite.jsx).
+export function RegisterSheet({ close, initialCode = '' }) {
   const { setUser, pushState, pullState, loadConfig } = useStore()
   const config = useStore(s => s.config)
   const [name, setName] = useState('')
-  const [code, setCode] = useState('')
+  const [code, setCode] = useState(initialCode)
   const inviteOnly = !!config?.invite_only
   // A password is offered only where the instance allows it (#118), and is the only choice in a
   // browser that cannot make a passkey. Where both work, the passkey stays the first one.

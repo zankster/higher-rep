@@ -45,7 +45,10 @@ Each step ends with its tests passing and is one commit.
 ### 2b. Invites, roster, end coaching
 - A trainer invite is one of openGym's own invite codes (so `INVITE_ONLY` keeps working) plus a
   coaching row that says which trainer it comes from, the client's first name and email, and when
-  it expires. Registration burns the code as today; a small hook then creates the link.
+  it expires (14 days). openGym burns the code only on invite-only instances, so registration is
+  not hooked: the join page signs the person up the usual way, then `POST
+  /api/coaching/invites/accept` links them (the same route links an existing account). A revoked or
+  lapsed invite also revokes its openGym code, so it can't open an account.
 - The invite link opens a page that names the trainer ("Mike Smith invited you to Higher Rep")
   with the trainer's branding.
 - One active trainer per client in v1 (a unique index), but the tables allow more later.
@@ -54,6 +57,18 @@ Each step ends with its tests passing and is one commit.
   data). Both keep the liability record. Logged in the activity log.
 - Minimal roster: search, the filter chips that work without programs (All, Paused), invite status
   (sent, opened, joined, expired) with Resend and Revoke.
+- **Built 2026-11-01**, mock-ups approved the same day (inline in chat).
+  - API: `api/coaching/routes.js` (invites, invite page, accept, pause, remove, end), migration 2
+    (`invites`); tests `api/test/coaching-invites.test.js` with `coaching-harness.mjs`.
+  - App: `views/Clients.jsx` (roster, `#/clients`), `components/InviteSheet.jsx`,
+    `views/JoinInvite.jsx` (`#/join/<code>`), `views/Coaching.jsx` (client side, End coaching),
+    `components/CoachingRow.jsx` (Settings), `lib/coaching.js`; tests `lib/coaching.test.js`,
+    `views/Clients.test.jsx`. Marked hooks in `App.jsx`, `Login.jsx` (RegisterSheet exported),
+    `Settings.jsx`.
+  - Different from the mock-ups: the join page uses openGym's own sign-up sheet (name plus passkey
+    or password) instead of email and password fields; "Download my documents and chat" joins the
+    End coaching sheet in 2e; "Resend" is "Send new invite" (a fresh link) until email exists (2c).
+  - Coaching copy is English only, through `ct()` in `lib/coaching.js`, until Mike picks languages.
 
 ### 2c. Email (Resend)
 - `api/coaching/email.js` calls Resend's HTTP API with plain `fetch` (no new dependency).

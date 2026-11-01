@@ -3425,6 +3425,298 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
+  /api/coaching/client/pause:
+    post:
+      tags: [coaching]
+      operationId: coachingClientPause
+      summary: 'Trainer: pause or resume a client'
+      description: >-
+        For a holiday or an injury break. The trainer keeps access; alerts and missed workouts stop
+        counting (from Phase 4). 404 for anyone who is not your client right now.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, paused]
+              properties:
+                id: { type: string }
+                paused: { type: boolean }
+      responses:
+        '200':
+          description: The client, with the new status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client: { $ref: '#/components/schemas/CoachingClient' }
+        '400':
+          description: No boolean.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/remove:
+    post:
+      tags: [coaching]
+      operationId: coachingClientRemove
+      summary: 'Trainer: remove a client'
+      description: >-
+        Ends coaching. The trainer loses access; the client keeps their account and their own data,
+        and the link is kept (status `ended`) as the trainer's record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: string }
+      responses:
+        '200':
+          description: Removed.
+          content:
+            application/json:
+              schema: { type: object, properties: { ok: { type: boolean, const: true } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/end:
+    post:
+      tags: [coaching]
+      operationId: coachingEnd
+      summary: 'Client: end coaching with your trainer'
+      description: >-
+        Works as a block: the trainer loses access and neither side can message the other. The link
+        is kept (status `blocked`) as the record. Coaching again takes a new invite from the trainer.
+      responses:
+        '200':
+          description: Ended.
+          content:
+            application/json:
+              schema: { type: object, properties: { ok: { type: boolean, const: true } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: You have no trainer.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/invites:
+    get:
+      tags: [coaching]
+      operationId: coachingInvites
+      summary: 'Trainer: your open invites'
+      description: >-
+        Newest first: pending invites, and expired ones for 30 days after their date. Joined and
+        revoked invites are not listed. Only a pending invite carries its `code`.
+      responses:
+        '200':
+          description: Your invites.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invites:
+                    type: array
+                    items: { $ref: '#/components/schemas/CoachingInvite' }
+                  days: { type: integer, description: How long a new invite lasts. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/coaching/invites/new:
+    post:
+      tags: [coaching]
+      operationId: coachingInviteNew
+      summary: 'Trainer: invite a client'
+      description: >-
+        Makes a one-time invite that lasts 14 days. Its code is also an openGym invite code, so on
+        an invite-only instance the person can sign up with it. The link is
+        `<origin>/#/join/<code>`. The email is kept for the invite email (Phase 2c).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [firstName]
+              properties:
+                firstName: { type: string, maxLength: 40 }
+                email: { type: string, maxLength: 254 }
+                note: { type: string, maxLength: 200 }
+      responses:
+        '200':
+          description: The invite.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invite: { $ref: '#/components/schemas/CoachingInvite' }
+        '400':
+          description: No first name (`missing`) or an address that does not look right (`email`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/coaching/invites/revoke:
+    post:
+      tags: [coaching]
+      operationId: coachingInviteRevoke
+      summary: 'Trainer: revoke an invite'
+      description: The link stops working, and so does its openGym sign-up code.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+      responses:
+        '200':
+          description: Revoked.
+          content:
+            application/json:
+              schema: { type: object, properties: { ok: { type: boolean, const: true } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not one of your open invites.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/invites/renew:
+    post:
+      tags: [coaching]
+      operationId: coachingInviteRenew
+      summary: 'Trainer: send a new invite in place of an old one'
+      description: The old link stops working; a new one with a new 14-day date takes its place.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+      responses:
+        '200':
+          description: The new invite.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invite: { $ref: '#/components/schemas/CoachingInvite' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not one of your open invites.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/invite:
+    get:
+      tags: [coaching]
+      operationId: coachingInvitePage
+      summary: 'The invite page: who invited you'
+      description: >-
+        No session needed; the code is the secret. Opening a valid invite marks it opened on the
+        trainer's roster. The first name, note and date are given only while the invite is valid.
+      security: []
+      parameters:
+        - { name: code, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The invite.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [valid, expired, used, revoked] }
+                  trainer: { type: object, properties: { name: { type: [string, 'null'] } } }
+                  firstName: { type: string }
+                  note: { type: [string, 'null'] }
+                  expires: { type: integer }
+        '404':
+          description: No such invite.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/invites/accept:
+    post:
+      tags: [coaching]
+      operationId: coachingInviteAccept
+      summary: 'Accept an invite: start coaching with the trainer'
+      description: >-
+        The signed-in person becomes the trainer's client. Accepting the same invite again is
+        harmless. On an invite-only instance, a code someone else signed up with is theirs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string }
+      responses:
+        '200':
+          description: Linked.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, const: true }
+                  trainer: { type: object, properties: { id: { type: string }, name: { type: [string, 'null'] } } }
+        '400':
+          description: Your own invite (`own`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: No such invite.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: You already train with this trainer (`linked`) or another one (`other`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: The invite has expired (`expired`), was revoked (`revoked`) or used (`used`).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -3578,6 +3870,19 @@ components:
         name: { type: [string, 'null'] }
         status: { type: string, enum: [active, paused] }
         since: { type: integer, description: Link start, UTC ms. }
+    CoachingInvite:   # trainer-fork
+      type: object
+      properties:
+        id: { type: integer }
+        firstName: { type: string }
+        email: { type: [string, 'null'] }
+        note: { type: [string, 'null'] }
+        created: { type: integer }
+        expires: { type: integer }
+        opened: { type: [integer, 'null'] }
+        status: { type: string, enum: [pending, expired] }
+        code: { type: string, description: Only while pending. }
+        url: { type: string, description: 'The link to send, `<ORIGIN>/#/join/<code>`. Only while pending.' }
     Error:
       type: object
       required: [error]
