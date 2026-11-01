@@ -179,14 +179,36 @@ Each step ends with its tests passing and is one commit.
     retention table (2f, with the export), branding colours (2g).
 
 ### 2f. Client profile (trainer)
-- Header: avatar, age, start date (program comes in Phase 3).
-- Tags (warnings in amber, "+ tag") and private notes marked "Only you". Neither is ever sent to
-  the client: the client's routes don't read those tables at all.
-- Records: each signed document with its version, the questionnaire with its yes count, intake.
-- Injury log section, empty until the pain report (Phase 5).
-- **Export record (ZIP):** PDFs of signed documents, the same data as JSON and CSV, and a manifest
-  with a SHA-256 for every file. ZIP written with `node:zlib`, no dependency. Every export goes in
-  the activity log. Programs, logged workouts and chat join the export in later phases.
+Mock-ups shown 2026-11-01 (seven screens). Mike's answers are below; build when he says "build 2f".
+- **Opening a client:** tapping a roster row opens the profile (`#/clients/:id`). The row's menu
+  today (send a document, export, pause, remove) moves to the profile's … button.
+  *Waiting on Mike's OK* (explained to him 2026-11-01).
+- Header: avatar, name, age and date of birth, start date, paperwork pill (Cleared to train /
+  N to sign / Waiting on guardian), "Under 18" pill. Program comes in Phase 3.
+- **Tags and notes are the trainer's only (yes).** Never shown or sent to the client, never in
+  My documents: the client's routes don't read those tables at all.
+- **Warning tags (yes):** a tag can be a warning; warnings are amber on the profile and beside the
+  client's name on the roster. "+ tag" sheet: name and a Warning switch.
+- **Tags from answers (yes):** a flagged yes answer offers "Make it a tag" (one tap, a warning).
+- Notes: newest first, with date and "edited" date; tap to edit or delete.
+- **Records (yes):** each signed document with version, signers and date; each form with its yes
+  count. A form record lists the answers with flagged yes answers first; every record downloads
+  as its PDF (the 2e record PDF, now readable by the trainer), and returned files open too.
+- **Clients still waiting (yes):** what's still open, the guardian (name, masked email, when the
+  link was sent and when it ends), and "Send <name> a new link" (same 2-minute limit as 2e).
+- Injury log section, empty until the pain report (Phase 5). No decision needed now.
+- **Export record (ZIP) (yes):** a PDF of every record, the returned files and signed PDFs, the
+  same data as JSON and CSV, and a manifest with a SHA-256 for every file. Notes and tags only when
+  the "Include my notes and tags" switch is on (off by default). ZIP written with `node:zlib`, no
+  dependency. Every export goes in the activity log. Programs, logged workouts and chat join the
+  export in later phases.
+- **Retention (yes):** records kept 5 years after coaching ends; for a minor, until 5 years after
+  their 18th birthday, whichever is later. The profile shows the date records may be deleted.
+  Nothing is deleted automatically.
+- **Activity log (don't log views):** exports are logged; opening a client's records is not.
+- **Pause coaching:** stays where it is today; moves into the profile menu with the rest, but its
+  holiday/injury-break version is Phase 3.
+- Tables to add: tags, notes, retention (`ended_at` per client relationship, keep-until computed).
 
 ### 2g. Settings
 - Client: My documents (read and download), Privacy (placeholder until photos), End coaching,
