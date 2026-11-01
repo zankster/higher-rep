@@ -142,7 +142,7 @@ describe('publish and send', () => {
     const host = await render(<PublishSheet doc={doc} version={2} close={() => {}} onDone={done} />)
     expect(host.textContent).toContain('3 clients did an earlier version.')
     await click(button(host, 'Publish and ask 3 clients'))
-    expect(calls.publishDocument).toHaveBeenCalledWith(1, true)
+    expect(calls.publishDocument).toHaveBeenCalledWith(1, true, false)
     expect(done).toHaveBeenCalled()
   })
   it('a refused publish says why and points at the question', async () => {
@@ -164,6 +164,6 @@ describe('publish and send', () => {
     expect(host.textContent).toContain('Already did version 2')
     expect(host.textContent).toContain('Paused. Sees it when coaching resumes.')
     await click(button(host, 'Send to 2 clients'))
-    expect(calls.sendDocument).toHaveBeenCalledWith(3, ['a', 'j'], null)
+    expect(calls.sendDocument).toHaveBeenCalledWith(3, ['a', 'j'], null, false)
   })
 })

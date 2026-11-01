@@ -112,7 +112,66 @@ export const MIGRATIONS = [
      done_at INTEGER
    );
    CREATE INDEX requests_client ON requests (client_id, status);
-   CREATE INDEX requests_document ON requests (document_id, status);`
+   CREATE INDEX requests_document ON requests (document_id, status);`,
+  // 4. Phase 2e: the client's side. `clients` holds the date of birth (asked before the link is
+  // made; under 13 nothing is stored). A document can be required before training starts, and a
+  // request copies that when it is made. For a client under 18 a document to sign needs the
+  // guardian's signature as well: the request stays open, with client_done_at set, until the
+  // guardian signs. `submissions` is the signed record and is insert only: the triggers refuse
+  // any change, so a correction is always a new record.
+  `ALTER TABLE documents ADD COLUMN required INTEGER NOT NULL DEFAULT 0;
+   ALTER TABLE requests ADD COLUMN required INTEGER NOT NULL DEFAULT 0;
+   ALTER TABLE requests ADD COLUMN guardian_needed INTEGER NOT NULL DEFAULT 0;
+   ALTER TABLE requests ADD COLUMN client_done_at INTEGER;
+   CREATE TABLE clients (
+     client_id TEXT PRIMARY KEY,
+     dob TEXT NOT NULL,
+     tz TEXT,
+     created_at INTEGER NOT NULL,
+     updated_at INTEGER NOT NULL
+   );
+   CREATE TABLE guardians (
+     id INTEGER PRIMARY KEY,
+     client_id TEXT NOT NULL,
+     trainer_id TEXT NOT NULL,
+     name TEXT NOT NULL,
+     email TEXT,
+     relationship TEXT NOT NULL,
+     token_hash TEXT,
+     token_expires_at INTEGER,
+     token_used_at INTEGER,
+     emailed_at INTEGER,
+     created_at INTEGER NOT NULL
+   );
+   CREATE INDEX guardians_client ON guardians (client_id, created_at);
+   CREATE UNIQUE INDEX guardians_token ON guardians (token_hash) WHERE token_hash IS NOT NULL;
+   CREATE TABLE submissions (
+     id INTEGER PRIMARY KEY,
+     trainer_id TEXT NOT NULL,
+     client_id TEXT NOT NULL,
+     request_id INTEGER NOT NULL REFERENCES requests (id),
+     document_id INTEGER NOT NULL REFERENCES documents (id),
+     version_id INTEGER NOT NULL REFERENCES document_versions (id),
+     signer TEXT NOT NULL CHECK (signer IN ('client', 'guardian')),
+     guardian_id INTEGER REFERENCES guardians (id),
+     signer_name TEXT,
+     agreed INTEGER NOT NULL DEFAULT 0,
+     answers TEXT,
+     flagged_yes INTEGER NOT NULL DEFAULT 0,
+     content_hash TEXT NOT NULL,
+     signature_hash TEXT,
+     file_hash TEXT,
+     device TEXT,
+     app_version TEXT,
+     tz TEXT,
+     signed_at INTEGER NOT NULL
+   );
+   CREATE INDEX submissions_client ON submissions (client_id, signed_at);
+   CREATE UNIQUE INDEX submissions_once ON submissions (request_id, signer);
+   CREATE TRIGGER submissions_no_update BEFORE UPDATE ON submissions
+     BEGIN SELECT RAISE(ABORT, 'submissions are insert only'); END;
+   CREATE TRIGGER submissions_no_delete BEFORE DELETE ON submissions
+     BEGIN SELECT RAISE(ABORT, 'submissions are insert only'); END;`
 ];
 
 export function openCoachingDb(dataDir, { file = 'coaching.sqlite' } = {}) {

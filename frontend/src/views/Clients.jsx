@@ -11,7 +11,7 @@ import { menuSheet, confirmSheet } from '../sheets.jsx'
 import { openInviteSheet, copyInvite, shareInvite } from '../components/InviteSheet.jsx'
 import {
   ct, listClients, listInvites, pauseClient, removeClient, revokeInvite, renewInvite, emailInvite,
-  coachingError, inviteLine, sinceLine, rosterFilter, coachingChanged, onCoachingChanged,
+  coachingError, inviteLine, sinceLine, rosterFilter, coachingChanged, onCoachingChanged, paperworkLine,
 } from '../lib/coaching.js'
 
 export const removeMessage = name => <div style={{ textAlign: 'start' }}>
@@ -92,7 +92,8 @@ export default function Clients() {
 
     {filter !== 'invited' && <Section>
       {clients && !shown.length && <Row title={all.length ? ct('No client matches') : ct('No clients yet')} subtitle={all.length ? null : ct('Invite your first client with the button below.')} />}
-      {shown.map(c => <Row key={c.id} title={c.name} subtitle={sinceLine(c.since)} value={c.status === 'paused' ? ct('Paused') : null}
+      {shown.map(c => <Row key={c.id} title={c.name} subtitle={(c.age != null ? c.age + ' · ' : '') + sinceLine(c.since)}
+        value={c.status === 'paused' ? ct('Paused') : paperworkLine(c) && <span style={{ color: c.cleared ? 'var(--label-2)' : 'var(--orange)' }}>{paperworkLine(c)}</span>}
         icon="person" iconTint="var(--acc)" accessory="chevron" onClick={() => clientMenu(c)} />)}
     </Section>}
 

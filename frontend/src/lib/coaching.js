@@ -29,11 +29,12 @@ export const getDocument = id => api('/api/coaching/document?id=' + encodeURICom
 export const newDocument = ({ title, kind, rights }) => post('/api/coaching/documents/new', { title, kind, rights }).then(r => r.document)
 export const saveDraft = (id, { title, body }) => post('/api/coaching/document/draft', { id, title, body }).then(r => r.draft)
 export const discardDraft = id => post('/api/coaching/document/discard', { id }).then(r => r.document)
-export const publishDocument = (id, askCurrent) => post('/api/coaching/document/publish', { id, askCurrent: !!askCurrent })
+export const publishDocument = (id, askCurrent, required) => post('/api/coaching/document/publish', { id, askCurrent: !!askCurrent, required: !!required })
 export const setPacket = ids => post('/api/coaching/documents/packet', { ids }).then(r => r.documents || [])
 export const deleteDocument = id => post('/api/coaching/document/delete', { id })
 export const documentRecipients = id => api('/api/coaching/document/recipients?id=' + encodeURIComponent(id))
-export const sendDocument = (id, clients, due) => post('/api/coaching/document/send', { id, clients, due: due ?? null })
+export const sendDocument = (id, clients, due, required) => post('/api/coaching/document/send', { id, clients, due: due ?? null, ...(typeof required === 'boolean' ? { required } : {}) })
+export const setRequired = (id, required) => post('/api/coaching/document/required', { id, required }).then(r => r.document)
 // The raw PDF, not JSON: the server checks the bytes start like a PDF and caps it at 10 MB.
 export const uploadPdf = file => api('/api/coaching/files', { method: 'POST', body: file, headers: { 'Content-Type': 'application/pdf' }, timeout: 120000 })
 export const fileUrl = hash => './api/coaching/file?hash=' + encodeURIComponent(hash)
@@ -87,7 +88,7 @@ export function publishError(e) {
   }
 }
 export const invitePage = code => api('/api/coaching/invite?code=' + encodeURIComponent(code))
-export const acceptInvite = code => post('/api/coaching/invites/accept', { code })
+export const acceptInvite = (code, dob) => post('/api/coaching/invites/accept', { code, dob, tz: localTz() })
 export const pauseClient = (id, paused) => post('/api/coaching/client/pause', { id, paused }).then(r => r.client)
 export const removeClient = id => post('/api/coaching/client/remove', { id })
 export const endCoaching = () => post('/api/coaching/end')
@@ -151,6 +152,89 @@ export function coachingError(e, trainerName) {
     case 'too-soon': return ct('The email was sent a few minutes ago. Give it a little time.')
     case 'not-sent': return ct('The email could not be sent. Share the link instead.')
     default: return e?.message || ct('Something went wrong. Try again.')
+  }
+}
+
+/* ---------- the client's paperwork (Phase 2e) ---------- */
+export const MIN_AGE = 13
+export const ADULT = 18
+export const localTz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null } catch { return null } }
+const device = () => String(globalThis.navigator?.userAgent || '').slice(0, 200)
+const appVersion = () => typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : ''   // eslint-disable-line no-undef
+
+export const myDocuments = () => api('/api/coaching/my/documents')
+export const saveAbout = dob => post('/api/coaching/my/about', { dob, tz: localTz() })
+/** Complete one request: { answers } for a form, { agreed, name, signature } to sign, { files } to return. */
+export const submitRequest = (request, fields) => post('/api/coaching/my/submit', { request, tz: localTz(), device: device(), appVersion: appVersion(), ...fields })
+export const saveGuardian = ({ name, email, relationship, send }) => post('/api/coaching/my/guardian', { name, email, relationship, send: !!send })
+// The raw file, not JSON: a filled-in PDF or one JPEG photo of a page.
+export const uploadMine = (blob, type) => api('/api/coaching/my/files', { method: 'POST', body: blob, headers: { 'Content-Type': type }, timeout: 120000 })
+export const myFileUrl = hash => './api/coaching/my/file?hash=' + encodeURIComponent(hash)
+export const recordUrl = requestId => './api/coaching/my/record?id=' + encodeURIComponent(requestId)
+export const guardianPage = token => api('/api/coaching/guardian?token=' + encodeURIComponent(token))
+export const guardianFileUrl = (token, hash) => './api/coaching/guardian/file?token=' + encodeURIComponent(token) + '&hash=' + encodeURIComponent(hash)
+export const guardianSign = (token, request, fields) => post('/api/coaching/guardian/sign', { token, request, tz: localTz(), device: device(), ...fields })
+
+/** "YYYY-MM-DD" from what was typed, or null when it is not a real day in the past. */
+export function dobFrom(day, month, year, now = Date.now()) {
+  const d = Number(day), m = Number(month), y = Number(year)
+  if (!Number.isInteger(d) || !Number.isInteger(m) || !Number.isInteger(y) || y < 1900) return null
+  const t = Date.UTC(y, m - 1, d), back = new Date(t)
+  if (back.getUTCFullYear() !== y || back.getUTCMonth() !== m - 1 || back.getUTCDate() !== d || t > now) return null
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+}
+/** Whole years from a "YYYY-MM-DD" date of birth to today (the same rule as the server). */
+export function ageFrom(dob, now = Date.now()) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dob || ''))
+  if (!m) return null
+  const at = new Date(now)
+  let age = at.getUTCFullYear() - +m[1]
+  if (at.getUTCMonth() + 1 < +m[2] || (at.getUTCMonth() + 1 === +m[2] && at.getUTCDate() < +m[3])) age--
+  return age
+}
+
+// The join page asks the date of birth before the account is made; it rides along to the accept
+// that follows sign-up, for the length of this tab only.
+const JOIN_DOB = 'hr_join_dob'
+export function rememberJoinDob(dob) { try { sessionStorage.setItem(JOIN_DOB, dob) } catch { /* private mode: asked again */ } }
+export function takeJoinDob() {
+  try { const v = sessionStorage.getItem(JOIN_DOB); sessionStorage.removeItem(JOIN_DOB); return v || null } catch { return null }
+}
+
+/** The guardian token in a /guardian/<token> path, or null. */
+export function guardianToken(pathname) {
+  const m = /^\/guardian\/([A-Za-z0-9_-]{30,100})\/?$/.exec(String(pathname || ''))
+  return m ? m[1] : null
+}
+
+/** What the trainer's roster says about a client's paperwork, or null when nothing is open. */
+export function paperworkLine(c) {
+  if (c.paperwork === 'about') return ct('Sign-up not finished')
+  if (c.paperwork === 'guardian') return ct('Waiting on guardian')
+  if (c.todo > 0) return c.todo === 1 ? ct('1 to sign') : ct('{0} to sign', c.todo)
+  return null
+}
+
+/** Why a submission was refused, in words. */
+export function submitError(e) {
+  const n = e?.data?.index != null ? e.data.index + 1 : null
+  switch (e?.data?.code) {
+    case 'agree': return ct('Tick the box to say you have read it and agree.')
+    case 'name': return ct('Type your full name.')
+    case 'signature': return n ? ct('Question {0} needs a signature.', n) : ct('Sign with your finger in the box.')
+    case 'required': return ct('Question {0} needs an answer.', n)
+    case 'follow-up': return ct('Question {0}: please add the details.', n)
+    case 'number': return ct('Question {0} needs a number.', n)
+    case 'date': case 'choice': return ct('Check your answer to question {0}.', n)
+    case 'files': return ct('Add the filled-in PDF or a photo of each page.')
+    case 'too-large': return ct('That file is larger than {0} MB.', MAX_PDF_MB)
+    case 'type': return ct('That file could not be read. Use a PDF or a photo.')
+    case 'too-young': return ct('You need to be {0} or older.', MIN_AGE)
+    case 'dob': return ct('Check the date of birth.')
+    case 'email': return ct('That email address does not look right')
+    case 'too-soon': return ct('The link was emailed a moment ago. Give it a little time.')
+    case 'no-guardian': return ct('Add your parent or guardian first.')
+    default: return coachingError(e)
   }
 }
 

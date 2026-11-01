@@ -12,6 +12,8 @@ import { makeMailer, inviteEmail, resetEmail, looksLikeEmail } from './email.js'
 import { makeResetCode, hashResetCode, normalizeEmail } from '../password.js';
 import { createWindow } from '../rate-limit.js';
 import { documentRoutes } from './documents.js';
+import { packetRoutes, saveAbout, createPacket, clearanceOf } from './packet.js';
+import { MIN_AGE, parseDob, ageOn, cleanTz } from './submission.js';
 
 export const INVITE_DAYS = 14;
 // An expired invite stays on the roster this long, with "Send new", then drops off.
@@ -37,9 +39,16 @@ export function coachingRoutes({
   const addressOf = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || '?';
   const query = (req, k) => new URL(req.url, 'http://x').searchParams.get(k);
 
-  const clientRow = (link, u) => ({
-    id: link.client_id, name: u ? u.name : null, status: link.status, since: link.started_at
-  });
+  // A client's age and date of birth (from 2e), and where they stand with the paperwork.
+  const clientRow = (link, u) => {
+    const about = sql.prepare('SELECT dob FROM clients WHERE client_id = ?').get(link.client_id);
+    const c = clearanceOf(sql, link.trainer_id, link.client_id);
+    return {
+      id: link.client_id, name: u ? u.name : null, status: link.status, since: link.started_at,
+      dob: about?.dob || null, age: about ? ageOn(about.dob, now()) : null,
+      cleared: c.cleared, paperwork: c.state, todo: c.todo,
+    };
+  };
   // The name a client sees: the trainer's branding name once 2g sets one, else their profile name.
   const trainerName = id => {
     const row = sql.prepare('SELECT branding FROM trainers WHERE user_id = ?').get(id);
@@ -125,6 +134,7 @@ export function coachingRoutes({
 
   return {
     ...documentRoutes({ sql, access, json, readBody, audit, dataDir, now }),
+    ...packetRoutes({ sql, access, json, readBody, audit, dataDir, now, mailer, trainerInfo, trainerName, base }),
 
     // Appoint or remove a trainer. Owner only, like appointing an admin. Removing is refused while
     // the trainer still has clients: their clients would be left linked to nobody.
@@ -152,9 +162,12 @@ export function coachingRoutes({
     'GET /api/coaching/me': async (req, res) => {
       const user = requireUser(req, res); if (!user) return;
       const link = liveLinkOf(user.id);
+      // `cleared` false means the trainer's required paperwork is not done yet (state says what).
+      const c = link && clearanceOf(sql, link.trainer_id, user.id);
       json(res, 200, {
         trainer: isTrainer(user),
-        coach: link ? { id: link.trainer_id, name: trainerName(link.trainer_id), status: link.status, since: link.started_at } : null
+        coach: link ? { id: link.trainer_id, name: trainerName(link.trainer_id), status: link.status, since: link.started_at,
+          cleared: c.cleared, paperwork: c.state, todo: c.todo, guardian: c.guardian } : null
       });
     },
 
@@ -312,7 +325,9 @@ export function coachingRoutes({
     },
 
     // Accepting is the client's consent. The person signed in takes the invite: right after
-    // creating their account from the invite page, or with an account they already had.
+    // creating their account from the invite page, or with an account they already had. The date
+    // of birth comes with it (asked first on the invite page); under 13 nothing is stored and no
+    // link is made. The trainer's sign-up packet is asked for in the same step.
     'POST /api/coaching/invites/accept': async (req, res) => {
       const user = requireUser(req, res); if (!user) return;
       const body = await readBody(req);
@@ -322,6 +337,9 @@ export function coachingRoutes({
       const status = inviteState(inv);
       if (status === 'joined' && inv.client_id === user.id) return json(res, 200, { ok: true, trainer: { id: inv.trainer_id, name: trainerName(inv.trainer_id) } });
       if (status !== 'pending') return json(res, 410, { error: status === 'expired' ? 'this invite has expired' : 'this invite is no longer valid', code: status === 'joined' ? 'used' : status });
+      const dob = parseDob(body.dob, now());
+      if (!dob) return json(res, 400, { error: 'date of birth required', code: 'dob' });
+      if (ageOn(dob, now()) < MIN_AGE) return json(res, 400, { error: `you need to be ${MIN_AGE} or older`, code: 'too-young' });
       if (inv.trainer_id === user.id) return json(res, 400, { error: 'this is your own invite', code: 'own' });
       const trainer = userById(inv.trainer_id);
       if (!isTrainer(trainer)) return json(res, 410, { error: 'this invite is no longer valid', code: 'revoked' });
@@ -342,6 +360,8 @@ export function coachingRoutes({
         const preset = sql.prepare('SELECT default_preset FROM trainers WHERE user_id = ?').get(inv.trainer_id)?.default_preset || null;
         sql.prepare('INSERT INTO link_settings (link_id, trainer_id, preset, updated_at) VALUES (?, ?, ?, ?)').run(linkId, inv.trainer_id, preset, t);
         sql.prepare(`UPDATE invites SET status = 'joined', client_id = ?, link_id = ? WHERE id = ?`).run(user.id, linkId, inv.id);
+        saveAbout(sql, user.id, dob, cleanTz(body.tz), t);
+        createPacket(sql, { trainer_id: inv.trainer_id, client_id: user.id, started_at: t }, t);
       });
       // Burn the openGym code as well, so nobody signs up with it afterwards.
       if (g && !g.usedBy) { g.usedBy = user.id; g.usedAt = new Date(t).toISOString(); saveDb(); }

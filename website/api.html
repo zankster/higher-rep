@@ -246,7 +246,7 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   <p class="api-facts">
     <span>OpenAPI 3.1.0</span>
     <span>openGym v1.4.3</span>
-    <span>102 endpoints</span>
+    <span>113 endpoints</span>
     <span>AGPL-3.0-or-later</span>
   </p>
 
@@ -3267,6 +3267,11 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
     <span class="p-type">boolean</span>
     <span class="p-desc"></span>
   </div>
+  <div class="prow">
+    <span class="p-name">required</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc">With askCurrent: the new requests are required before the next session.</span>
+  </div>
 </div>
     <p class="ep-h">Responses</p>
     <div class="ptab">
@@ -3453,6 +3458,11 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
     <span class="p-type">integer | null</span>
     <span class="p-desc">UTC milliseconds</span>
   </div>
+  <div class="prow">
+    <span class="p-name">required</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc">Required before the next session. Left out: the document's own setting.</span>
+  </div>
 </div>
     <p class="ep-h">Responses</p>
     <div class="ptab">
@@ -3561,6 +3571,551 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   <div class="prow rrow">
     <span class="r-code s4">404</span>
     <span class="p-desc">No such file, or not yours.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingDocumentRequired">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/document/required</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Trainer: required before training</span>
+  </summary>
+  <div class="ep-body">
+<p>A client is not cleared to train until every required request is done, including the guardian's signature for a client under 18. Applies to sign-up packets from now on.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">id<em class="p-req" title="required">required</em></span>
+    <span class="p-type">integer</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">required<em class="p-req" title="required">required</em></span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Saved.<span class="r-sig">{ document: <a href="#schema-CoachingDocumentSummary">CoachingDocumentSummary</a> }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">required is not true or false.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">403</span>
+    <span class="p-desc">Signed in, but not an admin. The attempt is recorded in the audit log.<span class="r-sig"><code>{&quot;error&quot;:&quot;forbidden&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">Not one of your documents.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMyAbout">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/my/about</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client: date of birth</span>
+  </summary>
+  <div class="ep-body">
+<p>For a client linked before dates of birth were asked: stores it and asks for the trainer's sign-up packet. Under 13 nothing is stored.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">dob<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string <span class="p-hint">(date)</span></span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">tz</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Saved; where the paperwork stands.<span class="r-sig"><a href="#schema-CoachingMyDocuments">CoachingMyDocuments</a></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">A bad date (<code>dob</code>) or under 13 (<code>too-young</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">You have no trainer (<code>no-trainer</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">409</span>
+    <span class="p-desc">Already given (<code>already</code>).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMyDocuments">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/my/documents</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client: my trainer's paperwork</span>
+  </summary>
+  <div class="ep-body">
+<p>To do (with each document's content), waiting for the guardian, done, the guardian on record and whether you are cleared to train.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">The paperwork.<span class="r-sig"><a href="#schema-CoachingMyDocuments">CoachingMyDocuments</a></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">You have no trainer (<code>no-trainer</code>).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMyFileUpload">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/my/files</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client: upload a filled-in PDF or a photo</span>
+  </summary>
+  <div class="ep-body">
+<p>The raw bytes, Content-Type application/pdf or image/jpeg, up to 10 MB. Use the hash in a submission.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Stored.<span class="r-sig">{ hash: string, size: integer, type: string }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">The bytes are not what the type says (<code>type</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">You have no trainer (<code>no-trainer</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">413</span>
+    <span class="p-desc">Larger than 10 MB (<code>too-large</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">415</span>
+    <span class="p-desc">Not a PDF or JPEG (<code>type</code>).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMyFile">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/my/file</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client: read a file</span>
+  </summary>
+  <div class="ep-body">
+<p>A file of a document you were asked for, one you uploaded, or one in your own records.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+<p class="ep-h">Query parameters</p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">hash<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">The file.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">No such file, or not yours.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMySubmit">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/my/submit</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client: complete a document</span>
+  </summary>
+  <div class="ep-body">
+<p>Answers a form, signs a document (agreed, full name, finger signature as a JPEG data URL) or returns a PDF (one PDF, or photos joined into one). The record is insert only. For a client under 18 a document to sign then waits for the guardian; signer guardian is the guardian signing on this phone. A completed document to sign is emailed as a PDF to the client and guardian; forms never are.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">request<em class="p-req" title="required">required</em></span>
+    <span class="p-type">integer</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">signer</span>
+    <span class="p-type">&quot;client&quot; | &quot;guardian&quot;</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">answers</span>
+    <span class="p-type">object</span>
+    <span class="p-desc">By question id: yes_no as yes and followUp, text, number, date, choice (string or list), signature (data URL).</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">agreed</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">name</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">signature</span>
+    <span class="p-type">string</span>
+    <span class="p-desc">data:image/jpeg;base64,...</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">files</span>
+    <span class="p-type">string[]</span>
+    <span class="p-desc">Hashes from /api/coaching/my/files</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">tz</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">device</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">appVersion</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Recorded; where the paperwork stands.<span class="r-sig"><a href="#schema-CoachingMyDocuments">CoachingMyDocuments</a></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">Not complete: <code>agree</code>, <code>name</code>, <code>signature</code>, <code>files</code>, or for a form <code>required</code>, <code>follow-up</code>, <code>number</code>, <code>date</code>, <code>choice</code>, <code>signature</code> with the question index.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">No such open request of yours, or no trainer (<code>no-trainer</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">409</span>
+    <span class="p-desc">Already done (<code>done</code>), no date of birth yet (<code>about</code>), no guardian on record (<code>no-guardian</code>).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMyGuardian">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/my/guardian</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client under 18: my parent or guardian</span>
+  </summary>
+  <div class="ep-body">
+<p>Their name, email and relationship. With send, a one-time signing link valid for 7 days is emailed to them; a new link replaces the old one.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">name<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">email</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">relationship</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">send</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Saved. emailed is true, false when the email failed, null when not sent.<span class="r-sig"><a href="#schema-CoachingMyDocuments">CoachingMyDocuments</a></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">No name (<code>name</code>), a bad or missing email (<code>email</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">You have no trainer (<code>no-trainer</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">409</span>
+    <span class="p-desc">18 or older (<code>adult</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">429</span>
+    <span class="p-desc">The link was emailed a moment ago (<code>too-soon</code>).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMyRecord">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/my/record</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client: download a signed record</span>
+  </summary>
+  <div class="ep-body">
+<p>The record of a completed request as a PDF: the document, a form's answers, each signature with name, time, time zone, device and app version. For a returned PDF, that PDF. Yours also after coaching ended.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+<p class="ep-h">Query parameters</p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">id<em class="p-req" title="required">required</em></span>
+    <span class="p-type">integer</span>
+    <span class="p-desc">The request id.</span>
+  </div>
+</div>
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">The PDF.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">No such record of yours.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingGuardianPage">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/guardian</code><span class="ep-chip public">public</span></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Guardian: what to sign</span>
+  </summary>
+  <div class="ep-body">
+<p>No session: the token from the emailed link is the secret. The client's completed forms to read, and the documents left to sign.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Public: no authentication required.</span></p>
+<p class="ep-h">Query parameters</p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">token<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">The page.<span class="r-sig">{ client: object, trainer: object, guardian: object, expires: integer, sign: object[], read: object[] }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">Not a valid link (<code>invalid</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">410</span>
+    <span class="p-desc">Used (<code>used</code>), expired (<code>expired</code>) or the coaching ended (<code>revoked</code>).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingGuardianFile">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/guardian/file</code><span class="ep-chip public">public</span></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Guardian: read the PDF to sign</span>
+  </summary>
+  <div class="ep-body">
+<p>No session: the token is the secret. Only the PDF of a document the guardian is asked to sign.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Public: no authentication required.</span></p>
+<p class="ep-h">Query parameters</p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">token<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">hash<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">The PDF.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">Not a valid link, or not a file on it.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">410</span>
+    <span class="p-desc">Used (<code>used</code>), expired (<code>expired</code>) or the coaching ended (<code>revoked</code>).</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingGuardianSign">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/guardian/sign</code><span class="ep-chip public">public</span></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Guardian: sign a document</span>
+  </summary>
+  <div class="ep-body">
+<p>No session: the token is the secret. The link is used up once nothing is left to sign.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Public: no authentication required.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">token<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">request<em class="p-req" title="required">required</em></span>
+    <span class="p-type">integer</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">agreed<em class="p-req" title="required">required</em></span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">name<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">signature<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">tz</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">device</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Signed. left is how many are still to sign.<span class="r-sig">{ ok: boolean, left: integer }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">Not complete (<code>agree</code>, <code>name</code>, <code>signature</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">Not a valid link, or no such request.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">409</span>
+    <span class="p-desc">Nothing left to sign there (<code>done</code>).</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">410</span>
+    <span class="p-desc">Used (<code>used</code>), expired (<code>expired</code>) or the coaching ended (<code>revoked</code>).</span>
   </div>
     </div>
   </div>
@@ -3738,7 +4293,7 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
     <span class="ep-sum">Accept an invite: start coaching with the trainer</span>
   </summary>
   <div class="ep-body">
-<p>The signed-in person becomes the trainer's client. Accepting the same invite again is harmless. On an invite-only instance, a code someone else signed up with is theirs.</p>
+<p>The signed-in person becomes the trainer's client. Accepting the same invite again is harmless. On an invite-only instance, a code someone else signed up with is theirs. The date of birth comes with it: under 13 nothing is stored and no link is made. The trainer's sign-up packet (published documents only) is asked for in the same step.</p>
     <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
 
 <p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
@@ -3746,6 +4301,16 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
     <span class="p-name">code<em class="p-req" title="required">required</em></span>
     <span class="p-type">string</span>
     <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">dob<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string <span class="p-hint">(date)</span></span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">tz</span>
+    <span class="p-type">string</span>
+    <span class="p-desc">IANA time zone</span>
   </div>
 </div>
     <p class="ep-h">Responses</p>
@@ -3756,7 +4321,7 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   </div>
   <div class="prow rrow">
     <span class="r-code s4">400</span>
-    <span class="p-desc">Your own invite (<code>own</code>).</span>
+    <span class="p-desc">Your own invite (<code>own</code>), no or a bad date of birth (<code>dob</code>), under 13 (<code>too-young</code>).</span>
   </div>
   <div class="prow rrow">
     <span class="r-code s4">401</span>
@@ -4742,6 +5307,11 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
     <span class="p-desc"></span>
   </div>
   <div class="prow">
+    <span class="p-name">required</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc">Required before training starts.</span>
+  </div>
+  <div class="prow">
     <span class="p-name">version</span>
     <span class="p-type">integer | null</span>
     <span class="p-desc">The latest published version</span>
@@ -4753,6 +5323,94 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   </div>
   <div class="prow">
     <span class="p-name">updated</span>
+    <span class="p-type">integer</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+  </div>
+</details>
+
+<details class="ep sch" id="schema-CoachingMyDocuments">
+  <summary>
+    <span class="sch-name"><code>CoachingMyDocuments</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum"></span>
+  </summary>
+  <div class="ep-body">
+
+<div class="ptab">
+  <div class="prow">
+    <span class="p-name">trainer</span>
+    <span class="p-type">object</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">trainer.id</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">trainer.name</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">about</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc">The date of birth is given.</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">dob</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">age</span>
+    <span class="p-type">integer | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">minor</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">guardian</span>
+    <span class="p-type">object | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">todo</span>
+    <span class="p-type">object[]</span>
+    <span class="p-desc">Open, in order (the packet first), each with kind, title, version, body, required and due.</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">waiting</span>
+    <span class="p-type">object[]</span>
+    <span class="p-desc">Signed by you</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">done</span>
+    <span class="p-type">object[]</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">cleared</span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">state</span>
+    <span class="p-type">&quot;about&quot; | &quot;todo&quot; | &quot;guardian&quot; | &quot;cleared&quot;</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">requiredLeft</span>
+    <span class="p-type">integer</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">guardianLeft</span>
     <span class="p-type">integer</span>
     <span class="p-desc"></span>
   </div>

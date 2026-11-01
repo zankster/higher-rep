@@ -13,11 +13,12 @@ const point = (icon, text) => <div className="row" style={{ gap: 10, alignItems:
 export function PublishSheet({ doc, version, close, onDone, onProblem }) {
   const asked = doc.completedEarlier || 0
   const [ask, setAsk] = useState(asked > 0)
+  const [required, setRequired] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const go = async () => {
     setBusy(true); setErr('')
-    try { const r = await publishDocument(doc.id, ask && asked > 0); close(); onDone?.(r) }
+    try { const r = await publishDocument(doc.id, ask && asked > 0, ask && asked > 0 && required); close(); onDone?.(r) }
     catch (e) { setErr(publishError(e)); onProblem?.(e); setBusy(false) }
   }
   return <>
@@ -31,6 +32,11 @@ export function PublishSheet({ doc, version, close, onDone, onProblem }) {
       <div className="grow" style={{ flex: 1 }}><div style={{ fontWeight: 600 }}>{ct('Ask current clients to do version {0}', version)}</div>
         <div className="small muted">{ct('{0} clients did an earlier version. It goes on their home as a to-do.', asked)}</div></div>
       <Switch checked={ask} onChange={setAsk} aria-label={ct('Ask current clients to do version {0}', version)} />
+    </div>}
+    {asked > 0 && ask && <div className="card row" style={{ gap: 10, marginTop: 10 }}>
+      <div className="grow" style={{ flex: 1 }}><div style={{ fontWeight: 600 }}>{ct('Required before their next session')}</div>
+        <div className="small muted">{required ? ct('They cannot train with you until they sign version {0}.', version) : ct('Off: version {0} still covers them until they sign.', version - 1)}</div></div>
+      <Switch checked={required} onChange={setRequired} aria-label={ct('Required before their next session')} />
     </div>}
     {err && <div className="small" role="alert" style={{ color: 'var(--red)', marginTop: 10 }}><Icon name="warning" /> {err}</div>}
     <div style={{ height: 12 }} />
@@ -46,6 +52,7 @@ export function SendSheet({ doc, close, onSent }) {
   const [list, setList] = useState(null)
   const [chosen, setChosen] = useState(new Set())
   const [due, setDue] = useState('')
+  const [required, setRequired] = useState(!!doc.required)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   useEffect(() => {
@@ -65,13 +72,13 @@ export function SendSheet({ doc, close, onSent }) {
     try {
       // The due date is the end of that day, where the trainer is.
       const at = due ? new Date(due + 'T23:59:59').getTime() : null
-      const r = await sendDocument(doc.id, [...chosen], at)
+      const r = await sendDocument(doc.id, [...chosen], at, required)
       coachingChanged(); close(); onSent?.(r)
     } catch (e) { setErr(coachingError(e)); setBusy(false) }
   }
   return <>
     <h3 style={{ marginBottom: 4 }}>{ct('Send {0}', doc.title)}</h3>
-    <div className="muted small" style={{ marginBottom: 10 }}>{ct('Version {0}. It goes on their home as a to-do. Training is never blocked while it is open.', doc.version)}</div>
+    <div className="muted small" style={{ marginBottom: 10 }}>{ct('Version {0}. It goes on their home as a to-do. Only a required one holds up training.', doc.version)}</div>
     {!list && !err && <div className="small muted">{ct('Loading…')}</div>}
     {list && !list.clients.length && <div className="card small muted">{ct('You have no clients yet.')}</div>}
     {list && list.clients.length > 0 && <div className="card" style={{ padding: 0 }}>
@@ -91,6 +98,10 @@ export function SendSheet({ doc, close, onSent }) {
       <span className="grow small">{ct('Due by (optional)')}</span>
       <input className="input" type="date" min={isoDay(new Date())} value={due} onChange={e => setDue(e.target.value)} style={{ width: 'auto' }} aria-label={ct('Due by')} />
     </label>
+    <div className="row" style={{ gap: 10, marginTop: 10 }}>
+      <span className="grow small" style={{ flex: 1 }}>{ct('Required before their next session')}</span>
+      <Switch checked={required} onChange={setRequired} aria-label={ct('Required before their next session')} />
+    </div>
     {err && <div className="small" role="alert" style={{ color: 'var(--red)', marginTop: 10 }}><Icon name="warning" /> {err}</div>}
     <div style={{ height: 12 }} />
     <Button variant="primary" onClick={go} disabled={busy || !list}>{chosen.size === 1 ? ct('Send to 1 client') : ct('Send to {0} clients', chosen.size)}</Button>

@@ -2,13 +2,16 @@
 // offers openGym's own sign-up (the code rides along, for an invite-only instance) or sign-in.
 // Signed in, it takes the invite: at once when this tab just signed up from here, otherwise with
 // a tap, because linking an existing account to a trainer is the client's consent to give.
+// Phase 2e: "When were you born?" comes first, before any account is made. Under 13 it stops
+// there and nothing is kept. The date rides along to the accept, then the packet opens.
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUI } from '../store/useUI.js'
 import { Button } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
 import Login, { RegisterSheet } from './Login.jsx'
-import { ct, invitePage, acceptInvite, coachingError, markAutoAccept, takeAutoAccept } from '../lib/coaching.js'
+import { AboutYou, TooYoung } from '../components/PacketSteps.jsx'
+import { ct, invitePage, acceptInvite, coachingError, submitError, markAutoAccept, takeAutoAccept, rememberJoinDob, takeJoinDob, MIN_AGE } from '../lib/coaching.js'
 
 function InviteCard({ invite }) {
   const name = invite.trainer.name
@@ -34,6 +37,8 @@ export default function JoinInvite({ code, signedIn }) {
   const [signIn, setSignIn] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const [dob, setDob] = useState(null)
+  const [young, setYoung] = useState(false)
 
   useEffect(() => {
     let gone = false
@@ -41,17 +46,23 @@ export default function JoinInvite({ code, signedIn }) {
     return () => { gone = true }
   }, [code])
 
-  const join = async () => {
+  const join = async (born = dob) => {
     setBusy(true); setErr('')
     try {
-      const r = await acceptInvite(code)
+      const r = await acceptInvite(code, born)
       useUI.getState().toast(ct('You’re now training with {0}', r.trainer.name))
-      nav('/home', { replace: true })
-    } catch (e) { setErr(coachingError(e, invite?.trainer?.name)); setBusy(false) }
+      nav('/packet', { replace: true })
+    } catch (e) {
+      setErr(['dob', 'too-young'].includes(e?.data?.code) ? submitError(e) : coachingError(e, invite?.trainer?.name)); setBusy(false)
+      if (e?.data?.code === 'dob') setDob(null)
+    }
   }
   // Just signed up from this page: take the invite without asking again.
   useEffect(() => {
-    if (signedIn && invite?.status === 'valid' && takeAutoAccept(code)) join()
+    if (!signedIn || invite?.status !== 'valid') return
+    const born = takeJoinDob()
+    if (takeAutoAccept(code) && born) { setDob(born); join(born) }
+    else if (born) setDob(born)   // signed in with an account they had: the date is kept, they tap Join
   }, [signedIn, invite])   // eslint-disable-line react-hooks/exhaustive-deps
 
   if (invite === undefined) return <div className="narrow" />
@@ -60,6 +71,12 @@ export default function JoinInvite({ code, signedIn }) {
     {signedIn && <><div style={{ height: 12 }} /><Button onClick={() => nav('/home', { replace: true })}>{ct('Go to Home')}</Button></>}
   </div>
 
+  if (young) return <div className="narrow"><TooYoung onClose={signedIn ? () => nav('/home', { replace: true }) : null} /></div>
+  if (!dob && !busy) {
+    const next = (born, age) => { if (age < MIN_AGE) setYoung(true); else setDob(born) }
+    return <div className="narrow" style={{ paddingTop: 28 }}><AboutYou trainerName={invite.trainer.name} onNext={next} error={err} /></div>
+  }
+
   if (!signedIn && signIn) return <>
     <div className="narrow"><InviteCard invite={invite} /></div>
     <Login />
@@ -67,17 +84,18 @@ export default function JoinInvite({ code, signedIn }) {
 
   const register = () => {
     markAutoAccept(code)
+    rememberJoinDob(dob)
     useUI.getState().openSheet(close => <RegisterSheet close={close} initialCode={code} />)
   }
   return <div className="narrow">
     <InviteCard invite={invite} />
     {signedIn ? <>
-      <Button variant="primary" onClick={join} disabled={busy}>{ct('Join {0}', invite.trainer.name)}</Button>
+      <Button variant="primary" onClick={() => join()} disabled={busy}>{ct('Join {0}', invite.trainer.name)}</Button>
       <div className="muted small" style={{ marginTop: 10, textAlign: 'center' }}>{ct('{0} will see your workouts, progress and messages. You can end coaching at any time in Settings.', invite.trainer.name)}</div>
     </> : <>
       <Button variant="primary" onClick={register}>{ct('Create account')}</Button>
       <div style={{ height: 8 }} />
-      <Button variant="ghost" onClick={() => setSignIn(true)}>{ct('I already have an account')}</Button>
+      <Button variant="ghost" onClick={() => { rememberJoinDob(dob); setSignIn(true) }}>{ct('I already have an account')}</Button>
     </>}
     {err && <div className="card small" role="alert" style={{ marginTop: 12 }}>{err}</div>}
   </div>

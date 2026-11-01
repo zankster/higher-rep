@@ -4,11 +4,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUI } from '../store/useUI.js'
-import { Section, Button, TextField, Check } from '../components/ui.jsx'
+import { Section, Button, TextField, Check, Switch } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
 import { useListReorder, moved } from '../lib/use-list-reorder.js'
 import {
-  ct, listDocuments, newDocument, setPacket, coachingError, coachingChanged, onCoachingChanged,
+  ct, listDocuments, newDocument, setPacket, setRequired, coachingError, coachingChanged, onCoachingChanged,
   KIND_LABEL, KIND_SHORT, KIND_ICON, versionLine,
 } from '../lib/coaching.js'
 
@@ -53,12 +53,16 @@ export function NewDocumentSheet({ close, onCreated }) {
   </>
 }
 
-function DocRow({ d, onOpen, handle, style }) {
+// In the packet, a switch says "required before training with you" (Phase 2e).
+function DocRow({ d, onOpen, handle, style, onRequired }) {
   return <div data-reorder-row className="item" style={{ ...style, cursor: 'pointer' }} role="button" tabIndex={0}
     onClick={onOpen} onKeyDown={e => { if (e.key === 'Enter') onOpen() }}>
-    <span className="lrow-i" style={{ color: 'var(--acc)' }}><Icon name={KIND_ICON[d.kind]} /></span>
-    <div className="grow"><div className="tt">{d.title}</div><div className="ss">{KIND_SHORT[d.kind]()} · {versionLine(d)}</div></div>
+    <span className="lrow-i" style={{ '--tint': 'var(--acc)' }}><Icon name={KIND_ICON[d.kind]} /></span>
+    <div className="grow"><div className="tt">{d.title}</div><div className="ss">{KIND_SHORT[d.kind]()} · {versionLine(d)}{onRequired ? ' · ' + (d.required ? ct('required to start') : ct('optional')) : ''}</div></div>
     {d.version == null && <span className="small" style={{ color: 'var(--orange)', fontWeight: 600, marginInlineEnd: 6 }}>{ct('DRAFT')}</span>}
+    {onRequired && <span onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()} style={{ marginInlineEnd: 6, display: 'flex' }}>
+      <Switch checked={d.required} onChange={onRequired} aria-label={ct('{0} is required before training', d.title)} />
+    </span>}
     {handle ? <button className="iconbtn" aria-label={ct('Move {0}', d.title)} title={ct('Drag to reorder')} {...handle}><Icon name="chevronsUpDown" /></button>
       : <Icon name="chevronRight" className="chev" />}
   </div>
@@ -83,6 +87,10 @@ export default function Documents() {
     try { setDocs(await setPacket(next.map(d => d.id))) } catch (e) { toast(coachingError(e)); load() }
   })
   const open = d => nav('/documents/' + d.id)
+  const required = d => async on => {
+    setDocs(ds => ds.map(x => x.id === d.id ? { ...x, required: on } : x))
+    try { await setRequired(d.id, on) } catch (e) { toast(coachingError(e)); load() }
+  }
   const create = () => useUI.getState().openSheet(close => <NewDocumentSheet close={close} onCreated={open} />)
 
   return <div className="narrow">
@@ -93,9 +101,9 @@ export default function Documents() {
     </div>
     {failed && <div className="card small" role="alert">{failed}</div>}
     {docs && <>
-      <Section title={ct('Sign-up packet')} footer={packet.length ? ct('New clients complete these in this order. Drafts are skipped until you publish them.') : ct('Open a document and turn on “In the sign-up packet” to add it.')}>
+      <Section title={ct('Sign-up packet')} footer={packet.length ? ct('New clients complete these in this order. Drafts are skipped until you publish them. The switch means “required before training with you”; for under-18s that includes the guardian’s signature.') : ct('Open a document and turn on “In the sign-up packet” to add it.')}>
         {packet.length > 0 && <div className="list" ref={reorder.listRef}>
-          {packet.map((d, i) => <DocRow key={d.id} d={d} onOpen={() => open(d)} style={reorder.rowStyle(i)} handle={packet.length > 1 ? reorder.handle(i) : null} />)}
+          {packet.map((d, i) => <DocRow key={d.id} d={d} onOpen={() => open(d)} style={reorder.rowStyle(i)} handle={packet.length > 1 ? reorder.handle(i) : null} onRequired={required(d)} />)}
         </div>}
       </Section>
       <Section title={ct('Not in the packet')}>

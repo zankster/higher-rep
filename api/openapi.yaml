@@ -3779,6 +3779,7 @@ paths:
               properties:
                 id: { type: integer }
                 askCurrent: { type: boolean }
+                required: { type: boolean, description: 'With askCurrent: the new requests are required before the next session.' }
       responses:
         '200':
           description: Published.
@@ -3925,6 +3926,7 @@ paths:
                 id: { type: integer }
                 clients: { oneOf: [ { type: array, items: { type: string } }, { type: string, const: all } ] }
                 due: { type: [integer, 'null'], description: UTC milliseconds }
+                required: { type: boolean, description: "Required before the next session. Left out: the document's own setting." }
       responses:
         '200':
           description: Sent.
@@ -4011,6 +4013,411 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404':
           description: No such file, or not yours.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document/required:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentRequired
+      summary: 'Trainer: required before training'
+      description: >-
+        A client is not cleared to train until every required request is done, including the
+        guardian's signature for a client under 18. Applies to sign-up packets from now on.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, required]
+              properties:
+                id: { type: integer }
+                required: { type: boolean }
+      responses:
+        '200':
+          description: Saved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document: { $ref: '#/components/schemas/CoachingDocumentSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: 'required is not true or false.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: 'Not one of your documents.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/my/about:
+    post:
+      tags: [coaching]
+      operationId: coachingMyAbout
+      summary: 'Client: date of birth'
+      description: >-
+        For a client linked before dates of birth were asked: stores it and asks for the
+        trainer's sign-up packet. Under 13 nothing is stored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dob]
+              properties:
+                dob: { type: string, format: date }
+                tz: { type: string }
+      responses:
+        '200':
+          description: Saved; where the paperwork stands.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoachingMyDocuments' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '400':
+          description: 'A bad date (`dob`) or under 13 (`too-young`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: 'You have no trainer (`no-trainer`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: 'Already given (`already`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/my/documents:
+    get:
+      tags: [coaching]
+      operationId: coachingMyDocuments
+      summary: "Client: my trainer's paperwork"
+      description: >-
+        To do (with each document's content), waiting for the guardian, done, the guardian on
+        record and whether you are cleared to train.
+      responses:
+        '200':
+          description: The paperwork.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoachingMyDocuments' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: 'You have no trainer (`no-trainer`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/my/files:
+    post:
+      tags: [coaching]
+      operationId: coachingMyFileUpload
+      summary: 'Client: upload a filled-in PDF or a photo'
+      description: >-
+        The raw bytes, Content-Type application/pdf or image/jpeg, up to 10 MB. Use the hash in
+        a submission.
+      requestBody:
+        required: true
+        content:
+          application/pdf:
+            schema: { type: string, format: binary }
+          image/jpeg:
+            schema: { type: string, format: binary }
+      responses:
+        '200':
+          description: Stored.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hash: { type: string }
+                  size: { type: integer }
+                  type: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '400':
+          description: 'The bytes are not what the type says (`type`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: 'You have no trainer (`no-trainer`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '413':
+          description: 'Larger than 10 MB (`too-large`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '415':
+          description: 'Not a PDF or JPEG (`type`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/my/file:
+    get:
+      tags: [coaching]
+      operationId: coachingMyFile
+      summary: 'Client: read a file'
+      description: >-
+        A file of a document you were asked for, one you uploaded, or one in your own records.
+      parameters:
+        - { name: hash, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The file.
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+            image/jpeg:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: 'No such file, or not yours.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/my/submit:
+    post:
+      tags: [coaching]
+      operationId: coachingMySubmit
+      summary: 'Client: complete a document'
+      description: >-
+        Answers a form, signs a document (agreed, full name, finger signature as a JPEG data
+        URL) or returns a PDF (one PDF, or photos joined into one). The record is insert only.
+        For a client under 18 a document to sign then waits for the guardian; signer guardian is
+        the guardian signing on this phone. A completed document to sign is emailed as a PDF to
+        the client and guardian; forms never are.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [request]
+              properties:
+                request: { type: integer }
+                signer: { type: string, enum: [client, guardian] }
+                answers: { type: object, description: 'By question id: yes_no as yes and followUp, text, number, date, choice (string or list), signature (data URL).' }
+                agreed: { type: boolean }
+                name: { type: string }
+                signature: { type: string, description: 'data:image/jpeg;base64,...' }
+                files: { type: array, items: { type: string }, description: Hashes from /api/coaching/my/files }
+                tz: { type: string }
+                device: { type: string }
+                appVersion: { type: string }
+      responses:
+        '200':
+          description: Recorded; where the paperwork stands.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoachingMyDocuments' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '400':
+          description: 'Not complete: `agree`, `name`, `signature`, `files`, or for a form `required`, `follow-up`, `number`, `date`, `choice`, `signature` with the question index.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: 'No such open request of yours, or no trainer (`no-trainer`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: 'Already done (`done`), no date of birth yet (`about`), no guardian on record (`no-guardian`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/my/guardian:
+    post:
+      tags: [coaching]
+      operationId: coachingMyGuardian
+      summary: 'Client under 18: my parent or guardian'
+      description: >-
+        Their name, email and relationship. With send, a one-time signing link valid for 7 days
+        is emailed to them; a new link replaces the old one.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                relationship: { type: string }
+                send: { type: boolean }
+      responses:
+        '200':
+          description: Saved. emailed is true, false when the email failed, null when not sent.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoachingMyDocuments' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '400':
+          description: 'No name (`name`), a bad or missing email (`email`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: 'You have no trainer (`no-trainer`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: '18 or older (`adult`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: 'The link was emailed a moment ago (`too-soon`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/my/record:
+    get:
+      tags: [coaching]
+      operationId: coachingMyRecord
+      summary: 'Client: download a signed record'
+      description: >-
+        The record of a completed request as a PDF: the document, a form's answers, each
+        signature with name, time, time zone, device and app version. For a returned PDF, that
+        PDF. Yours also after coaching ended.
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: integer }, description: The request id. }
+      responses:
+        '200':
+          description: The PDF.
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: 'No such record of yours.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/guardian:
+    get:
+      tags: [coaching]
+      operationId: coachingGuardianPage
+      summary: 'Guardian: what to sign'
+      description: >-
+        No session: the token from the emailed link is the secret. The client's completed forms
+        to read, and the documents left to sign.
+      security: []
+      parameters:
+        - { name: token, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The page.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client: { type: object, properties: { name: { type: [string, 'null'] } } }
+                  trainer: { type: object, properties: { name: { type: [string, 'null'] } } }
+                  guardian: { type: object, properties: { name: { type: string }, relationship: { type: string } } }
+                  expires: { type: integer }
+                  sign: { type: array, items: { type: object } }
+                  read: { type: array, items: { type: object } }
+        '404':
+          description: 'Not a valid link (`invalid`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: 'Used (`used`), expired (`expired`) or the coaching ended (`revoked`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/guardian/file:
+    get:
+      tags: [coaching]
+      operationId: coachingGuardianFile
+      summary: 'Guardian: read the PDF to sign'
+      description: >-
+        No session: the token is the secret. Only the PDF of a document the guardian is asked to sign.
+      security: []
+      parameters:
+        - { name: token, in: query, required: true, schema: { type: string } }
+        - { name: hash, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The PDF.
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '404':
+          description: 'Not a valid link, or not a file on it.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: 'Used (`used`), expired (`expired`) or the coaching ended (`revoked`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/guardian/sign:
+    post:
+      tags: [coaching]
+      operationId: coachingGuardianSign
+      summary: 'Guardian: sign a document'
+      description: >-
+        No session: the token is the secret. The link is used up once nothing is left to sign.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, request, agreed, name, signature]
+              properties:
+                token: { type: string }
+                request: { type: integer }
+                agreed: { type: boolean }
+                name: { type: string }
+                signature: { type: string }
+                tz: { type: string }
+                device: { type: string }
+      responses:
+        '200':
+          description: Signed. left is how many are still to sign.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  left: { type: integer }
+        '400':
+          description: 'Not complete (`agree`, `name`, `signature`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: 'Not a valid link, or no such request.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: 'Nothing left to sign there (`done`).'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: 'Used (`used`), expired (`expired`) or the coaching ended (`revoked`).'
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
@@ -4171,15 +4578,19 @@ paths:
       description: >-
         The signed-in person becomes the trainer's client. Accepting the same invite again is
         harmless. On an invite-only instance, a code someone else signed up with is theirs.
+        The date of birth comes with it: under 13 nothing is stored and no link is made. The
+        trainer's sign-up packet (published documents only) is asked for in the same step.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [code]
+              required: [code, dob]
               properties:
                 code: { type: string }
+                dob: { type: string, format: date }
+                tz: { type: string, description: IANA time zone }
       responses:
         '200':
           description: Linked.
@@ -4191,7 +4602,7 @@ paths:
                   ok: { type: boolean, const: true }
                   trainer: { type: object, properties: { id: { type: string }, name: { type: [string, 'null'] } } }
         '400':
-          description: Your own invite (`own`).
+          description: Your own invite (`own`), no or a bad date of birth (`dob`), under 13 (`too-young`).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
@@ -4386,9 +4797,26 @@ components:
         title: { type: string }
         inPacket: { type: boolean }
         order: { type: [integer, 'null'] }
+        required: { type: boolean, description: Required before training starts. }
         version: { type: [integer, 'null'], description: The latest published version, null before the first. }
         hasDraft: { type: boolean }
         updated: { type: integer }
+    CoachingMyDocuments:   # trainer-fork
+      type: object
+      properties:
+        trainer: { type: object, properties: { id: { type: string }, name: { type: [string, 'null'] } } }
+        about: { type: boolean, description: The date of birth is given. }
+        dob: { type: [string, 'null'] }
+        age: { type: [integer, 'null'] }
+        minor: { type: boolean }
+        guardian: { type: [object, 'null'] }
+        todo: { type: array, items: { type: object }, description: 'Open, in order (the packet first), each with kind, title, version, body, required and due.' }
+        waiting: { type: array, items: { type: object }, description: Signed by you, waiting for the guardian. }
+        done: { type: array, items: { type: object } }
+        cleared: { type: boolean }
+        state: { type: string, enum: [about, todo, guardian, cleared] }
+        requiredLeft: { type: integer }
+        guardianLeft: { type: integer }
     CoachingDocumentVersion:   # trainer-fork
       type: [object, 'null']
       properties:

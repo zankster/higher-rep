@@ -63,7 +63,7 @@ test('the invite page needs no session, names the trainer and marks the invite o
 test('accepting links the signed-in person once, and nobody else after them', async t => {
   const h = await startCoachingServer(t, world);
   const inv = await invite(h);
-  const accept = uid => h.post(uid, '/api/coaching/invites/accept', { code: inv.code });
+  const accept = uid => h.post(uid, '/api/coaching/invites/accept', { code: inv.code, dob: '1990-05-01' });
   assert.equal((await accept(null)).status, 401);
   assert.equal((await accept(MIKE)).body.code, 'own');
   assert.equal((await accept(BEN)).body.code, 'other', 'Ben already trains with Tess');
@@ -89,7 +89,7 @@ test('a client who ended coaching can be coached again through a new invite', as
   const h = await startCoachingServer(t, world);
   assert.equal((await h.get(CAL, '/api/coaching/me')).body.coach, null);
   const inv = await invite(h, MIKE, { firstName: 'Cal' });
-  assert.equal((await h.post(CAL, '/api/coaching/invites/accept', { code: inv.code })).status, 200);
+  assert.equal((await h.post(CAL, '/api/coaching/invites/accept', { code: inv.code, dob: '1990-05-01' })).status, 200);
   assert.ok((await clientIds(h, MIKE)).includes(CAL));
 });
 
@@ -98,7 +98,7 @@ test('a revoked invite opens nothing, here or at sign-up', async t => {
   const inv = await invite(h);
   assert.deepEqual((await h.post(MIKE, '/api/coaching/invites/revoke', { id: inv.id })).body, { ok: true });
   assert.equal((await h.post(MIKE, '/api/coaching/invites/revoke', { id: inv.id })).status, 404);
-  assert.equal((await h.post(SAM, '/api/coaching/invites/accept', { code: inv.code })).body.code, 'revoked');
+  assert.equal((await h.post(SAM, '/api/coaching/invites/accept', { code: inv.code, dob: '1990-05-01' })).body.code, 'revoked');
   assert.equal((await h.get(null, `/api/coaching/invite?code=${inv.code}`)).body.status, 'revoked');
   assert.equal(h.db().invites.find(i => i.code === inv.code).revoked, true);
   assert.deepEqual((await h.get(MIKE, '/api/coaching/invites')).body.invites, []);
@@ -112,14 +112,14 @@ test('an expired invite shows as expired, refuses, and "Send new" replaces it', 
   assert.equal(listed[0].status, 'expired');
   assert.equal(listed[0].code, undefined, 'no link to copy');
   assert.equal(h.db().invites.find(i => i.code === inv.code).revoked, true, 'its openGym code is revoked');
-  assert.equal((await h.post(SAM, '/api/coaching/invites/accept', { code: inv.code })).body.code, 'expired');
+  assert.equal((await h.post(SAM, '/api/coaching/invites/accept', { code: inv.code, dob: '1990-05-01' })).body.code, 'expired');
 
   const fresh = (await h.post(MIKE, '/api/coaching/invites/renew', { id: inv.id })).body.invite;
   assert.equal(fresh.status, 'pending');
   assert.notEqual(fresh.code, inv.code);
   assert.equal(fresh.firstName, 'Sam');
   assert.deepEqual((await h.get(MIKE, '/api/coaching/invites')).body.invites.map(i => i.id), [fresh.id]);
-  assert.equal((await h.post(SAM, '/api/coaching/invites/accept', { code: fresh.code })).status, 200);
+  assert.equal((await h.post(SAM, '/api/coaching/invites/accept', { code: fresh.code, dob: '1990-05-01' })).status, 200);
 
   // A month after expiry it drops off the roster.
   const old = await invite(h, MIKE, { firstName: 'Old' });
@@ -184,7 +184,7 @@ test('on an invite-only instance the coaching code is the sign-up code, until it
   const zoe = await signUp('Zoe', inv.code);
   assert.equal(zoe.status, 200);
   const r = await fetch(h.api + '/api/coaching/invites/accept', {
-    method: 'POST', headers: { 'Content-Type': 'application/json', Cookie: zoe.cookie }, body: JSON.stringify({ code: inv.code })
+    method: 'POST', headers: { 'Content-Type': 'application/json', Cookie: zoe.cookie }, body: JSON.stringify({ code: inv.code, dob: '1990-05-01' })
   });
   assert.equal(r.status, 200, 'the person who signed up with the code takes the invite');
   assert.ok((await clientIds(h, MIKE)).includes(zoe.body.user.id));

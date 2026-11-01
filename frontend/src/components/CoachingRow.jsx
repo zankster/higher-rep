@@ -1,5 +1,5 @@
-// trainer-fork: the rows Settings' root gains (Phase 2b, 2d). A trainer gets Clients and Documents, a client gets
-// Coaching with their trainer's name; anyone else, a guest or the demo sees nothing.
+// trainer-fork: the rows Settings' root gains (Phase 2b, 2d, 2e). A trainer gets Clients and Documents, a client gets
+// Coaching with their trainer's name and My documents; anyone else, a guest or the demo sees nothing.
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Section, Row } from './ui.jsx'
@@ -20,5 +20,6 @@ export default function CoachingRow({ user }) {
     {me.trainer && <Row icon="clipboard" iconTint="var(--acc)" title={ct('Documents')} accessory="chevron" onClick={() => nav('/documents')} className="sp-root-row" />}
     {/* A trainer can have a trainer of their own. */}
     {me.coach && <Row icon="figureStrength" iconTint="var(--acc)" title={ct('Coaching')} value={me.coach.name} accessory="chevron" onClick={() => nav('/coaching')} className="sp-root-row" />}
+    {me.coach && <Row icon="clipboard" iconTint="var(--acc)" title={ct('My documents')} value={me.coach.todo ? ct('{0} to do', me.coach.todo) : null} accessory="chevron" onClick={() => nav('/my-documents')} className="sp-root-row" />}
   </Section>
 }

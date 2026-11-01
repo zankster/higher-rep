@@ -136,14 +136,36 @@ describe('InviteSheet', () => {
 
 describe('JoinInvite', () => {
   const page = { status: 'valid', trainer: { name: 'Mike' }, firstName: 'Ava', note: 'See you Monday', expires: NOW + 86400000 }
+  // "When were you born?" comes first (Phase 2e).
+  async function born(host, day, month, year) {
+    type(host.querySelector('input[aria-label="Day"]'), day)
+    await click(host.querySelector('button[aria-label="Month"]'))
+    await click([...(await topSheet()).querySelectorAll('.menu-item')].find(el => el.textContent.includes(month)))
+    type(host.querySelector('input[aria-label="Year"]'), year)
+    await click(button(host, 'Next'))
+  }
+  it('under 13: stops before any account, and keeps nothing', async () => {
+    calls.invitePage.mockResolvedValue(page)
+    const host = await render(<JoinInvite code="ABCD1234" />)
+    expect(host.textContent).toContain('When were you born?')
+    await born(host, '31', 'February', '2010')
+    expect(host.textContent).toContain('Check the date of birth.')
+    await born(host, '1', 'January', String(new Date().getFullYear() - 10))
+    expect(host.textContent).toContain('You need to be 13 or older')
+    expect(button(host, 'Create account')).toBeUndefined()
+    expect(sessionStorage.getItem('hr_join_dob')).toBeNull()
+    expect(calls.acceptInvite).not.toHaveBeenCalled()
+  })
   it('signed out: names the trainer, shows the note, offers sign-up', async () => {
     calls.invitePage.mockResolvedValue(page)
     const host = await render(<JoinInvite code="ABCD1234" />)
+    await born(host, '12', 'March', '1990')
     expect(host.textContent).toContain('Mike invited you to train with them')
     expect(host.textContent).toContain('See you Monday')
     await click(button(host, 'Create account'))
     expect(useUI.getState().sheets.length).toBe(1)
     expect(sessionStorage.getItem('hr_join_auto')).toBe('ABCD1234')
+    expect(sessionStorage.getItem('hr_join_dob')).toBe('1990-03-12')
   })
   it('an expired invite says whom to ask', async () => {
     calls.invitePage.mockResolvedValue({ status: 'expired', trainer: { name: 'Mike' } })
@@ -155,16 +177,18 @@ describe('JoinInvite', () => {
     calls.invitePage.mockResolvedValue(page)
     calls.acceptInvite.mockResolvedValue({ ok: true, trainer: { id: 'u_mike', name: 'Mike' } })
     const host = await render(<JoinInvite code="ABCD1234" signedIn />)
+    await born(host, '12', 'March', '1990')
     expect(calls.acceptInvite).not.toHaveBeenCalled()
     await click(button(host, 'Join Mike'))
-    expect(calls.acceptInvite).toHaveBeenCalledWith('ABCD1234')
+    expect(calls.acceptInvite).toHaveBeenCalledWith('ABCD1234', '1990-03-12')
   })
   it('right after signing up from the page: joins without a second tap', async () => {
     calls.invitePage.mockResolvedValue(page)
     calls.acceptInvite.mockResolvedValue({ ok: true, trainer: { id: 'u_mike', name: 'Mike' } })
     markAutoAccept('ABCD1234')
+    sessionStorage.setItem('hr_join_dob', '1990-03-12')
     await render(<JoinInvite code="ABCD1234" signedIn />)
-    expect(calls.acceptInvite).toHaveBeenCalledWith('ABCD1234')
+    expect(calls.acceptInvite).toHaveBeenCalledWith('ABCD1234', '1990-03-12')
   })
 })
 

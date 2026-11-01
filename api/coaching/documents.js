@@ -31,7 +31,7 @@ export function documentRoutes({ sql, access, json, readBody, audit, dataDir, no
   const summary = d => {
     const latest = latestOf(d.id), draft = draftOf(d.id);
     return {
-      id: d.id, kind: d.kind, title: d.title, inPacket: !!d.in_packet, order: d.packet_order,
+      id: d.id, kind: d.kind, title: d.title, inPacket: !!d.in_packet, order: d.packet_order, required: !!d.required,
       version: latest ? latest.version : null, hasDraft: !!draft,
       updated: Math.max(draft?.updated_at || 0, latest?.published_at || 0, d.created_at),
     };
@@ -122,8 +122,10 @@ export function documentRoutes({ sql, access, json, readBody, audit, dataDir, no
       json(res, 200, { document: detail(d) });
     },
 
-    // Publishing freezes the draft as the next version. Open requests move to the new version.
-    // `askCurrent` also asks the clients who completed an earlier version to do this one.
+    // Publishing freezes the draft as the next version. Open requests move to the new version,
+    // except one the client already signed and that waits for the guardian: the guardian signs
+    // what the client signed. `askCurrent` also asks the clients who completed an earlier version
+    // to do this one; `required` makes that new request required before their next session.
     'POST /api/coaching/document/publish': async (req, res) => {
       const trainer = requireTrainer(req, res); if (!trainer) return;
       const body = await readBody(req);
@@ -143,9 +145,9 @@ export function documentRoutes({ sql, access, json, readBody, audit, dataDir, no
         sql.prepare(`UPDATE document_versions SET status = 'published', version = ?, body = ?, published_at = ?, updated_at = ? WHERE id = ?`)
           .run(version, JSON.stringify(content), t, t, draft.id);
         sql.prepare('UPDATE documents SET title = ? WHERE id = ?').run(draft.title, d.id);
-        sql.prepare(`UPDATE requests SET version_id = ? WHERE document_id = ? AND status = 'open'`).run(draft.id, d.id);
-        const add = sql.prepare(`INSERT INTO requests (trainer_id, client_id, document_id, version_id, reason, status, created_at) VALUES (?, ?, ?, ?, 'new_version', 'open', ?)`);
-        for (const c of ask) add.run(trainer.id, c, d.id, draft.id, t);
+        sql.prepare(`UPDATE requests SET version_id = ? WHERE document_id = ? AND status = 'open' AND client_done_at IS NULL`).run(draft.id, d.id);
+        const add = sql.prepare(`INSERT INTO requests (trainer_id, client_id, document_id, version_id, reason, status, required, created_at) VALUES (?, ?, ?, ?, 'new_version', 'open', ?, ?)`);
+        for (const c of ask) add.run(trainer.id, c, d.id, draft.id, body.required === true ? 1 : 0, t);
       });
       audit(req, 'coaching.document.publish', { user: trainer, msg: `${draft.title} v${version}` });
       json(res, 200, { document: detail(ownDoc(trainer, d.id)), version, asked: ask.length });
@@ -165,6 +167,18 @@ export function documentRoutes({ sql, access, json, readBody, audit, dataDir, no
       });
       const docs = sql.prepare('SELECT * FROM documents WHERE trainer_id = ? ORDER BY in_packet DESC, packet_order, created_at').all(trainer.id);
       json(res, 200, { documents: docs.map(summary) });
+    },
+
+    // "Required before training": a client is not cleared to train until every required request
+    // is done. Applies to sign-up packets from now on; requests already made keep what they had.
+    'POST /api/coaching/document/required': async (req, res) => {
+      const trainer = requireTrainer(req, res); if (!trainer) return;
+      const body = await readBody(req);
+      const d = ownDoc(trainer, body.id);
+      if (!d) return json(res, 404, { error: 'no such document' });
+      if (typeof body.required !== 'boolean') return json(res, 400, { error: 'required must be true or false' });
+      sql.prepare('UPDATE documents SET required = ? WHERE id = ?').run(body.required ? 1 : 0, d.id);
+      json(res, 200, { document: summary(ownDoc(trainer, d.id)) });
     },
 
     // Only a document that was never published can go: a published one may already be signed.
@@ -202,7 +216,8 @@ export function documentRoutes({ sql, access, json, readBody, audit, dataDir, no
     },
 
     // Ask clients for the latest version. Someone who already finished it, or has it open, is
-    // skipped. A paused client gets it now and sees it when coaching resumes.
+    // skipped. A paused client gets it now and sees it when coaching resumes. `required` (the
+    // document's own setting when left out) makes it required before their next session.
     'POST /api/coaching/document/send': async (req, res) => {
       const trainer = requireTrainer(req, res); if (!trainer) return;
       const body = await readBody(req);
@@ -216,12 +231,13 @@ export function documentRoutes({ sql, access, json, readBody, audit, dataDir, no
       if (wanted.some(c => !live.has(c))) return json(res, 404, { error: 'no such client' });
       const due = body.due == null || body.due === '' ? null : Number(body.due);
       if (due !== null && !(Number.isFinite(due) && due > now() - 86400000)) return json(res, 400, { error: 'that date has passed', code: 'due' });
+      const required = typeof body.required === 'boolean' ? body.required : !!d.required;
       const t = now();
       let sent = 0;
       tx(sql, () => {
         const busy = sql.prepare(`SELECT 1 FROM requests WHERE document_id = ? AND client_id = ? AND (status = 'open' OR (status = 'done' AND version_id = ?))`);
-        const add = sql.prepare(`INSERT INTO requests (trainer_id, client_id, document_id, version_id, reason, status, due_at, created_at) VALUES (?, ?, ?, ?, 'sent', 'open', ?, ?)`);
-        for (const c of new Set(wanted)) if (!busy.get(d.id, c, latest.id)) { add.run(trainer.id, c, d.id, latest.id, due, t); sent++; }
+        const add = sql.prepare(`INSERT INTO requests (trainer_id, client_id, document_id, version_id, reason, status, required, due_at, created_at) VALUES (?, ?, ?, ?, 'sent', 'open', ?, ?, ?)`);
+        for (const c of new Set(wanted)) if (!busy.get(d.id, c, latest.id)) { add.run(trainer.id, c, d.id, latest.id, required ? 1 : 0, due, t); sent++; }
       });
       audit(req, 'coaching.document.send', { user: trainer, msg: `${d.title} to ${sent}` });
       json(res, 200, { sent, skipped: new Set(wanted).size - sent });

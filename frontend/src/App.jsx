@@ -41,7 +41,7 @@ import { SeasonalLayer } from './components/Seasonal.jsx'
 import { openDeviceLinkRedeem } from './components/Passkeys.jsx'
 import { useAnimPacksBoot } from './components/Animations.jsx'
 import Login from './views/Login.jsx'
-import { joinCode, resetLinkCode } from './lib/coaching.js' // trainer-fork
+import { joinCode, resetLinkCode, guardianToken } from './lib/coaching.js' // trainer-fork
 import MobileOnboarding from './views/MobileOnboarding.jsx'
 import PermissionSteps from './views/PermissionSteps.jsx'
 import Home from './views/Home.jsx'
@@ -86,6 +86,9 @@ const JoinInvite = lazyView(() => import('./views/JoinInvite.jsx'))
 const ResetPassword = lazyView(() => import('./views/ResetPassword.jsx'))
 const Documents = lazyView(() => import('./views/Documents.jsx'))
 const DocumentEdit = lazyView(() => import('./views/DocumentEdit.jsx'))
+const Packet = lazyView(() => import('./views/Packet.jsx'))
+const MyDocuments = lazyView(() => import('./views/MyDocuments.jsx'))
+const GuardianSign = lazyView(() => import('./views/GuardianSign.jsx'))
 let viewsPrefetched = false
 const prefetchViews = () => {
   if (viewsPrefetched) return
@@ -297,7 +300,7 @@ function Shell() {
   )
 
   // trainer-fork: an invite link opens its own page before sign-in, not the plain Login.
-  const view = l => (!authed ? (joinCode(l.pathname) ? <JoinInvite code={joinCode(l.pathname)} /> : resetLinkCode(l.pathname) ? <ResetPassword code={resetLinkCode(l.pathname)} /> : <Login />) : needsMobileOnboarding ? <MobileOnboarding /> : permSteps ? <PermissionSteps /> : (
+  const view = l => (!authed ? (joinCode(l.pathname) ? <JoinInvite code={joinCode(l.pathname)} /> : resetLinkCode(l.pathname) ? <ResetPassword code={resetLinkCode(l.pathname)} /> : guardianToken(l.pathname) ? <GuardianSign token={guardianToken(l.pathname)} /> : <Login />) : needsMobileOnboarding ? <MobileOnboarding /> : permSteps ? <PermissionSteps /> : (
     <Routes location={l}>
       <Route path="/home" element={<Home />} />
       {/* Gym check-in — switched off in Settings, the route falls through to the
@@ -330,6 +333,9 @@ function Shell() {
       <Route path="/reset/:code" element={<ResetPassword code={resetLinkCode(l.pathname)} />} />
       <Route path="/documents" element={<Documents />} />
       <Route path="/documents/:id" element={<DocumentEdit />} />
+      <Route path="/packet" element={<Packet />} />
+      <Route path="/my-documents" element={<MyDocuments />} />
+      <Route path="/guardian/:token" element={<GuardianSign token={guardianToken(l.pathname)} />} />
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   ))

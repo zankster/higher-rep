@@ -1,5 +1,5 @@
-/* The coaching file store (trainer-fork, Phase 2d): uploaded PDFs now, signature images and logos
- * later. A file is kept once, named by its SHA-256, under DATA_DIR/coaching-files. openGym's
+/* The coaching file store (trainer-fork, Phase 2d): uploaded PDFs, and from 2e signature images
+ * and photos of filled-in pages (JPEG); logos later. A file is kept once, named by its SHA-256, under DATA_DIR/coaching-files. openGym's
  * media clean-up never looks here, and nothing here is served without a route checking who may
  * read it. */
 import crypto from 'node:crypto';
@@ -7,7 +7,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export const MAX_PDF = 10 * 1024 * 1024;
-const EXT = { 'application/pdf': '.pdf' };
+const EXT = { 'application/pdf': '.pdf', 'image/jpeg': '.jpg' };
+export const FILE_TYPES = Object.keys(EXT);
 
 export const filesDir = dataDir => path.join(dataDir, 'coaching-files');
 export const filePath = (dataDir, hash, type = 'application/pdf') => path.join(filesDir(dataDir), hash + (EXT[type] || ''));
@@ -30,6 +31,9 @@ export function readRaw(req, max) {
 }
 
 export const isPdf = buf => buf.length > 8 && buf.subarray(0, 5).toString('latin1') === '%PDF-';
+export const isJpeg = buf => buf.length > 4 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff;
+/** The type the bytes really are, of the ones the store keeps, or null. */
+export const sniff = buf => isPdf(buf) ? 'application/pdf' : isJpeg(buf) ? 'image/jpeg' : null;
 
 /** Writes the file once (temp then rename) and returns its hash. */
 export function storeFile(dataDir, buf, type = 'application/pdf') {

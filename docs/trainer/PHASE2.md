@@ -143,6 +143,40 @@ Each step ends with its tests passing and is one commit.
 - "You're all set": waiver copy emailed, PDF download, everything under Settings › My documents.
 - PDFs are written by a small plain-JS writer in `api/coaching/pdf.js` (text and the signature
   image, no dependency).
+- **Built 2026-11-01.** Mike approved the mock-ups after changing these (all in the build):
+  - The date of birth is kept for every client and the trainer sees it (roster shows the age).
+    Under 13: no account link and nothing stored.
+  - The trainer marks which packet documents are **required before training** (a switch on the
+    packet list). A client is cleared only once every required request is done; for a client
+    under 18 a document to sign also needs the guardian's signature. A new version or a document
+    sent later can be made required again (switch on Publish and on Send, off by default on
+    Publish). Optional documents never hold anything up.
+  - A PDF to return may also be photos of each page; they are joined into one PDF on the server.
+  - The guardian's link works once, for 7 days; a new link replaces the old one.
+  - The signed-record PDF holds the exact text (or the PDF's name and SHA-256), version, typed
+    name, signature image, date, time and time zone, device and app version, for the client and
+    the guardian. Documents to sign are emailed as that PDF; forms never are.
+  - API: migration 4 (`clients`, `guardians`, `submissions` insert only by trigger; `required` on
+    documents and requests; `guardian_needed` and `client_done_at` on requests).
+    `api/coaching/packet.js` (my/about, my/documents, my/files, my/file, my/submit, my/guardian,
+    my/record, guardian, guardian/file, guardian/sign), `submission.js` (date of birth, age,
+    answers, clearance), `pdf.js` (the writer). The invite accept now takes `dob` and makes the
+    packet's requests. `POST /api/coaching/document/required`. Tests:
+    `api/test/coaching-packet.test.js`.
+  - App: the invite page asks the date of birth first (`components/PacketSteps.jsx`),
+    `views/Packet.jsx` (#/packet: the steps, guardian, "You're all set" / "Almost there"),
+    `views/MyDocuments.jsx` (Settings › My documents, PDF downloads), `views/GuardianSign.jsx`
+    (#/guardian/<token>, no account), `components/SignaturePad.jsx`, the Home card
+    (`components/PaperworkCard.jsx`, one marked line in `Home.jsx`), required switches on the
+    packet, Publish and Send, and age plus "Waiting on guardian" / "N to sign" on the roster.
+    Test: `views/Packet.test.jsx`.
+  - "Not cleared" locks nothing yet, because plans and logged sessions for a client come in
+    Phase 3; `clearanceOf()` in `packet.js` is what those routes will ask. The client's own
+    openGym tracking is never locked.
+  - Clients who joined before 2e are asked their date of birth from the Home card, then get the
+    packet.
+  - Not in 2e: the trainer reading a client's answers and records (2f, client profile), the
+    retention table (2f, with the export), branding colours (2g).
 
 ### 2f. Client profile (trainer)
 - Header: avatar, age, start date (program comes in Phase 3).
