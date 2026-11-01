@@ -245,3 +245,73 @@ export function rosterFilter(clients, filter, q = '') {
     .filter(c => filter !== 'paused' || c.status === 'paused')
     .filter(c => !s || String(c.name || '').toLowerCase().includes(s))
 }
+
+/* ---------- the client profile, trainer side (Phase 2f) ---------- */
+const enc = encodeURIComponent
+export const clientProfile = id => api('/api/coaching/client/profile?id=' + enc(id))
+export const clientRecord = (id, record) => api(`/api/coaching/client/record?id=${enc(id)}&record=${enc(record)}`).then(r => r.record)
+export const clientRecordUrl = (id, record) => `./api/coaching/client/record/pdf?id=${enc(id)}&record=${enc(record)}`
+export const clientExportUrl = (id, notes) => './api/coaching/client/export?id=' + enc(id) + (notes ? '&notes=1' : '')
+export const addTag = (id, fields) => post('/api/coaching/client/tags', { id, ...fields }).then(r => r.tags)
+export const updateTag = (id, tag, fields) => post('/api/coaching/client/tag', { id, tag, ...fields }).then(r => r.tags)
+export const deleteTag = (id, tag) => post('/api/coaching/client/tag/delete', { id, tag }).then(r => r.tags)
+export const addNote = (id, text) => post('/api/coaching/client/notes', { id, text }).then(r => r.notes)
+export const editNote = (id, note, text) => post('/api/coaching/client/note', { id, note, text }).then(r => r.notes)
+export const deleteNote = (id, note) => post('/api/coaching/client/note/delete', { id, note }).then(r => r.notes)
+export const resendGuardianLink = id => post('/api/coaching/client/guardian/link', { id })
+
+const longDay = ms => new Date(ms).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+const dobDay = dob => new Date(dob + 'T12:00:00Z').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
+
+/** "34 · born 1 May 1990", or null before the client gave their date of birth. */
+export const ageLine = c => c.dob ? ct('{0} · born {1}', c.age, dobDay(c.dob)) : null
+
+/** The profile's paperwork pill: what it says and whether it is good news. */
+export function paperworkPill(c) {
+  if (c.cleared) return { label: ct('Cleared to train'), ok: true }
+  return { label: paperworkLine(c) || ct('Not cleared yet'), ok: false }
+}
+
+/** First letters of the first and last name, for the avatar. */
+export function initials(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return '?'
+  return ((parts[0][0] || '') + (parts.length > 1 ? parts.at(-1)[0] : '')).toUpperCase()
+}
+
+/** How long the records are kept, in one sentence. */
+export function retentionLine(r) {
+  if (r.keepUntil) return ct('Records may be deleted after {0}. Nothing is deleted automatically.', longDay(r.keepUntil))
+  return r.notBefore
+    // notBefore comes from the date of birth (midnight UTC), so it is shown as that day in UTC.
+    ? ct('Records are kept {0} years after coaching ends, and at least until {1} (5 years after they turn 18).', r.years, new Date(r.notBefore).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }))
+    : ct('Records are kept {0} years after coaching ends.', r.years)
+}
+
+/** A record's line on the profile. */
+export function recordLine(r) {
+  if (r.waitingGuardian) return ct('Version {0} · waiting on guardian', r.version)
+  if (r.kind === 'form') {
+    const yes = r.yesCount === 1 ? ct('1 yes') : ct('{0} yes', r.yesCount || 0)
+    return ct('Version {0} · {1}', r.version, longDay(r.done)) + ' · ' + yes + (r.flagged ? ' · ' + ct('{0} flagged', r.flagged) : '')
+  }
+  const g = r.signers.find(s => s.signer === 'guardian')
+  const base = r.kind === 'sign' ? ct('Version {0} · signed {1}', r.version, longDay(r.done)) : ct('Version {0} · returned {1}', r.version, longDay(r.done))
+  return g ? base + ' · ' + ct('with {0}', g.name) : base
+}
+
+/** "Written 3 Nov 2026 · edited 5 Nov 2026". */
+export const noteLine = n => ct('Written {0}', longDay(n.created)) + (n.edited ? ' · ' + ct('edited {0}', longDay(n.edited)) : '')
+
+/** What went wrong on the profile, in words. */
+export function profileError(e) {
+  switch (e?.data?.code) {
+    case 'taken': return ct('That tag is already there.')
+    case 'text': return ct('Type something first.')
+    case 'too-many': return ct('A client can have at most 30 tags.')
+    case 'too-soon': return ct('The link was emailed a moment ago. Give it a little time.')
+    case 'nothing': return ct('There is nothing left for the guardian to sign.')
+    case 'no-email': return ct('There is no email address for the guardian. They can sign on the client’s phone.')
+    default: return coachingError(e)
+  }
+}

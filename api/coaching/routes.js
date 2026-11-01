@@ -13,6 +13,7 @@ import { makeResetCode, hashResetCode, normalizeEmail } from '../password.js';
 import { createWindow } from '../rate-limit.js';
 import { documentRoutes } from './documents.js';
 import { packetRoutes, saveAbout, createPacket, clearanceOf } from './packet.js';
+import { profileRoutes } from './profile.js';
 import { MIN_AGE, parseDob, ageOn, cleanTz } from './submission.js';
 
 export const INVITE_DAYS = 14;
@@ -47,6 +48,8 @@ export function coachingRoutes({
       id: link.client_id, name: u ? u.name : null, status: link.status, since: link.started_at,
       dob: about?.dob || null, age: about ? ageOn(about.dob, now()) : null,
       cleared: c.cleared, paperwork: c.state, todo: c.todo,
+      // Warning tags show beside the name on the roster (2f). Only the trainer's routes call this.
+      warnings: sql.prepare('SELECT text FROM tags WHERE trainer_id = ? AND client_id = ? AND warning = 1 ORDER BY created_at, id').all(link.trainer_id, link.client_id).map(t => t.text),
     };
   };
   // The name a client sees: the trainer's branding name once 2g sets one, else their profile name.
@@ -135,6 +138,7 @@ export function coachingRoutes({
   return {
     ...documentRoutes({ sql, access, json, readBody, audit, dataDir, now }),
     ...packetRoutes({ sql, access, json, readBody, audit, dataDir, now, mailer, trainerInfo, trainerName, base }),
+    ...profileRoutes({ sql, access, json, readBody, audit, dataDir, now, mailer, trainerInfo, trainerName, base, clientRow }),
 
     // Appoint or remove a trainer. Owner only, like appointing an admin. Removing is refused while
     // the trainer still has clients: their clients would be left linked to nobody.

@@ -21,7 +21,7 @@ import {
 } from './submission.js';
 
 export const GUARDIAN_DAYS = 7;
-const GUARDIAN_EMAIL_GAP_MS = 2 * 60000;
+export const GUARDIAN_EMAIL_GAP_MS = 2 * 60000;
 const DAY = 86400000;
 const HASH = /^[0-9a-f]{64}$/;
 
@@ -65,7 +65,7 @@ export function fmtSigned(ms, tz) {
   return `${day} at ${time} (${z || 'UTC'})`;
 }
 
-function answerText(q, a) {
+export function answerText(q, a) {
   if (a === undefined) return 'Not answered';
   if (q.type === 'yes_no') return (a.yes ? 'Yes' : 'No') + (a.followUp ? `. ${a.followUp}` : '');
   if (Array.isArray(a)) return a.join(', ');
@@ -122,6 +122,22 @@ export function recordPdf({ dataDir, trainerName, clientName, kind, title, versi
   return doc.toBuffer();
 }
 
+/** "liability-waiver-v2.pdf": a record's file name, from its title and version. */
+export const recordName = (r, suffix = '') => `${r.title.replace(/[^\w .-]+/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'document'}-v${r.version}${suffix}.pdf`;
+
+/** A fresh one-time link for the guardian, emailed to them (a new link replaces the old one).
+ *  Resolves whether the email went out. Used by the client's packet and by the trainer. */
+export async function emailGuardianLink({ sql, mailer, trainerInfo, base, now }, g, clientName) {
+  const t = now();
+  const token = crypto.randomBytes(32).toString('base64url');
+  sql.prepare('UPDATE guardians SET token_hash = ?, token_expires_at = ?, token_used_at = NULL WHERE id = ?').run(sha(token), t + GUARDIAN_DAYS * DAY, g.id);
+  const trainer = trainerInfo(g.trainer_id);
+  const mail = guardianEmail({ trainer, guardianName: g.name, clientName, url: base + '/#/guardian/' + token, days: GUARDIAN_DAYS });
+  const ok = (await mailer.send({ to: g.email, via: trainer.name, replyTo: trainer.contactEmail, ...mail })).ok;
+  if (ok) sql.prepare('UPDATE guardians SET emailed_at = ? WHERE id = ?').run(t, g.id);
+  return ok;
+}
+
 export function packetRoutes({ sql, access, json, readBody, audit, dataDir, now, mailer, trainerInfo, trainerName, base }) {
   const { userById, liveLinkOf, requireUser } = access;
   const query = (req, k) => new URL(req.url, 'http://x').searchParams.get(k);
@@ -156,7 +172,6 @@ export function packetRoutes({ sql, access, json, readBody, audit, dataDir, now,
       subs,
     };
   }
-  const recordName = r => `${r.title.replace(/[^\w .-]+/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'document'}-v${r.version}.pdf`;
 
   // The signed copy of a document to sign goes to the client and, when they signed, the guardian.
   // Forms and returned PDFs are not emailed: they can hold health answers.
@@ -400,12 +415,7 @@ export function packetRoutes({ sql, access, json, readBody, audit, dataDir, now,
       }
       let emailed = null;
       if (body.send) {
-        const token = crypto.randomBytes(32).toString('base64url');
-        sql.prepare('UPDATE guardians SET token_hash = ?, token_expires_at = ?, token_used_at = NULL WHERE id = ?').run(sha(token), t + GUARDIAN_DAYS * DAY, g.id);
-        const trainer = trainerInfo(own.link.trainer_id);
-        const mail = guardianEmail({ trainer, guardianName: name, clientName: own.user.name, url: base + '/#/guardian/' + token, days: GUARDIAN_DAYS });
-        emailed = (await mailer.send({ to: email, via: trainer.name, replyTo: trainer.contactEmail, ...mail })).ok;
-        if (emailed) sql.prepare('UPDATE guardians SET emailed_at = ? WHERE id = ?').run(t, g.id);
+        emailed = await emailGuardianLink({ sql, mailer, trainerInfo, base, now }, g, own.user.name);
         audit(req, 'coaching.guardian.link', { user: own.user, target: userById(own.link.trainer_id) });
       }
       json(res, 200, { emailed, ...myView(own.user, own.link) });

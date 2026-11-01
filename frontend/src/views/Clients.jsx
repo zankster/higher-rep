@@ -1,16 +1,17 @@
 // trainer-fork: the trainer's roster (Phase 2b). Clients with a live link, the open invites, and
-// per row the actions the approved mock-up shows: pause or resume and remove for a client; copy,
-// share, revoke or send new for an invite. The client profile (Phase 2f) replaces the row menu.
-// The "Needs attention" and "Unread" chips come with programs and chat (Phases 4 and 5).
+// per invite the actions the approved mock-up shows: copy, share, revoke or send new. Tapping a
+// client opens their profile (Phase 2f, views/ClientProfile.jsx), which holds pause and remove;
+// warning tags show beside the name. The "Needs attention" and "Unread" chips come with programs
+// and chat (Phases 4 and 5).
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUI } from '../store/useUI.js'
 import { Section, Row, SearchField, Button } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
-import { menuSheet, confirmSheet } from '../sheets.jsx'
+import { menuSheet } from '../sheets.jsx'
 import { openInviteSheet, copyInvite, shareInvite } from '../components/InviteSheet.jsx'
 import {
-  ct, listClients, listInvites, pauseClient, removeClient, revokeInvite, renewInvite, emailInvite,
+  ct, listClients, listInvites, revokeInvite, renewInvite, emailInvite,
   coachingError, inviteLine, sinceLine, rosterFilter, coachingChanged, onCoachingChanged, paperworkLine,
 } from '../lib/coaching.js'
 
@@ -37,19 +38,6 @@ export default function Clients() {
 
   // Through the event, not load(): see coachingChanged in lib/coaching.js.
   const act = fn => async () => { try { await fn() } catch (e) { toast(coachingError(e)) } finally { coachingChanged() } }
-
-  const clientMenu = c => menuSheet({
-    title: c.name, subtitle: c.status === 'paused' ? ct('Paused') : sinceLine(c.since),
-    items: [
-      c.status === 'paused'
-        ? { icon: 'play', label: ct('Resume coaching'), onClick: act(() => pauseClient(c.id, false)) }
-        : { icon: 'pause', label: ct('Pause coaching'), sub: ct('Holiday or injury break. No alerts, nothing counts as missed.'), onClick: act(() => pauseClient(c.id, true)) },
-      { icon: 'trash', label: ct('Remove client'), danger: true, onClick: () => confirmSheet({
-        title: ct('Remove {0}?', c.name), message: removeMessage(c.name), danger: true,
-        confirmText: ct('Remove {0}', c.name), onConfirm: act(async () => { await removeClient(c.id); toast(ct('{0} removed', c.name)) }),
-      }) },
-    ],
-  })
 
   // A fresh link goes out by email when the invite has an address, else through the share sheet.
   const sendNew = inv => act(async () => {
@@ -92,9 +80,10 @@ export default function Clients() {
 
     {filter !== 'invited' && <Section>
       {clients && !shown.length && <Row title={all.length ? ct('No client matches') : ct('No clients yet')} subtitle={all.length ? null : ct('Invite your first client with the button below.')} />}
-      {shown.map(c => <Row key={c.id} title={c.name} subtitle={(c.age != null ? c.age + ' · ' : '') + sinceLine(c.since)}
+      {shown.map(c => <Row key={c.id} title={<>{c.name}{(c.warnings || []).map(w => <span key={w} className="tag nocap" style={{ marginInlineStart: 6, background: 'rgba(255, 149, 0, 0.2)', color: 'var(--label)', fontSize: 12, verticalAlign: 'middle' }}><Icon name="warning" style={{ color: 'var(--orange)' }} /> {w}</span>)}</>}
+        subtitle={(c.age != null ? c.age + ' · ' : '') + sinceLine(c.since)}
         value={c.status === 'paused' ? ct('Paused') : paperworkLine(c) && <span style={{ color: c.cleared ? 'var(--label-2)' : 'var(--orange)' }}>{paperworkLine(c)}</span>}
-        icon="person" iconTint="var(--acc)" accessory="chevron" onClick={() => clientMenu(c)} />)}
+        icon="person" iconTint="var(--acc)" accessory="chevron" onClick={() => nav('/clients/' + encodeURIComponent(c.id))} />)}
     </Section>}
 
     {(filter === 'invited' || (filter === 'all' && invites.length > 0)) && <Section title={ct('Invites')}>

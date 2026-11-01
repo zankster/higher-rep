@@ -3,7 +3,7 @@
 // coaching calls mocked. The permissions behind them are the api's tests (api/test/coaching-*).
 import React, { act } from 'react'
 import { createRoot } from 'react-dom/client'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useParams } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const calls = vi.hoisted(() => ({
@@ -87,26 +87,15 @@ describe('Clients', () => {
     expect(host.textContent).toContain('Zoe')
   })
 
-  it('pauses a client from the row menu', async () => {
-    calls.pauseClient.mockResolvedValue({ ...ava, status: 'paused' })
-    const host = await render(<Clients />)
-    await click([...host.querySelectorAll('button.lrow')].find(b => b.textContent.includes('Ava Reyes')))
-    const menu = await topSheet()
-    await click([...menu.querySelectorAll('.menu-item')].find(el => el.textContent.includes('Pause coaching')))
-    expect(calls.pauseClient).toHaveBeenCalledWith('u_ava', true)
-    expect(calls.listClients).toHaveBeenCalledTimes(2)
-  })
-
-  it('removes a client only after the confirm', async () => {
-    calls.removeClient.mockResolvedValue({ ok: true })
-    const host = await render(<Clients />)
-    await click([...host.querySelectorAll('button.lrow')].find(b => b.textContent.includes('Ava Reyes')))
-    await click([...(await topSheet()).querySelectorAll('.menu-item')].find(el => el.textContent.includes('Remove client')))
-    expect(calls.removeClient).not.toHaveBeenCalled()
-    const confirm = await topSheet()
-    expect(confirm.textContent).toContain('keeps their account and their own data')
-    await click(button(confirm, 'Remove Ava Reyes'))
-    expect(calls.removeClient).toHaveBeenCalledWith('u_ava')
+  it('tapping a client opens their profile, and warning tags show beside the name', async () => {
+    calls.listClients.mockResolvedValue([{ ...ava, warnings: ['Knee pain'] }, pia])
+    const Probe = () => <div data-testid="probe">{'profile ' + useParams().id}</div>
+    const host = await render(<Routes><Route path="/" element={<Clients />} /><Route path="/clients/:id" element={<Probe />} /></Routes>)
+    const row = [...host.querySelectorAll('button.lrow')].find(b => b.textContent.includes('Ava Reyes'))
+    expect(row.textContent).toContain('Knee pain')
+    await click(row)
+    expect(host.querySelector('[data-testid="probe"]').textContent).toBe('profile u_ava')
+    expect(useUI.getState().sheets).toHaveLength(0)
   })
 
   it('an expired invite offers only Send new', async () => {

@@ -105,7 +105,7 @@ test('GET /api/coaching/clients lists only the trainer\'s own live clients', asy
   assert.deepEqual(await ids(MIKE), [ANA, PIA], 'not Ben (Tess\'s), not Cal (ended), not strangers');
   assert.deepEqual(await ids(TESS), [BEN]);
   const pia = (await h.get(MIKE, '/api/coaching/clients')).body.clients[1];
-  assert.deepEqual({ ...pia, since: 0 }, { id: PIA, name: 'Pia', status: 'paused', since: 0, dob: null, age: null, cleared: false, paperwork: 'about', todo: 0 });
+  assert.deepEqual({ ...pia, since: 0 }, { id: PIA, name: 'Pia', status: 'paused', since: 0, dob: null, age: null, cleared: false, paperwork: 'about', todo: 0, warnings: [] });
 });
 
 test('GET /api/coaching/client opens only the trainer\'s own client, and 404s alike otherwise', async t => {

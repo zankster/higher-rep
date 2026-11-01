@@ -81,6 +81,7 @@ const Muscles = lazyView(() => import('./views/Muscles.jsx'))
 const SettingsRoute = lazyView(() => import('./views/Settings.jsx').then(m => ({ default: m.SettingsRoute })))
 // trainer-fork: coaching screens (Phase 2b).
 const Clients = lazyView(() => import('./views/Clients.jsx'))
+const ClientProfile = lazyView(() => import('./views/ClientProfile.jsx'))
 const Coaching = lazyView(() => import('./views/Coaching.jsx'))
 const JoinInvite = lazyView(() => import('./views/JoinInvite.jsx'))
 const ResetPassword = lazyView(() => import('./views/ResetPassword.jsx'))
@@ -328,6 +329,7 @@ function Shell() {
       <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
       {/* trainer-fork: coaching. The server decides who sees what; these only draw it. */}
       <Route path="/clients" element={<Clients />} />
+      <Route path="/clients/:id" element={<ClientProfile />} />
       <Route path="/coaching" element={<Coaching />} />
       <Route path="/join/:code" element={<JoinInvite code={joinCode(l.pathname)} signedIn />} />
       <Route path="/reset/:code" element={<ResetPassword code={resetLinkCode(l.pathname)} />} />

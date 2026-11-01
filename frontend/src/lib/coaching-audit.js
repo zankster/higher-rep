@@ -20,4 +20,5 @@ export const COACHING_AUDIT_LABELS = {
   'coaching.document.complete': 'Completed a document from their trainer',
   'coaching.guardian.link': 'Emailed a guardian signing link',
   'coaching.guardian.sign': 'A guardian signed a document',
+  'coaching.client.export': 'Exported a client’s record',
 }

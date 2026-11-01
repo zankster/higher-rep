@@ -179,7 +179,7 @@ Each step ends with its tests passing and is one commit.
     retention table (2f, with the export), branding colours (2g).
 
 ### 2f. Client profile (trainer)
-Mock-ups shown 2026-11-01 (seven screens). Mike's answers are below; build when he says "build 2f".
+Mock-ups shown 2026-11-01 (seven screens). Mike's answers are below. Built 2026-11-01 (see the end of this section).
 - **Opening a client:** tapping a roster row opens the profile (`#/clients/:id`). The row's menu
   today (send a document, export, pause, remove) moves to the profile's … button.
   Mike: yes (2026-11-01).
@@ -209,6 +209,26 @@ Mock-ups shown 2026-11-01 (seven screens). Mike's answers are below; build when 
 - **Pause coaching:** stays where it is today; moves into the profile menu with the rest, but its
   holiday/injury-break version is Phase 3.
 - Tables to add: tags, notes, retention (`ended_at` per client relationship, keep-until computed).
+- **Built 2026-11-01** after Mike said "build 2f".
+  - API: migration 5 (`tags`, `notes`). No `retention` table: the keep-until date is worked out from
+    `links.ended_at` and the date of birth (`keepUntil` in `api/coaching/profile.js`).
+    `profile.js` holds the trainer's routes: `client/profile`, `client/record`, `client/record/pdf`, tags
+    (add, rename or warning, delete), notes (add, edit, delete), `client/guardian/link` and
+    `client/export`. `zip.js` writes the ZIP with `node:zlib`. The roster's client rows carry `warnings`.
+    `packet.js` now shares `emailGuardianLink` and `recordName`. Tests: `api/test/coaching-profile.test.js`.
+  - App: `views/ClientProfile.jsx` (`#/clients/:id`), `components/ClientProfileSheets.jsx` (tag, note,
+    record, export, send a document), helpers in `lib/coaching.js`. The roster row opens the profile and
+    shows warning tags beside the name. Test: `views/ClientProfile.test.jsx`.
+  - "Make it a tag" adds the tag in one tap. Its wording is the follow-up answer when that is short
+    (40 characters at most), otherwise the question, shortened. Tap a tag to rename it, switch the
+    warning on or off, or remove it.
+  - The export ZIP holds `records/` (one PDF per record), `files/` (signed and returned PDFs),
+    `records.csv`, `answers.csv`, `client.json`, `README.txt` and `manifest.json` (SHA-256 of every
+    file). With the switch on it also holds `tags.csv` and `notes.csv`. CSV cells that a spreadsheet
+    would run as a formula are written as text.
+  - The guardian's email is masked on the profile (`da•••@example.com`).
+  - Logged: exports and a guardian link sent by the trainer. Not logged: opening the profile or a
+    record, and tag or note changes.
 
 ### 2g. Settings
 - Client: My documents (read and download), Privacy (placeholder until photos), End coaching,

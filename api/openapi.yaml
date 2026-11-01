@@ -3425,6 +3425,367 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
+  /api/coaching/client/profile:
+    get:
+      tags: [coaching]
+      operationId: coachingClientProfile
+      summary: "Trainer: a client's profile"
+      description: >-
+        Everything on the client profile: the client (age, date of birth, paperwork), your tags and private notes, flagged yes answers (to make tags from), what is still open and the guardian (email masked), the records, and how long they are kept. Tags and notes are yours only: no client route reads them. Opening a profile is not logged.
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: string }, description: "The client's user id." }
+      responses:
+        '200':
+          description: The profile.
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such record.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/record:
+    get:
+      tags: [coaching]
+      operationId: coachingClientRecord
+      summary: "Trainer: one of a client's records"
+      description: >-
+        Who signed and when (time zone, device, app version, content hash). For a form, every answer, flagged yes answers first; for a signed PDF, its name and hash.
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: string }, description: "The client's user id." }
+        - { name: record, in: query, required: true, schema: { type: integer }, description: The request id of the record. }
+      responses:
+        '200':
+          description: The record.
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such record.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/record/pdf:
+    get:
+      tags: [coaching]
+      operationId: coachingClientRecordPdf
+      summary: "Trainer: a record as its PDF"
+      description: >-
+        The same signed-record PDF the client has, or the PDF the client returned.
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: string }, description: "The client's user id." }
+        - { name: record, in: query, required: true, schema: { type: integer }, description: The request id of the record. }
+      responses:
+        '200':
+          description: The PDF.
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such record.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/tags:
+    post:
+      tags: [coaching]
+      operationId: coachingClientTagAdd
+      summary: "Trainer: add a tag"
+      description: >-
+        A tag on your client, seen only by you. A warning tag shows amber on the profile and beside the name on the roster. With `fromAnswer` the tag is made from a flagged yes answer: its wording comes from the answer (unless `text` is given) and it is a warning.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: string }
+                text: { type: string, maxLength: 40 }
+                warning: { type: boolean }
+                fromAnswer: { type: object, properties: { record: { type: integer }, question: { type: string } } }
+      responses:
+        '200':
+          description: "All the client's tags."
+          content:
+            application/json:
+              schema: { type: object }
+        '400':
+          description: No name, or at most 30 tags.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A tag with that name is already there.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/tag:
+    post:
+      tags: [coaching]
+      operationId: coachingClientTag
+      summary: "Trainer: rename a tag or change its warning"
+      description: >-
+        Either field may be left out.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, tag]
+              properties:
+                id: { type: string }
+                tag: { type: integer }
+                text: { type: string, maxLength: 40 }
+                warning: { type: boolean }
+      responses:
+        '200':
+          description: "All the client's tags."
+          content:
+            application/json:
+              schema: { type: object }
+        '400':
+          description: Empty name.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A tag with that name is already there.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/tag/delete:
+    post:
+      tags: [coaching]
+      operationId: coachingClientTagDelete
+      summary: "Trainer: remove a tag"
+      description: >-
+        Removes the tag.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, tag]
+              properties:
+                id: { type: string }
+                tag: { type: integer }
+      responses:
+        '200':
+          description: "All the client's tags."
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/notes:
+    post:
+      tags: [coaching]
+      operationId: coachingClientNoteAdd
+      summary: "Trainer: add a private note"
+      description: >-
+        A note only you see. Never shown or sent to the client, and never in their documents.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, text]
+              properties:
+                id: { type: string }
+                text: { type: string, maxLength: 4000 }
+      responses:
+        '200':
+          description: "All the client's notes, newest first."
+          content:
+            application/json:
+              schema: { type: object }
+        '400':
+          description: Empty note.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/note:
+    post:
+      tags: [coaching]
+      operationId: coachingClientNote
+      summary: "Trainer: edit a private note"
+      description: >-
+        Changes the text and records when it was edited.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, note, text]
+              properties:
+                id: { type: string }
+                note: { type: integer }
+                text: { type: string, maxLength: 4000 }
+      responses:
+        '200':
+          description: "All the client's notes, newest first."
+          content:
+            application/json:
+              schema: { type: object }
+        '400':
+          description: Empty note.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/note/delete:
+    post:
+      tags: [coaching]
+      operationId: coachingClientNoteDelete
+      summary: "Trainer: delete a private note"
+      description: >-
+        Deletes the note.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, note]
+              properties:
+                id: { type: string }
+                note: { type: integer }
+      responses:
+        '200':
+          description: "All the client's notes, newest first."
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/guardian/link:
+    post:
+      tags: [coaching]
+      operationId: coachingClientGuardianLink
+      summary: "Trainer: send the guardian a new signing link"
+      description: >-
+        For a client under 18 whose guardian still has a document to sign. A new one-time link (7 days) replaces the old one, at most one every 2 minutes. Logged.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: string }
+      responses:
+        '200':
+          description: "Sent, with the guardian as the profile shows them."
+          content:
+            application/json:
+              schema: { type: object }
+        '409':
+          description: Nothing for the guardian to sign, or no email address for them.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: The link was emailed less than 2 minutes ago.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '502':
+          description: The email could not be sent.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such item.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/export:
+    get:
+      tags: [coaching]
+      operationId: coachingClientExport
+      summary: "Trainer: export a client's record (ZIP)"
+      description: >-
+        A ZIP with a PDF of every record, the signed and returned PDFs, the same data as JSON and CSV, and manifest.json with the SHA-256 of every file. Your tags and notes only with `notes=1`. Every export is written to the activity log.
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: string }, description: "The client's user id." }
+        - { name: notes, in: query, required: false, schema: { type: string, enum: ['1'] }, description: Include your private notes and tags. }
+      responses:
+        '200':
+          description: The ZIP.
+          content:
+            application/zip:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client, or no such record.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   /api/coaching/client/pause:
     post:
       tags: [coaching]
@@ -4776,6 +5137,7 @@ components:
         name: { type: [string, 'null'] }
         status: { type: string, enum: [active, paused] }
         since: { type: integer, description: Link start, UTC ms. }
+        warnings: { type: array, items: { type: string }, description: "The trainer's warning tags." }
     CoachingInvite:   # trainer-fork
       type: object
       properties:

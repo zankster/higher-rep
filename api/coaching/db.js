@@ -171,7 +171,30 @@ export const MIGRATIONS = [
    CREATE TRIGGER submissions_no_update BEFORE UPDATE ON submissions
      BEGIN SELECT RAISE(ABORT, 'submissions are insert only'); END;
    CREATE TRIGGER submissions_no_delete BEFORE DELETE ON submissions
-     BEGIN SELECT RAISE(ABORT, 'submissions are insert only'); END;`
+     BEGIN SELECT RAISE(ABORT, 'submissions are insert only'); END;`,
+  // 5. Phase 2f: the trainer's own tags and private notes on a client. Only the trainer's routes
+  // read these tables; nothing the client can reach does. A tag made from a flagged answer keeps
+  // the submission it came from. How long records are kept is worked out from links.ended_at and
+  // the date of birth (profile.js, keepUntil), so it needs no table of its own.
+  `CREATE TABLE tags (
+     id INTEGER PRIMARY KEY,
+     trainer_id TEXT NOT NULL,
+     client_id TEXT NOT NULL,
+     text TEXT NOT NULL,
+     warning INTEGER NOT NULL DEFAULT 0,
+     submission_id INTEGER REFERENCES submissions (id),
+     created_at INTEGER NOT NULL
+   );
+   CREATE UNIQUE INDEX tags_once ON tags (trainer_id, client_id, text COLLATE NOCASE);
+   CREATE TABLE notes (
+     id INTEGER PRIMARY KEY,
+     trainer_id TEXT NOT NULL,
+     client_id TEXT NOT NULL,
+     text TEXT NOT NULL,
+     created_at INTEGER NOT NULL,
+     edited_at INTEGER
+   );
+   CREATE INDEX notes_client ON notes (trainer_id, client_id, created_at);`
 ];
 
 export function openCoachingDb(dataDir, { file = 'coaching.sqlite' } = {}) {
