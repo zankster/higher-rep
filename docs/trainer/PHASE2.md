@@ -182,7 +182,7 @@ Each step ends with its tests passing and is one commit.
 Mock-ups shown 2026-11-01 (seven screens). Mike's answers are below; build when he says "build 2f".
 - **Opening a client:** tapping a roster row opens the profile (`#/clients/:id`). The row's menu
   today (send a document, export, pause, remove) moves to the profile's … button.
-  *Waiting on Mike's OK* (explained to him 2026-11-01).
+  Mike: yes (2026-11-01).
 - Header: avatar, name, age and date of birth, start date, paperwork pill (Cleared to train /
   N to sign / Waiting on guardian), "Under 18" pill. Program comes in Phase 3.
 - **Tags and notes are the trainer's only (yes).** Never shown or sent to the client, never in
