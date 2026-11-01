@@ -19,6 +19,15 @@ screens with the coaching additions). Shared look:
   the 1–10 rating after a workout. They are two different numbers with different names.
 - **PRs:** heaviest weight, best estimated 1RM, best set volume, best session volume, and the best
   weight for each rep count, per exercise.
+- **Planned sets per muscle (decided 2026-11-01):** worked out from the trainer's program, openGym's
+  way. Each set counts 1 for its main muscle and a part of a set for helping muscles (openGym uses
+  0.4), so plans read "Quads 9 / 13.2". Tapping a muscle lists where its planned sets come from.
+  The program builder shows the weekly total per muscle as exercises are added. Target ranges set by
+  the trainer (for example "Quads 12–14") are a possible later extra, not v1.
+- **Set types** come from openGym: warm-up, failure, drop set, rest-pause. Its set counts already
+  leave warm-ups out, which is our hard-set rule.
+- **Week streak for coached clients:** a week counts only when every planned workout was done, so
+  the streak matches compliance. Self-coached users keep openGym's rule (any workout that week).
 - **Change arrows** compare with the previous equal period. On "Program so far" they compare the
   current block with the previous block, week for week, and the screen says so.
 
@@ -51,8 +60,10 @@ screens with the coaching additions). Shared look:
   the deload week marked, and a line under the chart for any week that fell short.
 - **Estimated 1RM** for the main lifts, with dots on PRs. Each lift name opens that lift's exercise
   progress.
-- **Sets per muscle group** this week against the planned range. The status is always an icon and a
-  word: In range, Planned · day, Behind · reason. Days still to come never count as behind.
+- **Sets per muscle group:** openGym's body map on the left, and on the right the done / planned bars
+  for this week ("Quads 9 / 13.2") with week navigation. Clicking a muscle on the figure highlights
+  its row. A line under the bars names the workouts left this week and any missed ones, with an
+  icon and a word. Days still to come never count as behind.
 - **<Client>'s changes:** swaps (with the most common one), moved days, skips and extra sessions,
   from the autonomy events in `SPEC-client-settings.md`, and a "Message <client> about swaps"
   button.
@@ -80,7 +91,9 @@ openGym's runner, finish sheet and Stats, and add the coaching parts as small ho
 
 **Coaching additions:**
 - **Runner:**
-  - a live PR banner at the top ("New PR · Back squat, Heaviest weight · 105 kg × 5");
+  - a live PR banner at the top ("New PR · Back squat, Heaviest weight · 105 kg × 5"). openGym
+    only works out PRs when a workout is finished, so this needs a small marked hook in its
+    Workout screen;
   - the trainer's cue, the alternate exercise and Swap (within the client's swap setting);
   - "Plan from Mike: 4 × 5 · 102.5 kg · RIR 2". The set rows are pre-filled with the target;
   - "Last time" uses the same program day by default (Lower A's last squat);
@@ -104,8 +117,8 @@ The trainer's analytics tile "RPE vs plan" follows the trainer's choice.
 
 - Every logged set: exercise, weight, reps, RPE, set type (warm-up or not), done time, and a link to
   the scheduled workout and program slot, so "Last time" can find the same program day.
-- Planned sets per muscle per week, worked out from the program (each exercise's muscles), with a
-  range the trainer can edit.
+- Planned sets per muscle per week, worked out from the program the same way openGym does (helping
+  muscles count part of a set). No stored targets in v1.
 - PR records per client and exercise, including the best weight for each rep count, worked out when
   a workout is saved and kept so the screens don't recompute history.
 - Weekly summaries per client on the server: hard sets, kg, compliance, RPE vs plan, session effort,
