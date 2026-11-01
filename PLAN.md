@@ -12,7 +12,7 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 - **Open before release:**
   - **Lawyer review of the waiver text** (Mike arranges it). Until then the waiver is marked DRAFT and never shown to real clients.
   - **Health questionnaire source (decided 2026-11-01):** Each trainer adds their own documents (see "Ready for more trainers"). Mike will add the PAR-Q his ACE certification provides, or later his own template. Before release, check the copyright line on the ACE form. If it says "PAR-Q+ Collaboration", putting it in an app still needs their written permission (eparmedx@gmail.com, possibly a fee). The questionnaire step is built from data, so any of these versions drops in.
-  - **Waiver copy (decided 2026-11-01):** kept in the app with "Download PDF", plus an automatic email copy to the client (waiver only, never health answers). Set up the email service in Phase 2 for this, invites, password resets and guardian links. Account and provider: Mike's OK.
+  - **Waiver copy (decided 2026-11-01):** kept in the app with "Download PDF", plus an automatic email copy to the client (waiver only, never health answers). Set up the email service in Phase 2 for this, invites, password resets and guardian links. Provider: **Resend** (chosen 2026-11-01; free tier about 3,000 emails a month, 100 a day; called with plain `fetch`, no new dependency). Mike creates the account; DNS records for higherrep.com go in at Porkbun.
 
 ## Decisions so far
 - **Base:** openGym (React 19 + Vite, Node API, JSON files, Capacitor apps). See the repo's own `CLAUDE.md` and `docs/ARCHITECTURE.md`.
@@ -37,7 +37,7 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 - **Coaching media** (chat photos, voice notes, form-check videos, shared progress photos) gets its own store, separate from openGym's per-user uploads, which are owner-only (`GET /api/media/{hash}`) and get swept when unreferenced (`api/media.js`). Each file records who may see it, checked on every request, and it's never swept by openGym's cleanup. Size limits per type. Later, Cloudflare R2 if disk fills.
 - **Chat delivery:** server-sent events while the app is open, with a polling fallback. Push notifications when it's closed.
 - **Push:** keep web push. Native push for both phones goes through Firebase Cloud Messaging (FCM handles APNs for iPhone) with the Capacitor push plugin. The phone apps only have local notifications today, so this is a native change: batch it with others and rebuild the apps.
-- **Sign-in for clients:** email and password (openGym's `PASSWORD_LOGIN`) plus Mike's invite link. Passkeys optional. A free email service (e.g. Brevo or Resend) sends invites and password resets, since openGym sends no email.
+- **Sign-in for clients:** email and password (openGym's `PASSWORD_LOGIN`) plus Mike's invite link. Passkeys optional. Resend (free tier) sends invites and password resets, since openGym sends no email.
 - **Scheduler** inside the API for weekly reports, scheduled messages, reminders and "program ending" alerts. Each job stores its next run in SQLite, catches up after a restart, and runs in each client's time zone.
 - **Live session offline:** the workout queues on Mike's phone (`lib/queue.js`) and sends when back online.
 - **Waivers:** stored unchanged with the time, the exact waiver text that was signed, and the device. Never editable.
