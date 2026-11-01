@@ -171,6 +171,10 @@ tags:
     description: >-
       AI Coach: plans, reviews and debriefs. Every route here answers 503 unless the
       instance has the Coach switched on and a provider connected.
+  - name: coaching
+    description: >-
+      Trainers and their clients (Higher Rep fork). A trainer reads only their own clients'
+      data; being a server admin grants nothing here.
 
 security:
   - cookieAuth: []
@@ -3291,6 +3295,136 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  # trainer-fork: coaching routes (api/coaching/routes.js).
+  /api/admin/user/trainer:
+    post:
+      tags: [coaching]
+      operationId: adminUserTrainer
+      summary: 'Owner: make someone a trainer, or remove the role'
+      description: >-
+        Owner only, like the admin role. Trainer and admin are separate roles: being an admin
+        grants nothing in coaching. A disabled account is enabled before it can be made a
+        trainer. Removing the role is refused (409) while the trainer still has clients.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, trainer]
+              properties:
+                id: { type: string, description: The user id. }
+                trainer: { type: boolean }
+      responses:
+        '200':
+          description: Changed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, const: true }
+                  id: { type: string }
+                  trainer: { type: boolean }
+        '400':
+          description: A disabled account, or no boolean.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: No user with that id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: The trainer still has clients.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+                  clients: { type: integer }
+
+  /api/coaching/me:
+    get:
+      tags: [coaching]
+      operationId: coachingMe
+      summary: 'Your coaching role: trainer, client of a trainer, both or neither'
+      description: >-
+        Any signed-in user. `coach` is the trainer you are linked to while the link is active
+        or paused, otherwise null.
+      responses:
+        '200':
+          description: Your coaching role.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trainer: { type: boolean }
+                  coach:
+                    oneOf:
+                      - type: 'null'
+                      - type: object
+                        properties:
+                          id: { type: string }
+                          name: { type: [string, 'null'] }
+                          status: { type: string, enum: [active, paused] }
+                          since: { type: integer, description: Link start, UTC ms. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/coaching/clients:
+    get:
+      tags: [coaching]
+      operationId: coachingClients
+      summary: 'Trainer: your clients'
+      description: >-
+        Trainers only. Every client with an active or paused link to you, oldest first. Ended
+        and blocked links are not listed.
+      responses:
+        '200':
+          description: Your clients.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clients:
+                    type: array
+                    items: { $ref: '#/components/schemas/CoachingClient' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/coaching/client:
+    get:
+      tags: [coaching]
+      operationId: coachingClient
+      summary: 'Trainer: one of your clients'
+      description: >-
+        Trainers only. 404 for anyone who is not your client right now, including users that do
+        not exist, so the answer never tells whether an account exists.
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: string }, description: The client's user id. }
+      responses:
+        '200':
+          description: The client.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client: { $ref: '#/components/schemas/CoachingClient' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -3437,6 +3571,13 @@ components:
           example: { error: "that code is wrong, used or expired", code: "link-invalid" }
 
   schemas:
+    CoachingClient:   # trainer-fork
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: [string, 'null'] }
+        status: { type: string, enum: [active, paused] }
+        since: { type: integer, description: Link start, UTC ms. }
     Error:
       type: object
       required: [error]
