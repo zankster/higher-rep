@@ -2,11 +2,12 @@
 // age, start date and paperwork; tags (warnings in amber); flagged answers that can become tags;
 // what is still open, with the guardian; private notes; the injury log (from Phase 5); records
 // with their PDFs and the record export. The roster row's old menu lives in the … button.
-// Programs join the header in Phase 3.
+// Programs join the header in Phase 3. Phase 2g: "What <name> sees of you", with the switch that
+// gives this one client the trainer's phone number.
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useUI } from '../store/useUI.js'
-import { Section, Row, Button } from '../components/ui.jsx'
+import { Section, Row, Button, Switch } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
 import { menuSheet, confirmSheet } from '../sheets.jsx'
 import { removeMessage } from './Clients.jsx'
@@ -14,6 +15,7 @@ import { openTagSheet, openNoteSheet, openRecordSheet, openExportSheet, openSend
 import {
   ct, clientProfile, pauseClient, removeClient, addTag, updateTag, deleteTag, resendGuardianLink, coachingError, profileError,
   coachingChanged, onCoachingChanged, sinceLine, ageLine, paperworkPill, initials, retentionLine, recordLine, noteLine, KIND_ICON,
+  setShowPhone, phoneShownLine,
 } from '../lib/coaching.js'
 
 // Plain rgba, not color-mix(): the iPhone app still runs on iOS 15, which has no color-mix().
@@ -82,6 +84,12 @@ export default function ClientProfile() {
     catch (e) { toast(profileError(e)) }
   }
 
+  const showPhone = async on => {
+    setP(x => ({ ...x, sees: { ...x.sees, showPhone: on } }))
+    try { const r = await setShowPhone(c.id, on); toast(phoneShownLine(r.phoneShown)) }
+    catch (e) { setP(x => ({ ...x, sees: { ...x.sees, showPhone: !on } })); toast(profileError(e)) }
+  }
+
   const pill = paperworkPill(c)
   const g = p.guardian
   const guardianWaiting = p.waiting.some(w => w.waitingGuardian)
@@ -130,6 +138,14 @@ export default function ClientProfile() {
       {g && <Row icon="person" iconTint="var(--grey)" title={ct('{0} ({1})', g.name, g.relationship)}
         subtitle={[g.email, g.linkSent ? ct('link sent {0}', day(g.linkSent)) : null, g.linkExpires ? ct('ends {0}', day(g.linkExpires)) : g.linkSent ? ct('link used or ended') : null].filter(Boolean).join(' · ')} />}
       {g && guardianWaiting && g.canResend && <Row icon="envelope" iconTint="var(--acc)" title={ct('Send {0} a new link', g.name.split(/\s+/)[0])} onClick={resend} />}
+    </Section>}
+
+    {p.sees && <Section title={ct('What {0} sees of you', first)} footer={ct('Your email shows to every client. The phone number is off for every new client.')}>
+      <Row icon="envelope" iconTint="var(--grey)" title={p.sees.email || ct('No email yet')} subtitle={ct('Email · always shown')} />
+      <Row icon="phoneScreen" iconTint="var(--grey)" title={ct('Show my phone number')}
+        subtitle={p.sees.phone ? p.sees.phone : ct('Add a number in Settings › Branding first.')}>
+        <Switch checked={!!p.sees.showPhone} disabled={!p.sees.phone} onChange={showPhone} aria-label={ct('Show my phone number')} />
+      </Row>
     </Section>}
 
     <Section title={ct('Private notes')} footer={ct('Only you. Never shown or sent to {0}.', first)}>

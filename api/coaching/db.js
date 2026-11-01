@@ -194,7 +194,10 @@ export const MIGRATIONS = [
      created_at INTEGER NOT NULL,
      edited_at INTEGER
    );
-   CREATE INDEX notes_client ON notes (trainer_id, client_id, created_at);`
+   CREATE INDEX notes_client ON notes (trainer_id, client_id, created_at);`,
+  // 6. Phase 2g: whether this client sees the trainer's phone number. Off for every client until
+  // the trainer turns it on, on that client's profile.
+  `ALTER TABLE link_settings ADD COLUMN show_phone INTEGER NOT NULL DEFAULT 0;`
 ];
 
 export function openCoachingDb(dataDir, { file = 'coaching.sqlite' } = {}) {

@@ -1,12 +1,16 @@
 // trainer-fork: Settings › Coaching for a client (Phase 2b): who coaches you, and End coaching,
 // which works as a block (SPEC.md, Permissions). "Download my documents and chat" joins the end
-// sheet once there are documents (2e) and a chat (Phase 5) to download.
+// sheet once there are documents (2e) and a chat (Phase 5) to download. Phase 2g: the trainer's
+// card (their logo or initials on their colour, business name) and how to reach them; the phone
+// number only when the trainer turned it on for this client.
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUI } from '../store/useUI.js'
 import { Section, Row, Button } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
-import { ct, coachingMe, endCoaching, coachingError, sinceLine, coachingChanged, onCoachingChanged } from '../lib/coaching.js'
+import { TrainerMark } from '../components/TrainerBrand.jsx'
+import { Pill } from './ClientProfile.jsx'
+import { ct, myTrainer, endCoaching, coachingError, coachingChanged, onCoachingChanged, trainerCardLine, telHref, websiteLabel } from '../lib/coaching.js'
 
 const POINTS = [
   ['lock', name => ct('{0} can no longer see your workouts, progress or messages.', name)],
@@ -38,14 +42,16 @@ export function EndCoachingSheet({ name, close, onEnded }) {
 
 export default function Coaching() {
   const nav = useNavigate()
-  const [me, setMe] = useState(null)
+  const [coach, setCoach] = useState(undefined)   // undefined: loading, null: no trainer
   const [failed, setFailed] = useState('')
   useEffect(() => {
-    const load = () => coachingMe().then(setMe, e => setFailed(coachingError(e)))
+    const load = () => myTrainer().then(setCoach, e => e?.status === 404 ? setCoach(null) : setFailed(coachingError(e)))
     load()
     return onCoachingChanged(load)
   }, [])
-  const coach = me?.coach
+  const first = String(coach?.name || '').split(/\s+/)[0] || coach?.name
+  // A website in a new tab; mailto: and tel: hand over to the mail or phone app.
+  const open = url => { if (/^https?:/i.test(url)) window.open(url, '_blank', 'noopener'); else window.location.href = url }
   // Through the event, not setMe: see coachingChanged in lib/coaching.js.
   const ended = () => { coachingChanged(); useUI.getState().toast(ct('Coaching ended')) }
 
@@ -55,10 +61,23 @@ export default function Coaching() {
       <div style={{ flex: 1, marginInlineStart: 12 }}><h1>{ct('Coaching')}</h1></div>
     </div>
     {failed && <div className="card small" role="alert">{failed}</div>}
-    {me && (coach ? <>
+    {coach !== undefined && (coach ? <>
       <Section title={ct('Your trainer')} footer={coach.status === 'paused' ? ct('{0} has paused coaching for now. Nothing counts as missed while it is paused.', coach.name) : null}>
-        <Row icon="figureStrength" iconTint="var(--acc)" title={coach.name} subtitle={sinceLine(coach.since)} value={coach.status === 'paused' ? ct('Paused') : null} />
+        <div className="row" style={{ gap: 14, padding: '14px' }}>
+          <TrainerMark logo={coach.logo} accent={coach.accent} name={coach.business || coach.name} size={56} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: 17 }}>{coach.name}</div>
+            <div className="small" style={{ color: 'var(--label-2)' }}>{trainerCardLine(coach)}</div>
+            {coach.tagline && <div className="small muted">{coach.tagline}</div>}
+          </div>
+          {coach.status === 'paused' && <Pill warn>{ct('Paused')}</Pill>}
+        </div>
       </Section>
+      {(coach.email || coach.phone || coach.website) && <Section title={ct('Contact')} footer={ct('Messages to {0} go through chat once it opens.', first)}>
+        {coach.email && <Row icon="envelope" iconTint="var(--acc)" title={coach.email} subtitle={ct('Email')} accessory="chevron" onClick={() => open('mailto:' + coach.email)} />}
+        {coach.phone && <Row icon="phoneScreen" iconTint="var(--acc)" title={coach.phone} subtitle={ct('Phone')} accessory="chevron" onClick={() => open(telHref(coach.phone))} />}
+        {coach.website && <Row icon="globe" iconTint="var(--acc)" title={websiteLabel(coach.website)} subtitle={ct('Website')} accessory="chevron" onClick={() => open(coach.website)} />}
+      </Section>}
       <Section>
         <Row title={ct('End coaching')} danger onClick={() => useUI.getState().openSheet(close => <EndCoachingSheet name={coach.name} close={close} onEnded={ended} />)} />
       </Section>

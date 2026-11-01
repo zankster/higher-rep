@@ -251,7 +251,28 @@ Mock-ups shown 2026-11-01 (seven screens). Mike's answers are below. Built 2026-
   - **Source code** links to `github.com/zankster/higher-rep`: OK. The repository must be public
     before clients use the app; pushing still needs Mike's OK.
   - Privacy is a placeholder that lists only what is true now (signed documents and answers).
-  - Waiting on Mike's "build 2g".
+- **Built 2026-11-01** after Mike said "build 2g".
+  - API: migration 6 (`link_settings.show_phone`, off by default). `api/coaching/branding.js` holds the
+    six colours (each checked for white text at 4.5:1), `readBranding` (the one helper everything reads
+    branding through, Higher Rep's look as the default) and the routes: `branding` (get, save field by
+    field), `branding/logo` (PNG or JPEG, 2 MB, 32 to 4096 px a side), `logo` (public, only a hash that
+    is some trainer's current logo), `default-preset`, `client/phone` and `my/trainer` (the client's
+    trainer card; the phone number only when switched on). Tests: `api/test/coaching-branding.test.js`.
+  - The trainer's own name stays their name everywhere ("Mike Smith invited you"); the business name
+    shows beside it, never instead of it. Settings' Coaching row shows the business name when set.
+  - New clients start Balanced until the trainer picks another default.
+  - Emails: the business name heads them with the trainer's name below, the mark is the logo or the
+    initials on the trainer's colour, and the sender reads "<Email from name> via Higher Rep".
+  - App: `views/Branding.jsx` (`#/branding`, with the Preview sheet), `views/ClientDefaults.jsx`
+    (`#/client-defaults`), `views/CoachingPrivacy.jsx` (`#/coaching/privacy`), the trainer card and contact
+    rows in `views/Coaching.jsx`, "What <name> sees of you" on the client profile,
+    `components/TrainerBrand.jsx` (mark, invite header), and the Settings rows in `CoachingRow.jsx`.
+    The Source code row is on Settings › About & updates, for everyone. Test: `views/Branding.test.jsx`.
+  - The invite page keeps Higher Rep's look for a trainer who set nothing. A branded one shows the
+    header on the first step (date of birth) too.
+  - Text fields save after a short pause; email, phone and website save when the field is left, so a
+    half-typed address is not refused while typing.
+  - Not logged: branding changes and the phone switch.
 
 ## Data model (SQLite, `coaching.sqlite`)
 

@@ -11,7 +11,7 @@
 import { maskEmail } from '../password.js';
 
 const RESEND_URL = 'https://api.resend.com/emails';
-const ACCENT = '#2457E6';
+const DEFAULT_ACCENT = '#2457E6';
 
 // A display name goes into a header, so no quotes, angle brackets or line breaks.
 const headerName = s => String(s || '').replace(/[\r\n"<>\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
@@ -62,15 +62,20 @@ const fmtWhen = (ms, tz) => {
 };
 const initials = name => String(name || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || 'HR';
 
-// One layout for all four: the sender's mark and name, the body, one button, the small print.
-function layout({ mark, title, subtitle, blocks, button, notes = [], footer }) {
+// One layout for all four: the sender's mark (their logo, or initials on their accent colour) and
+// name, the body, one button, the small print. Higher Rep's blue unless the trainer picked one (2g).
+const HEX = /^#[0-9a-f]{6}$/i;
+const isHttp = s => typeof s === 'string' && /^https?:\/\//i.test(s);
+function layout({ mark, logo, accent, title, subtitle, blocks, button, notes = [], footer }) {
+  const ACCENT = HEX.test(accent || '') ? accent : DEFAULT_ACCENT;
   const p = s => `<p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#1c1c1e">${s}</p>`;
   const small = s => `<p style="margin:0 0 10px;font-size:13px;line-height:1.6;color:#6c6c70">${s}</p>`;
   const html = `<!doctype html><html><body style="margin:0;padding:24px 12px;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:14px"><tr><td style="padding:24px 28px">
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:18px"><tr>
-<td style="width:36px;height:36px;border-radius:9px;background:${ACCENT};color:#ffffff;font-size:14px;font-weight:600;text-align:center;vertical-align:middle">${esc(mark)}</td>
+${isHttp(logo) ? `<td style="width:36px;height:36px"><img src="${esc(logo)}" width="36" height="36" alt="" style="display:block;width:36px;height:36px;border-radius:9px;object-fit:cover"></td>`
+  : `<td style="width:36px;height:36px;border-radius:9px;background:${ACCENT};color:#ffffff;font-size:14px;font-weight:600;text-align:center;vertical-align:middle">${esc(mark)}</td>`}
 <td style="padding-left:10px"><div style="font-size:15px;font-weight:600;color:#1c1c1e">${esc(title)}</div>${subtitle ? `<div style="font-size:13px;color:#6c6c70">${esc(subtitle)}</div>` : ''}</td>
 </tr></table>
 ${blocks.map(b => b.html ?? p(b)).join('\n')}
@@ -82,9 +87,11 @@ ${notes.map(small).join('\n')}
 }
 const strip = s => String(s).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 
-/** The sender block every trainer email shares. `trainer` = { name, contactEmail?, tagline? }. */
+/** The sender block every trainer email shares. `trainer` = { name, contactEmail?, tagline?, and
+ *  from 2g business?, accent?, logoUrl? }. A business name heads it, with the trainer's name below. */
 const fromTrainer = (trainer, product) => ({
-  mark: initials(trainer.name), title: trainer.name, subtitle: trainer.tagline || 'Personal training',
+  mark: initials(trainer.business || trainer.name), logo: trainer.logoUrl, accent: trainer.accent,
+  title: trainer.business || trainer.name, subtitle: trainer.tagline || (trainer.business ? trainer.name : 'Personal training'),
   footer: `Sent by ${esc(product)} for ${esc(trainer.name)}${trainer.contactEmail ? ` · ${esc(trainer.contactEmail)}` : ''}`,
 });
 

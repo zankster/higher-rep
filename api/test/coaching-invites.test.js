@@ -54,7 +54,7 @@ test('the invite page needs no session, names the trainer and marks the invite o
   assert.equal((await h.get(MIKE, '/api/coaching/invites')).body.invites[0].opened, null);
   const page = await h.get(null, `/api/coaching/invite?code=${inv.code.toLowerCase()}`);
   assert.equal(page.status, 200);
-  assert.deepEqual({ ...page.body, expires: 0 }, { status: 'valid', trainer: { name: 'Mike' }, firstName: 'Sam', note: 'See you Monday', expires: 0 });
+  assert.deepEqual({ ...page.body, expires: 0 }, { status: 'valid', trainer: { name: 'Mike', business: null, tagline: null, logo: null, accent: '#2457E6' }, firstName: 'Sam', note: 'See you Monday', expires: 0 });
   assert.ok((await h.get(MIKE, '/api/coaching/invites')).body.invites[0].opened > 0);
   assert.equal((await h.get(null, '/api/coaching/invite?code=0000000000000000')).status, 404);
   assert.equal((await h.get(null, '/api/coaching/invite')).status, 404);

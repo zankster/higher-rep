@@ -3372,6 +3372,7 @@ paths:
                         properties:
                           id: { type: string }
                           name: { type: [string, 'null'] }
+                          business: { type: [string, 'null'], description: "The trainer's business name, when they set one (Phase 2g)." }
                           status: { type: string, enum: [active, paused] }
                           since: { type: integer, description: Link start, UTC ms. }
         '401': { $ref: '#/components/responses/Unauthorized' }
@@ -3431,7 +3432,7 @@ paths:
       operationId: coachingClientProfile
       summary: "Trainer: a client's profile"
       description: >-
-        Everything on the client profile: the client (age, date of birth, paperwork), your tags and private notes, flagged yes answers (to make tags from), what is still open and the guardian (email masked), the records, and how long they are kept. Tags and notes are yours only: no client route reads them. Opening a profile is not logged.
+        Everything on the client profile: the client (age, date of birth, paperwork), your tags and private notes, flagged yes answers (to make tags from), what is still open and the guardian (email masked), the records, how long they are kept, and what the client sees of you (`sees`: your email, your phone number and whether this client is shown it). Tags and notes are yours only: no client route reads them. Opening a profile is not logged.
       parameters:
         - { name: id, in: query, required: true, schema: { type: string }, description: "The client's user id." }
       responses:
@@ -3782,6 +3783,223 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404':
           description: Not your client, or no such record.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/client/phone:
+    post:
+      tags: [coaching]
+      operationId: coachingClientPhone
+      summary: 'Trainer: show or hide your phone number from one client'
+      description: >-
+        Off for every new client. A client with it off never receives the number. Answers with how many of your live clients see it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, show]
+              properties:
+                id: { type: string }
+                show: { type: boolean }
+      responses:
+        '200':
+          description: Saved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  showPhone: { type: boolean }
+                  phoneShown: { $ref: '#/components/schemas/CoachingPhoneShown' }
+        '400':
+          description: A value that does not fit; `code` says which.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not your client.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/branding:
+    get:
+      tags: [coaching]
+      operationId: coachingBranding
+      summary: 'Trainer: your branding and new client defaults'
+      description: >-
+        Trainers only. Your branding (Higher Rep's look for anything not set), your own name and sign-in email (the fallbacks clients see), the six accent colours with their contrast against white text, how many clients see your phone number, and the preset new clients start with (balanced until you pick).
+      responses:
+        '200':
+          description: Your settings.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoachingTrainerSettings' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [coaching]
+      operationId: coachingBrandingSave
+      summary: 'Trainer: change your branding'
+      description: >-
+        Only the fields sent change. null or an empty string clears a field. A cleared accent is Coach blue; `logo: null` removes the logo (upload one with POST /api/coaching/branding/logo). A website without a scheme gains https://.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                business: { type: [string, 'null'], maxLength: 60 }
+                tagline: { type: [string, 'null'], maxLength: 60 }
+                mailFrom: { type: [string, 'null'], maxLength: 60, description: 'The sender name on your emails, shown as "<mailFrom> via Higher Rep".' }
+                accent: { type: [string, 'null'], enum: [blue, green, red, violet, teal, graphite, null] }
+                contactEmail: { type: [string, 'null'] }
+                phone: { type: [string, 'null'], maxLength: 30 }
+                website: { type: [string, 'null'] }
+                logo: { type: 'null' }
+      responses:
+        '200':
+          description: Saved.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoachingTrainerSettings' }
+        '400':
+          description: A value that does not fit; `code` says which.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/coaching/branding/logo:
+    post:
+      tags: [coaching]
+      operationId: coachingBrandingLogo
+      summary: 'Trainer: upload your logo'
+      description: >-
+        The raw PNG or JPEG as the body, up to 2 MB, between 32 and 4096 pixels on a side. Shown square.
+      requestBody:
+        required: true
+        content:
+          image/png: { schema: { type: string, format: binary } }
+          image/jpeg: { schema: { type: string, format: binary } }
+      responses:
+        '200':
+          description: Saved.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CoachingTrainerSettings' }
+        '400':
+          description: A value that does not fit; `code` says which.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '413':
+          description: Larger than 2 MB.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '415':
+          description: Not a PNG or JPEG.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/logo:
+    get:
+      tags: [coaching]
+      operationId: coachingLogo
+      summary: "A trainer's logo"
+      description: >-
+        No session needed, so email clients can load it. Only a hash that is some trainer's current logo is served.
+      security: []
+      parameters:
+        - { name: h, in: query, required: true, schema: { type: string }, description: "The logo's SHA-256." }
+      responses:
+        '200':
+          description: The image.
+          content:
+            image/png: { schema: { type: string, format: binary } }
+            image/jpeg: { schema: { type: string, format: binary } }
+        '404':
+          description: No such logo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/coaching/default-preset:
+    post:
+      tags: [coaching]
+      operationId: coachingDefaultPreset
+      summary: 'Trainer: the preset new clients start with'
+      description: >-
+        Clients who already joined keep theirs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [preset]
+              properties:
+                preset: { type: string, enum: [hands_on, balanced, independent] }
+      responses:
+        '200':
+          description: Saved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preset: { type: string, enum: [hands_on, balanced, independent] }
+        '400':
+          description: A value that does not fit; `code` says which.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/coaching/my/trainer:
+    get:
+      tags: [coaching]
+      operationId: coachingMyTrainer
+      summary: 'Client: your trainer and how to reach them'
+      description: >-
+        Any signed-in user with a trainer. The email is the trainer's contact email, else their sign-in email. `phone` is null unless the trainer turned it on for you.
+      responses:
+        '200':
+          description: Your trainer.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trainer:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      name: { type: [string, 'null'] }
+                      business: { type: [string, 'null'] }
+                      tagline: { type: [string, 'null'] }
+                      accent: { type: string }
+                      logo: { type: [string, 'null'] }
+                      email: { type: [string, 'null'] }
+                      phone: { type: [string, 'null'] }
+                      website: { type: [string, 'null'] }
+                      status: { type: string, enum: [active, paused] }
+                      since: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: You have no trainer.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
@@ -4921,7 +5139,15 @@ paths:
                 type: object
                 properties:
                   status: { type: string, enum: [valid, expired, used, revoked] }
-                  trainer: { type: object, properties: { name: { type: [string, 'null'] } } }
+                  trainer:
+                    type: object
+                    description: The trainer's name and branding. `logo` is a hash for GET /api/coaching/logo; `accent` is one of the six colours.
+                    properties:
+                      name: { type: [string, 'null'] }
+                      business: { type: [string, 'null'] }
+                      tagline: { type: [string, 'null'] }
+                      logo: { type: [string, 'null'] }
+                      accent: { type: string, example: '#2457E6' }
                   firstName: { type: string }
                   note: { type: [string, 'null'] }
                   expires: { type: integer }
@@ -5130,6 +5356,39 @@ components:
           example: { error: "that code is wrong, used or expired", code: "link-invalid" }
 
   schemas:
+    CoachingPhoneShown:   # trainer-fork
+      type: object
+      description: How many of your live clients see your phone number.
+      properties:
+        shown: { type: integer }
+        of: { type: integer }
+    CoachingTrainerSettings:   # trainer-fork
+      type: object
+      properties:
+        branding:
+          type: object
+          properties:
+            business: { type: [string, 'null'] }
+            tagline: { type: [string, 'null'] }
+            mailFrom: { type: [string, 'null'] }
+            accent: { type: string, enum: [blue, green, red, violet, teal, graphite] }
+            contactEmail: { type: [string, 'null'] }
+            phone: { type: [string, 'null'] }
+            website: { type: [string, 'null'] }
+            logo: { type: [string, 'null'], description: "The logo's hash, for GET /api/coaching/logo." }
+        name: { type: [string, 'null'] }
+        signInEmail: { type: [string, 'null'] }
+        swatches:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              hex: { type: string }
+              contrast: { type: number, description: "White text on it, as a WCAG ratio." }
+        phoneShown: { $ref: '#/components/schemas/CoachingPhoneShown' }
+        preset: { type: string, enum: [hands_on, balanced, independent] }
     CoachingClient:   # trainer-fork
       type: object
       properties:

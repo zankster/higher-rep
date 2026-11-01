@@ -246,7 +246,7 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   <p class="api-facts">
     <span>OpenAPI 3.1.0</span>
     <span>openGym v1.4.3</span>
-    <span>124 endpoints</span>
+    <span>131 endpoints</span>
     <span>AGPL-3.0-or-later</span>
   </p>
 
@@ -2796,7 +2796,7 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
     <span class="ep-sum">Trainer: a client's profile</span>
   </summary>
   <div class="ep-body">
-<p>Everything on the client profile: the client (age, date of birth, paperwork), your tags and private notes, flagged yes answers (to make tags from), what is still open and the guardian (email masked), the records, and how long they are kept. Tags and notes are yours only: no client route reads them. Opening a profile is not logged.</p>
+<p>Everything on the client profile: the client (age, date of birth, paperwork), your tags and private notes, flagged yes answers (to make tags from), what is still open and the guardian (email masked), the records, how long they are kept, and what the client sees of you (<code>sees</code>: your email, your phone number and whether this client is shown it). Tags and notes are yours only: no client route reads them. Opening a profile is not logged.</p>
     <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
 <p class="ep-h">Query parameters</p><div class="ptab">
   <div class="prow">
@@ -3339,6 +3339,304 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
   <div class="prow rrow">
     <span class="r-code s4">404</span>
     <span class="p-desc">Not your client, or no such record.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingClientPhone">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/client/phone</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Trainer: show or hide your phone number from one client</span>
+  </summary>
+  <div class="ep-body">
+<p>Off for every new client. A client with it off never receives the number. Answers with how many of your live clients see it.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">id<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">show<em class="p-req" title="required">required</em></span>
+    <span class="p-type">boolean</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Saved.<span class="r-sig">{ showPhone: boolean, phoneShown: <a href="#schema-CoachingPhoneShown">CoachingPhoneShown</a> }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">A value that does not fit; <code>code</code> says which.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">403</span>
+    <span class="p-desc">Signed in, but not an admin. The attempt is recorded in the audit log.<span class="r-sig"><code>{&quot;error&quot;:&quot;forbidden&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">Not your client.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingBranding">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/branding</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Trainer: your branding and new client defaults</span>
+  </summary>
+  <div class="ep-body">
+<p>Trainers only. Your branding (Higher Rep's look for anything not set), your own name and sign-in email (the fallbacks clients see), the six accent colours with their contrast against white text, how many clients see your phone number, and the preset new clients start with (balanced until you pick).</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Your settings.<span class="r-sig"><a href="#schema-CoachingTrainerSettings">CoachingTrainerSettings</a></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">403</span>
+    <span class="p-desc">Signed in, but not an admin. The attempt is recorded in the audit log.<span class="r-sig"><code>{&quot;error&quot;:&quot;forbidden&quot;}</code></span></span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingBrandingSave">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/branding</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Trainer: change your branding</span>
+  </summary>
+  <div class="ep-body">
+<p>Only the fields sent change. null or an empty string clears a field. A cleared accent is Coach blue; <code>logo: null</code> removes the logo (upload one with POST /api/coaching/branding/logo). A website without a scheme gains https://.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">business</span>
+    <span class="p-type">string | null <span class="p-hint">(&le; 60 chars)</span></span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">tagline</span>
+    <span class="p-type">string | null <span class="p-hint">(&le; 60 chars)</span></span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">mailFrom</span>
+    <span class="p-type">string | null <span class="p-hint">(&le; 60 chars)</span></span>
+    <span class="p-desc">The sender name on your emails, shown as &quot;&lt;mailFrom&gt; via Higher Rep&quot;.</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">accent</span>
+    <span class="p-type">&quot;blue&quot; | &quot;green&quot; | &quot;red&quot; | &quot;violet&quot; | &quot;teal&quot; | &quot;graphite&quot; | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">contactEmail</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">phone</span>
+    <span class="p-type">string | null <span class="p-hint">(&le; 30 chars)</span></span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">website</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">logo</span>
+    <span class="p-type">null</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Saved.<span class="r-sig"><a href="#schema-CoachingTrainerSettings">CoachingTrainerSettings</a></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">A value that does not fit; <code>code</code> says which.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">403</span>
+    <span class="p-desc">Signed in, but not an admin. The attempt is recorded in the audit log.<span class="r-sig"><code>{&quot;error&quot;:&quot;forbidden&quot;}</code></span></span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingBrandingLogo">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/branding/logo</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Trainer: upload your logo</span>
+  </summary>
+  <div class="ep-body">
+<p>The raw PNG or JPEG as the body, up to 2 MB, between 32 and 4096 pixels on a side. Shown square.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Saved.<span class="r-sig"><a href="#schema-CoachingTrainerSettings">CoachingTrainerSettings</a></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">A value that does not fit; <code>code</code> says which.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">403</span>
+    <span class="p-desc">Signed in, but not an admin. The attempt is recorded in the audit log.<span class="r-sig"><code>{&quot;error&quot;:&quot;forbidden&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">413</span>
+    <span class="p-desc">Larger than 2 MB.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">415</span>
+    <span class="p-desc">Not a PNG or JPEG.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingLogo">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/logo</code><span class="ep-chip public">public</span></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">A trainer's logo</span>
+  </summary>
+  <div class="ep-body">
+<p>No session needed, so email clients can load it. Only a hash that is some trainer's current logo is served.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Public: no authentication required.</span></p>
+<p class="ep-h">Query parameters</p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">h<em class="p-req" title="required">required</em></span>
+    <span class="p-type">string</span>
+    <span class="p-desc">The logo's SHA-256.</span>
+  </div>
+</div>
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">The image.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">No such logo.</span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingDefaultPreset">
+  <summary>
+    <span class="m post">POST</span>
+    <span class="ep-path"><code>/api/coaching/default-preset</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Trainer: the preset new clients start with</span>
+  </summary>
+  <div class="ep-body">
+<p>Clients who already joined keep theirs.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+<p class="ep-h">Request body <span class="p-hint">(JSON)</span></p><div class="ptab">
+  <div class="prow">
+    <span class="p-name">preset<em class="p-req" title="required">required</em></span>
+    <span class="p-type">&quot;hands_on&quot; | &quot;balanced&quot; | &quot;independent&quot;</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Saved.<span class="r-sig">{ preset: &quot;hands_on&quot; | &quot;balanced&quot; | &quot;independent&quot; }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">400</span>
+    <span class="p-desc">A value that does not fit; <code>code</code> says which.</span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">403</span>
+    <span class="p-desc">Signed in, but not an admin. The attempt is recorded in the audit log.<span class="r-sig"><code>{&quot;error&quot;:&quot;forbidden&quot;}</code></span></span>
+  </div>
+    </div>
+  </div>
+</details>
+
+<details class="ep" id="op-coachingMyTrainer">
+  <summary>
+    <span class="m get">GET</span>
+    <span class="ep-path"><code>/api/coaching/my/trainer</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">Client: your trainer and how to reach them</span>
+  </summary>
+  <div class="ep-body">
+<p>Any signed-in user with a trainer. The email is the trainer's contact email, else their sign-in email. <code>phone</code> is null unless the trainer turned it on for you.</p>
+    <p class="ep-auth"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Requires a session: the cookie set at sign-in, or <code>Authorization: Bearer &lt;token&gt;</code> from mobile-app pairing.</span></p>
+
+
+    <p class="ep-h">Responses</p>
+    <div class="ptab">
+  <div class="prow rrow">
+    <span class="r-code s2">200</span>
+    <span class="p-desc">Your trainer.<span class="r-sig">{ trainer: object }</span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">401</span>
+    <span class="p-desc">No session, expired/revoked session, or a disabled account.<span class="r-sig"><code>{&quot;error&quot;:&quot;not signed in&quot;}</code></span></span>
+  </div>
+  <div class="prow rrow">
+    <span class="r-code s4">404</span>
+    <span class="p-desc">You have no trainer.</span>
   </div>
     </div>
   </div>
@@ -5731,6 +6029,132 @@ main.api-main .lead { color: var(--fg-2); max-width: 58ch; margin: 14px 0 0; fon
        is <b>representative, not enforced</b>: the server stores it opaquely and the app
        grows it over time.</p>
     <div class="eps">
+
+<details class="ep sch" id="schema-CoachingPhoneShown">
+  <summary>
+    <span class="sch-name"><code>CoachingPhoneShown</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum">How many of your live clients see your phone number.</span>
+  </summary>
+  <div class="ep-body">
+
+<div class="ptab">
+  <div class="prow">
+    <span class="p-name">shown</span>
+    <span class="p-type">integer</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">of</span>
+    <span class="p-type">integer</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+  </div>
+</details>
+
+<details class="ep sch" id="schema-CoachingTrainerSettings">
+  <summary>
+    <span class="sch-name"><code>CoachingTrainerSettings</code></span>
+    <span class="ep-chev" aria-hidden="true"></span>
+    <span class="ep-sum"></span>
+  </summary>
+  <div class="ep-body">
+
+<div class="ptab">
+  <div class="prow">
+    <span class="p-name">branding</span>
+    <span class="p-type">object</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.business</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.tagline</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.mailFrom</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.accent</span>
+    <span class="p-type">&quot;blue&quot; | &quot;green&quot; | &quot;red&quot; | &quot;violet&quot; | &quot;teal&quot; | &quot;graphite&quot;</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.contactEmail</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.phone</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.website</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">branding.logo</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc">The logo's hash, for GET /api/coaching/logo.</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">name</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">signInEmail</span>
+    <span class="p-type">string | null</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">swatches</span>
+    <span class="p-type">object[]</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">swatches[].id</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">swatches[].name</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">swatches[].hex</span>
+    <span class="p-type">string</span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">swatches[].contrast</span>
+    <span class="p-type">number</span>
+    <span class="p-desc">White text on it, as a WCAG ratio.</span>
+  </div>
+  <div class="prow">
+    <span class="p-name">phoneShown</span>
+    <span class="p-type"><a href="#schema-CoachingPhoneShown">CoachingPhoneShown</a></span>
+    <span class="p-desc"></span>
+  </div>
+  <div class="prow">
+    <span class="p-name">preset</span>
+    <span class="p-type">&quot;hands_on&quot; | &quot;balanced&quot; | &quot;independent&quot;</span>
+    <span class="p-desc"></span>
+  </div>
+</div>
+  </div>
+</details>
 
 <details class="ep sch" id="schema-CoachingClient">
   <summary>

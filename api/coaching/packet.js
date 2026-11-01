@@ -133,7 +133,7 @@ export async function emailGuardianLink({ sql, mailer, trainerInfo, base, now },
   sql.prepare('UPDATE guardians SET token_hash = ?, token_expires_at = ?, token_used_at = NULL WHERE id = ?').run(sha(token), t + GUARDIAN_DAYS * DAY, g.id);
   const trainer = trainerInfo(g.trainer_id);
   const mail = guardianEmail({ trainer, guardianName: g.name, clientName, url: base + '/#/guardian/' + token, days: GUARDIAN_DAYS });
-  const ok = (await mailer.send({ to: g.email, via: trainer.name, replyTo: trainer.contactEmail, ...mail })).ok;
+  const ok = (await mailer.send({ to: g.email, via: trainer.via, replyTo: trainer.contactEmail, ...mail })).ok;
   if (ok) sql.prepare('UPDATE guardians SET emailed_at = ? WHERE id = ?').run(t, g.id);
   return ok;
 }
@@ -183,10 +183,10 @@ export function packetRoutes({ sql, access, json, readBody, audit, dataDir, now,
     const last = subs[subs.length - 1];
     const signerName = subs.map(s => s.signer_name).filter(Boolean).join(' and ');
     const mail = name => waiverEmail({ trainer, recipientName: name, signerName, title: r.title, version: r.version, signedAt: last.signed_at, tz: cleanTz(last.tz) || undefined, tzLabel: cleanTz(last.tz) || undefined, pdf: { filename: recordName(r), content: pdf } });
-    if (looksLikeEmail(client?.email)) await mailer.send({ to: client.email, via: trainer.name, replyTo: trainer.contactEmail, ...mail(client.name) });
+    if (looksLikeEmail(client?.email)) await mailer.send({ to: client.email, via: trainer.via, replyTo: trainer.contactEmail, ...mail(client.name) });
     const g = subs.find(s => s.signer === 'guardian');
     const gRow = g && sql.prepare('SELECT * FROM guardians WHERE id = ?').get(g.guardian_id);
-    if (looksLikeEmail(gRow?.email)) await mailer.send({ to: gRow.email, via: trainer.name, replyTo: trainer.contactEmail, ...mail(gRow.name) });
+    if (looksLikeEmail(gRow?.email)) await mailer.send({ to: gRow.email, via: trainer.via, replyTo: trainer.contactEmail, ...mail(gRow.name) });
   }
 
   /** Stores a JPEG (a signature) as a file the client owns. */

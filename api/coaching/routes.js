@@ -14,6 +14,7 @@ import { createWindow } from '../rate-limit.js';
 import { documentRoutes } from './documents.js';
 import { packetRoutes, saveAbout, createPacket, clearanceOf } from './packet.js';
 import { profileRoutes } from './profile.js';
+import { brandingRoutes, readBranding, logoUrl, DEFAULT_PRESET } from './branding.js';
 import { MIN_AGE, parseDob, ageOn, cleanTz } from './submission.js';
 
 export const INVITE_DAYS = 14;
@@ -52,27 +53,27 @@ export function coachingRoutes({
       warnings: sql.prepare('SELECT text FROM tags WHERE trainer_id = ? AND client_id = ? AND warning = 1 ORDER BY created_at, id').all(link.trainer_id, link.client_id).map(t => t.text),
     };
   };
-  // The name a client sees: the trainer's branding name once 2g sets one, else their profile name.
-  const trainerName = id => {
-    const row = sql.prepare('SELECT branding FROM trainers WHERE user_id = ?').get(id);
-    let b = {}; try { b = JSON.parse(row?.branding || '{}'); } catch { /* keep the default */ }
-    return str(b.name, 60) || userById(id)?.name || null;
-  };
-  // Who a trainer email comes from: the branding contact once 2g sets one, else their sign-in email.
-  const trainerInfo = id => {
-    const row = sql.prepare('SELECT branding FROM trainers WHERE user_id = ?').get(id);
-    let b = {}; try { b = JSON.parse(row?.branding || '{}'); } catch { /* keep the default */ }
-    const contact = [b.contactEmail, userById(id)?.email].find(looksLikeEmail) || null;
-    return { name: trainerName(id), contactEmail: contact, tagline: str(b.tagline, 60) || null };
-  };
+  // The trainer's own name. The business name (2g, optional) shows beside it, never instead of it.
+  const trainerName = id => userById(id)?.name || null;
   const base = String(origin).replace(/\/$/, '');
+  // Who a trainer email comes from, and how it looks: the branding (2g) over Higher Rep's own.
+  // `via` is the sender name, "<via> via Higher Rep"; the contact email falls back to the sign-in one.
+  const trainerInfo = id => {
+    const b = readBranding(sql, id);
+    const name = trainerName(id);
+    return {
+      name, business: b.business, tagline: b.tagline, via: b.mailFrom || name,
+      contactEmail: [b.contactEmail, userById(id)?.email].find(looksLikeEmail) || null,
+      accent: b.accentHex, logoUrl: base ? logoUrl(base, b.logo) : null,
+    };
+  };
 
   const invitesEmailedAt = new Map();
   async function emailInvite(inv) {
     if (!inv.email) return null;
     const trainer = trainerInfo(inv.trainer_id);
     const mail = inviteEmail({ trainer, firstName: inv.first_name, note: inv.note, url: joinUrl(inv.code), expires: inv.expires_at, tz: env.TZ });
-    const r = await mailer.send({ to: inv.email, via: trainer.name, replyTo: trainer.contactEmail, ...mail });
+    const r = await mailer.send({ to: inv.email, via: trainer.via, replyTo: trainer.contactEmail, ...mail });
     if (r.ok) invitesEmailedAt.set(inv.id, now());
     return r.ok;
   }
@@ -130,6 +131,12 @@ export function coachingRoutes({
     sweepLapsed();
   }
 
+  // The invite page's header: the trainer's name with their business, logo and accent (2g).
+  const inviteTrainer = id => {
+    const b = readBranding(sql, id);
+    return { name: trainerName(id), business: b.business, tagline: b.tagline, logo: b.logo?.hash || null, accent: b.accentHex };
+  };
+
   /* ---------- the link ---------- */
   const setStatus = (link, status, by) => sql.prepare(
     'UPDATE links SET status = ?, ended_at = ?, ended_by = ? WHERE id = ?'
@@ -139,6 +146,7 @@ export function coachingRoutes({
     ...documentRoutes({ sql, access, json, readBody, audit, dataDir, now }),
     ...packetRoutes({ sql, access, json, readBody, audit, dataDir, now, mailer, trainerInfo, trainerName, base }),
     ...profileRoutes({ sql, access, json, readBody, audit, dataDir, now, mailer, trainerInfo, trainerName, base, clientRow }),
+    ...brandingRoutes({ sql, access, json, readBody, dataDir, now }),
 
     // Appoint or remove a trainer. Owner only, like appointing an admin. Removing is refused while
     // the trainer still has clients: their clients would be left linked to nobody.
@@ -170,7 +178,7 @@ export function coachingRoutes({
       const c = link && clearanceOf(sql, link.trainer_id, user.id);
       json(res, 200, {
         trainer: isTrainer(user),
-        coach: link ? { id: link.trainer_id, name: trainerName(link.trainer_id), status: link.status, since: link.started_at,
+        coach: link ? { id: link.trainer_id, name: trainerName(link.trainer_id), business: readBranding(sql, link.trainer_id).business, status: link.status, since: link.started_at,
           cleared: c.cleared, paperwork: c.state, todo: c.todo, guardian: c.guardian } : null
       });
     },
@@ -323,7 +331,7 @@ export function coachingRoutes({
       if (status === 'pending' && !inv.opened_at) sql.prepare('UPDATE invites SET opened_at = ? WHERE id = ?').run(now(), inv.id);
       json(res, 200, {
         status: status === 'pending' ? 'valid' : status === 'joined' ? 'used' : status,
-        trainer: { name: trainerName(inv.trainer_id) },
+        trainer: inviteTrainer(inv.trainer_id),
         ...(status === 'pending' ? { firstName: inv.first_name, note: inv.note || null, expires: inv.expires_at } : {})
       });
     },
@@ -361,7 +369,7 @@ export function coachingRoutes({
         const { lastInsertRowid: linkId } = sql.prepare(
           `INSERT INTO links (trainer_id, client_id, status, started_at) VALUES (?, ?, 'active', ?)`
         ).run(inv.trainer_id, user.id, t);
-        const preset = sql.prepare('SELECT default_preset FROM trainers WHERE user_id = ?').get(inv.trainer_id)?.default_preset || null;
+        const preset = sql.prepare('SELECT default_preset FROM trainers WHERE user_id = ?').get(inv.trainer_id)?.default_preset || DEFAULT_PRESET;
         sql.prepare('INSERT INTO link_settings (link_id, trainer_id, preset, updated_at) VALUES (?, ?, ?, ?)').run(linkId, inv.trainer_id, preset, t);
         sql.prepare(`UPDATE invites SET status = 'joined', client_id = ?, link_id = ? WHERE id = ?`).run(user.id, linkId, inv.id);
         saveAbout(sql, user.id, dob, cleanTz(body.tz), t);

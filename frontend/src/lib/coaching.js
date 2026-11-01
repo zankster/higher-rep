@@ -315,3 +315,49 @@ export function profileError(e) {
     default: return coachingError(e)
   }
 }
+
+/* ---------- settings: branding, new client defaults, the trainer card (Phase 2g) ---------- */
+export const getBranding = () => api('/api/coaching/branding')
+export const saveBranding = fields => post('/api/coaching/branding', fields)
+// The raw image, not JSON: the server checks the bytes and caps it at 2 MB.
+export const uploadLogo = file => api('/api/coaching/branding/logo', { method: 'POST', body: file, headers: { 'Content-Type': file.type }, timeout: 60000 })
+export const logoUrl = hash => hash ? './api/coaching/logo?h=' + encodeURIComponent(hash) : null
+export const setDefaultPreset = preset => post('/api/coaching/default-preset', { preset }).then(r => r.preset)
+export const setShowPhone = (id, show) => post('/api/coaching/client/phone', { id, show })
+export const myTrainer = () => api('/api/coaching/my/trainer').then(r => r.trainer)
+export const MAX_LOGO_MB = 2
+export const LOGO_TYPES = ['image/png', 'image/jpeg']
+export const COACH_BLUE = '#2457E6'
+// The fork's own code, which the AGPL asks us to offer everyone who uses the app.
+export const SOURCE_URL = 'https://github.com/zankster/higher-rep'
+
+export const PRESETS = [
+  { id: 'hands_on', label: () => ct('Hands-on'), text: () => ct('They see the next workout. You make the changes.') },
+  { id: 'balanced', label: () => ct('Balanced'), text: () => ct('They see this week and can swap to your alternates.') },
+  { id: 'independent', label: () => ct('Independent'), text: () => ct('They see the whole block, can move days and add sessions.') },
+]
+export const presetLabel = id => (PRESETS.find(p => p.id === id) || PRESETS[1]).label()
+
+export const phoneShownLine = ({ shown, of }) => !of ? ct('No clients yet')
+  : of === 1 ? (shown ? ct('Shown to your client') : ct('Hidden from your client'))
+  : shown === of ? ct('Shown to all {0} clients', of) : ct('Shown to {0} of {1} clients', shown, of)
+export const contrastLine = ratio => ct('White text reads clearly on it ({0} : 1)', Number(ratio).toFixed(1))
+// "tel:" keeps the digits and a leading +; "smithstrength.com" for https://smithstrength.com/.
+export const telHref = phone => 'tel:' + String(phone).replace(/(?!^\+)[^\d]/g, '')
+export const websiteLabel = url => String(url).replace(/^https?:\/\//i, '').replace(/\/$/, '')
+/** The line under the trainer's name on the client's trainer card. */
+export const trainerCardLine = tr => tr.business
+  ? ct('{0} · since {1}', tr.business, new Date(tr.since).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }))
+  : sinceLine(tr.since)
+
+export function brandingError(e) {
+  switch (e?.data?.code) {
+    case 'email': return ct('That email address does not look right')
+    case 'phone': return ct('That phone number does not look right')
+    case 'website': return ct('That website address does not look right')
+    case 'size': return ct('The logo is larger than {0} MB.', MAX_LOGO_MB)
+    case 'type': return ct('Use a PNG or JPEG image.')
+    case 'dims': return ct('Use an image between 32 and 4096 pixels on a side.')
+    default: return coachingError(e)
+  }
+}

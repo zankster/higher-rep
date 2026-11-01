@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const calls = vi.hoisted(() => ({
   listClients: vi.fn(), listInvites: vi.fn(), newInvite: vi.fn(), pauseClient: vi.fn(), removeClient: vi.fn(),
-  revokeInvite: vi.fn(), renewInvite: vi.fn(), invitePage: vi.fn(), acceptInvite: vi.fn(), endCoaching: vi.fn(), coachingMe: vi.fn(),
+  revokeInvite: vi.fn(), renewInvite: vi.fn(), invitePage: vi.fn(), acceptInvite: vi.fn(), endCoaching: vi.fn(), coachingMe: vi.fn(), myTrainer: vi.fn(),
 }))
 vi.mock('../lib/coaching.js', async real => ({ ...(await real()), ...calls }))
 
@@ -183,7 +183,7 @@ describe('JoinInvite', () => {
 
 describe('Coaching (client)', () => {
   it('ends coaching only from the confirm sheet', async () => {
-    calls.coachingMe.mockResolvedValue({ trainer: false, coach: { id: 'u_mike', name: 'Mike', status: 'active', since: NOW } })
+    calls.myTrainer.mockResolvedValue({ id: 'u_mike', name: 'Mike', business: null, email: 'mike@example.com', phone: null, website: null, accent: '#2457E6', logo: null, status: 'active', since: NOW })
     calls.endCoaching.mockResolvedValue({ ok: true })
     const host = await render(<Coaching />)
     expect(host.textContent).toContain('Mike')

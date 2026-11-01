@@ -83,6 +83,9 @@ const SettingsRoute = lazyView(() => import('./views/Settings.jsx').then(m => ({
 const Clients = lazyView(() => import('./views/Clients.jsx'))
 const ClientProfile = lazyView(() => import('./views/ClientProfile.jsx'))
 const Coaching = lazyView(() => import('./views/Coaching.jsx'))
+const CoachingPrivacy = lazyView(() => import('./views/CoachingPrivacy.jsx'))
+const Branding = lazyView(() => import('./views/Branding.jsx'))
+const ClientDefaults = lazyView(() => import('./views/ClientDefaults.jsx'))
 const JoinInvite = lazyView(() => import('./views/JoinInvite.jsx'))
 const ResetPassword = lazyView(() => import('./views/ResetPassword.jsx'))
 const Documents = lazyView(() => import('./views/Documents.jsx'))
@@ -331,6 +334,9 @@ function Shell() {
       <Route path="/clients" element={<Clients />} />
       <Route path="/clients/:id" element={<ClientProfile />} />
       <Route path="/coaching" element={<Coaching />} />
+      <Route path="/coaching/privacy" element={<CoachingPrivacy />} />
+      <Route path="/branding" element={<Branding />} />
+      <Route path="/client-defaults" element={<ClientDefaults />} />
       <Route path="/join/:code" element={<JoinInvite code={joinCode(l.pathname)} signedIn />} />
       <Route path="/reset/:code" element={<ResetPassword code={resetLinkCode(l.pathname)} />} />
       <Route path="/documents" element={<Documents />} />

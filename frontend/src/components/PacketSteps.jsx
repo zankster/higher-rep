@@ -26,7 +26,7 @@ export function StepBar({ at, of, from, onLater }) {
 
 /* ---------- about you ---------- */
 
-export function AboutYou({ trainerName, onNext, busy, error }) {
+export function AboutYou({ trainerName, onNext, busy, error, invited = true }) {
   const [day, setDay] = useState('')
   const [month, setMonth] = useState(null)
   const [year, setYear] = useState('')
@@ -41,7 +41,7 @@ export function AboutYou({ trainerName, onNext, busy, error }) {
     onNext(dob, ageFrom(dob))
   }
   return <div>
-    {trainerName && <div className="small muted">{ct('{0} invited you', trainerName)}</div>}
+    {trainerName && invited && <div className="small muted">{ct('{0} invited you', trainerName)}</div>}
     <h2 style={{ margin: '6px 0 12px' }}>{ct('When were you born?')}</h2>
     <div className="row" style={{ gap: 8 }}>
       <TextField style={{ flex: 1 }} inputMode="numeric" maxLength={2} placeholder={ct('Day')} aria-label={ct('Day')} value={day} onChange={e => { setDay(e.target.value.replace(/\D/g, '')); setErr('') }} />

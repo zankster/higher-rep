@@ -13,6 +13,8 @@ import { filePath } from './files.js';
 import { makeZip } from './zip.js';
 import { recordPdf, recordName, answerText, emailGuardianLink, fmtSigned, GUARDIAN_EMAIL_GAP_MS } from './packet.js';
 import { ADULT, ageOn } from './submission.js';
+import { readBranding } from './branding.js';
+import { looksLikeEmail } from './email.js';
 
 export const RETAIN_YEARS = 5;
 export const LIMITS = { tag: 40, tags: 30, note: 4000 };
@@ -182,6 +184,15 @@ export function profileRoutes({ sql, access, json, readBody, audit, dataDir, now
       guardian: minor || waiting.some(w => w.waitingGuardian) ? guardianView(guardianOf(client.id, trainer.id), t) : null,
       records: recordsOf(trainer.id, client.id).map(recordSummary),
       retention: { years: RETAIN_YEARS, ...keepUntil({ endedAt: link.ended_at, dob: about?.dob, now: t }) },
+      // "What <name> sees of you" (2g): the email always, the phone number only when switched on.
+      sees: seesOf(trainer, link),
+    };
+  }
+  function seesOf(trainer, link) {
+    const b = readBranding(sql, trainer.id);
+    return {
+      email: b.contactEmail || (looksLikeEmail(trainer.email) ? trainer.email : null), phone: b.phone,
+      showPhone: !!sql.prepare('SELECT show_phone FROM link_settings WHERE link_id = ?').get(link.id)?.show_phone,
     };
   }
 

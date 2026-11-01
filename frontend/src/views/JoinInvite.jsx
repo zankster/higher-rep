@@ -4,6 +4,7 @@
 // a tap, because linking an existing account to a trainer is the client's consent to give.
 // Phase 2e: "When were you born?" comes first, before any account is made. Under 13 it stops
 // there and nothing is kept. The date rides along to the accept, then the packet opens.
+// Phase 2g: a trainer who set up Branding gets their logo, business name and colour here.
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUI } from '../store/useUI.js'
@@ -11,14 +12,18 @@ import { Button } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
 import Login, { RegisterSheet } from './Login.jsx'
 import { AboutYou, TooYoung } from '../components/PacketSteps.jsx'
+import { InviteHeader, InAccent, isBranded } from '../components/TrainerBrand.jsx'
 import { ct, invitePage, acceptInvite, coachingError, submitError, markAutoAccept, takeAutoAccept, rememberJoinDob, takeJoinDob, MIN_AGE } from '../lib/coaching.js'
 
 function InviteCard({ invite }) {
   const name = invite.trainer.name
+  const title = invite.firstName ? ct('{0} invited you, {1}', name, invite.firstName) : ct('{0} invited you to train with them', name)
   return <div style={{ textAlign: 'center', margin: '28px 0 18px' }}>
-    <div style={{ fontSize: 44, display: 'flex', justifyContent: 'center', color: 'var(--acc)' }}><Icon name="figureStrength" /></div>
-    <h1 style={{ fontSize: 26, margin: '10px 0 4px' }}>{ct('{0} invited you to train with them', name)}</h1>
-    <div className="muted">{ct('Higher Rep · Fitness coaching')}</div>
+    {isBranded(invite.trainer) ? <InviteHeader trainer={invite.trainer} title={title} /> : <>
+      <div style={{ fontSize: 44, display: 'flex', justifyContent: 'center', color: 'var(--acc)' }}><Icon name="figureStrength" /></div>
+      <h1 style={{ fontSize: 26, margin: '10px 0 4px' }}>{ct('{0} invited you to train with them', name)}</h1>
+      <div className="muted">{ct('Higher Rep · Fitness coaching')}</div>
+    </>}
     {invite.note && <div className="card" style={{ marginTop: 16, fontStyle: 'italic', textAlign: 'start' }}>“{invite.note}”</div>}
   </div>
 }
@@ -74,7 +79,9 @@ export default function JoinInvite({ code, signedIn }) {
   if (young) return <div className="narrow"><TooYoung onClose={signedIn ? () => nav('/home', { replace: true }) : null} /></div>
   if (!dob && !busy) {
     const next = (born, age) => { if (age < MIN_AGE) setYoung(true); else setDob(born) }
-    return <div className="narrow" style={{ paddingTop: 28 }}><AboutYou trainerName={invite.trainer.name} onNext={next} error={err} /></div>
+    // A branded invite shows its header first; it already says who invited you.
+    const branded = isBranded(invite.trainer)
+    return <div className="narrow" style={{ paddingTop: branded ? 0 : 28 }}>{branded && <InviteCard invite={invite} />}<AboutYou trainerName={invite.trainer.name} invited={!branded} onNext={next} error={err} /></div>
   }
 
   if (!signedIn && signIn) return <>
@@ -90,10 +97,10 @@ export default function JoinInvite({ code, signedIn }) {
   return <div className="narrow">
     <InviteCard invite={invite} />
     {signedIn ? <>
-      <Button variant="primary" onClick={() => join()} disabled={busy}>{ct('Join {0}', invite.trainer.name)}</Button>
+      <InAccent accent={isBranded(invite.trainer) ? invite.trainer.accent : null}><Button variant="primary" onClick={() => join()} disabled={busy}>{ct('Join {0}', invite.trainer.name)}</Button></InAccent>
       <div className="muted small" style={{ marginTop: 10, textAlign: 'center' }}>{ct('{0} will see your workouts, progress and messages. You can end coaching at any time in Settings.', invite.trainer.name)}</div>
     </> : <>
-      <Button variant="primary" onClick={register}>{ct('Create account')}</Button>
+      <InAccent accent={isBranded(invite.trainer) ? invite.trainer.accent : null}><Button variant="primary" onClick={register}>{ct('Create account')}</Button></InAccent>
       <div style={{ height: 8 }} />
       <Button variant="ghost" onClick={() => { rememberJoinDob(dob); setSignIn(true) }}>{ct('I already have an account')}</Button>
     </>}

@@ -89,7 +89,7 @@ test('GET /api/coaching/me says who you are in coaching', async t => {
   assert.deepEqual(await me(SAM), { trainer: false, coach: null });
   const ana = await me(ANA);
   assert.equal(ana.trainer, false);
-  assert.deepEqual({ ...ana.coach, since: 0 }, { id: MIKE, name: 'Mike', status: 'active', since: 0, cleared: false, paperwork: 'about', todo: 0, guardian: 0 }, 'no date of birth yet: not cleared');
+  assert.deepEqual({ ...ana.coach, since: 0 }, { id: MIKE, name: 'Mike', business: null, status: 'active', since: 0, cleared: false, paperwork: 'about', todo: 0, guardian: 0 }, 'no date of birth yet: not cleared');
   assert.equal((await me(PIA)).coach.status, 'paused');
   assert.equal((await me(BEN)).coach.id, TESS);
   assert.equal((await me(CAL)).coach, null, 'an ended link is no coach');
