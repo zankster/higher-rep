@@ -47,13 +47,13 @@ Inspired by Everfit, Trainerize, FitPros, QuickCoach, Hevy Coach, Kahunas and Co
 - Progress photos (front, side, back) with a side-by-side compare.
 - Weekly check-in forms the trainer designs. A daily habits checklist.
 - Charts per client: strength, body weight, measurements, assessments, compliance.
+- **Weekly progress report**, sent to each client automatically (push + in the chat thread): workouts done vs planned, PRs, effort, weight and measurement changes, check-in status, and a short note from the trainer. The trainer can preview it and add the note before it goes out, or let it send as is.
 
 ## Next phases (after v1)
 - **Booking and session packages:** book sessions and track "8 of 12 sessions left", synced with the trainer's calendar.
 - **Habits with streaks and badges** (steps, water, sleep, protein). Badges for PRs and streaks.
 - **Wearables:** sleep, steps, heart rate and HRV from Apple Health or Google Health Connect (openGym already reads Health data: `lib/health-*.js`, recovery model in `lib/recovery.js`).
 - **Periodization view:** training blocks, deload and test weeks on a timeline.
-- **Weekly progress report** sent to each client automatically.
 - **Resource library:** guides, PDFs and articles for clients.
 - **Groups:** group programs, group chat, challenges and leaderboards.
 - **Import a client's history** from other apps (openGym already imports Hevy and Strong: `lib/import-*.js`).
