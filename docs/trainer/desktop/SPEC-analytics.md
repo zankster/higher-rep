@@ -3,7 +3,8 @@
 Approved by Mike on 2026-11-01 (Phase 1b). Nothing here is built yet. Ideas taken from Hevy's
 feature pages (workout logging and progress tracking), adapted for coaching.
 Mock-ups: [`mockups/client-analytics.html`](mockups/client-analytics.html) (trainer, desktop) and
-[`mockups/phone-progress.html`](mockups/phone-progress.html) (client phone screens). Shared look:
+[`mockups/phone-coaching.html`](mockups/phone-coaching.html) (client phone screens: openGym's
+screens with the coaching additions). Shared look:
 [`SPEC-calendars.md`](SPEC-calendars.md).
 
 ## Counting rules (everywhere in the app)
@@ -23,11 +24,11 @@ Mock-ups: [`mockups/client-analytics.html`](mockups/client-analytics.html) (trai
 
 ## Where kg volume appears
 
-- **Client phone:**
-  - the runner header (tap to show kg before sets);
-  - the finish screen Volume tile, compared with the same workout last time;
-  - workout history (time, kg and sets on every workout);
-  - exercise detail ("Session vol." chip, "Best session volume" record);
+- **Client phone** (openGym already shows kg in most of these):
+  - the runner header;
+  - the finish Volume tile, plus the change since the same workout last time;
+  - recent workouts and history;
+  - exercise progress;
   - the weekly progress report ("Total volume this week" with the change).
 - **Trainer:**
   - the analytics volume chart (**Hard sets | kg** switch, Hard sets by default);
@@ -48,58 +49,56 @@ Mock-ups: [`mockups/client-analytics.html`](mockups/client-analytics.html) (trai
 - **Volume by week:** bars of hard sets done with the planned sets as an outline, or kg with the
   switch. A dot per week shows compliance (green, or red below 70%), block labels along the bottom,
   the deload week marked, and a line under the chart for any week that fell short.
-- **Estimated 1RM** for the main lifts, with dots on PRs. Each lift name links to its exercise
-  detail.
+- **Estimated 1RM** for the main lifts, with dots on PRs. Each lift name opens that lift's exercise
+  progress.
 - **Sets per muscle group** this week against the planned range. The status is always an icon and a
   word: In range, Planned · day, Behind · reason. Days still to come never count as behind.
 - **<Client>'s changes:** swaps (with the most common one), moved days, skips and extra sessions,
   from the autonomy events in `SPEC-client-settings.md`, and a "Message <client> about swaps"
   button.
 - **On the trainer's phone:** the same panels in one column. Tiles 2 × 2; the 1RM card becomes
-  exercise detail with chips to switch lifts; the muscle table becomes the body map screen.
+  openGym's exercise progress with a lift picker; the muscle table gets the body map, as in Stats.
 
-## 2. Client: workout runner (phone; Live session uses the same grid)
+## 2. Client phone screens: openGym's own, plus coaching
 
-- **Header:** workout name, Finish, then Time, Sets ("7 of 14") and Volume (kg) with a progress bar
-  for sets. Tapping the header puts kg before sets.
-- **Set grid columns: Last time · Target · Done.**
-  - "Last time" is the same program day's last session by default (Lower A's squat, not Lower B's),
-    falling back to the last time the exercise was done anywhere. A note says which session it
-    came from ("last time Oct 28, week 5").
-  - Done sets get a check icon and a light green tint. Colour is never the only sign.
-- **Live PR:** an amber banner drops in at the top ("New PR · Back squat, Heaviest weight · 105 kg ×
-  5"), and a medal replaces that set's number.
-- **Rest timer:** starts when a set is ticked; a bar at the bottom with −15, +15 and Skip.
-- Set types from the set number (warm-up, drop, failure) were seen in Hevy; not decided.
+openGym already shows the client most of this, so **we don't build new client screens**. We keep
+openGym's runner, finish sheet and Stats, and add the coaching parts as small hooks (PLAN.md,
+"Staying in sync with upstream"). Mock-up: `mockups/phone-coaching.html` (additions marked purple).
 
-## 3. Client: exercise detail
+**Already in openGym (keep as is):**
+- Runner header: time, "7/14 sets", kg total and progress bar, set bubbles, and the mini body map
+  that lights up as sets are ticked (`SessionMuscles`).
+- Per exercise: muscle and equipment chips, Best, "Last time (n days ago): 100×5 (RIR 2), …", the
+  WEIGHT / REPS / RIR steppers, plate maths, the rest timer (−15s, +15s, pause, Skip).
+- Finish ("Workout complete!"): Duration, Volume, Sets and PRs tiles, the PR list, "What you just
+  trained" body map, last and next workout, add a photo or clip.
+- Stats: Muscle balance with the real body map (Week / 30d / 90d / All, done/planned bars, "Not
+  trained in this period"), weekly muscle volume, exercise progress (Top set, Per set, Est. 1RM,
+  Effort), recent workouts with time, sets, kg and PRs, activity heatmap, streak, effort (RIR).
+- **Body map:** openGym's `BodyMap` (real muscle outlines, five shades of the accent colour). The
+  trainer's desktop analytics uses the same component, so client and trainer see the same figure.
 
-- Tabs: **Summary · History · How to**.
-- Summary: one chart for one lift with a period dropdown and block lines. Chips switch the measure:
-  Heaviest, Est. 1RM, Best set, Session vol. (kg).
-- **Records** list; each opens the workout where it happened.
-- **Best weight for each rep count** table, with "new" on today's records.
-- The client's loads follow their visibility setting (kg, % and RPE, or RPE only).
+**Coaching additions:**
+- **Runner:**
+  - a live PR banner at the top ("New PR · Back squat, Heaviest weight · 105 kg × 5");
+  - the trainer's cue, the alternate exercise and Swap (within the client's swap setting);
+  - "Plan from Mike: 4 × 5 · 102.5 kg · RIR 2". The set rows are pre-filled with the target;
+  - "Last time" uses the same program day by default (Lower A's last squat);
+  - the block and week ("Block 2 · Strength · week 6 of 9");
+  - under a set that differs from the target: "Target 102.5 × 5 · you went heavier".
+- **Finish:**
+  - "14 of 14 · 100% of plan" under Sets;
+  - "▲ 240 vs last Lower A" under Volume;
+  - the effort card: 1–10 (Easy / Max), a note, "Something hurt?", Send to Mike.
+- **Stats › Muscle balance:** the plan is the trainer's program, with a line naming the workouts
+  left this week and any missed ones.
+- **Stats › Exercise progress:** a "Best weight for each rep count" table.
+- **Recent workouts / History:** "effort 8 · 100% of plan", "Live with Mike", and "Extra" for the
+  client's own sessions.
 
-## 4. Client: muscles this week
-
-- Front and back figures shaded by hard sets this week, a "Fewer → More sets" scale, and week
-  navigation ("Nov 9–15 · 3 of 4 workouts").
-- Under it, the table of sets against the planned range with the same status words as the trainer's
-  table. The figure reuses the pain report's body map drawing.
-
-## 5. Client: finish screen
-
-- Tiles at the top: **Sets** ("14 of 14 · 100% of plan"), **Volume** ("6,180 kg · ▲ 240 vs last
-  Lower A"), **Duration** (against plan), **PRs**.
-- Then the approved effort rating: 1–10 with Easy / Max, a note, "Something hurt?", Send to Mike,
-  Skip for now. The date and time can be edited.
-
-## 6. Client: workout history
-
-- Newest first. Each workout: name, status (icon and word), date and block week, "Live with Mike"
-  when the trainer logged it, then time, kg and sets, then PRs and effort.
-- Extra sessions are marked "Extra" and show "–" for anything they don't have.
+**Effort scale:** the client sees openGym's RIR everywhere, including the plan line. The trainer
+can write targets as RPE or RIR in the program builder, and the app converts (RPE 8 = RIR 2).
+The trainer's analytics tile "RPE vs plan" follows the trainer's choice.
 
 ## Data the screens need (for Phases 2 to 4)
 
