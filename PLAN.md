@@ -15,6 +15,10 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 - **Architecture:** see "Architecture" below. Keep openGym and add a coaching module; no rewrite.
 - **Reuse:** openGym already has invites (`/api/admin/invites`), roles (`/api/admin/user/role`), web push, measurements (`lib/measurements.js`), media uploads, the offline queue (`lib/queue.js`) and the sync merge (`api/sync-stamps.js`).
 - **Hosting:** Mike's PC (Docker) while it's only him. Before clients join: a small VPS (about $5/mo) on higherrep.com (registered), with HTTPS and encrypted nightly backups of `data/`. Ask Mike before paying.
+- **Hostnames (chosen 2026-10-31, permanent):**
+  - **`app.higherrep.com`** is the server. `.env`: `RP_ID=app.higherrep.com`, `ORIGIN=https://app.higherrep.com`. It's built into the store apps, and browser passkeys and phone sign-ins are tied to it, so never change it after clients join. DNS: an `A` record for `app` → VPS, added only when the VPS exists.
+  - **`higherrep.com` + `www`** is the public site: home, privacy policy, terms, support email, link to the source. Free static hosting (GitHub Pages or Cloudflare Pages). Policy pages come near release, once the features are built.
+  - **`support@higherrep.com`:** Porkbun email forwarding. SPF/DKIM are added with the invite-email service.
 
 ## Architecture (reviewed and approved)
 - **One app everywhere.** openGym's React app is the website, the iPhone app and the Android app (Capacitor). The screens Mike and clients see depend on their role. Mike can build programs in a desktop browser. The store builds point at Mike's server, so clients never enter a server address.
