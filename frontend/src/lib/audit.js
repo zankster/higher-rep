@@ -9,6 +9,7 @@
 // stays out of the per-language string packs (see the header of views/Admin.jsx). Times still
 // follow the UI language, the way numbers and dates already do.
 import { dateLocale } from './i18n-core.js'
+import { COACHING_AUDIT_LABELS } from './coaching-audit.js' // trainer-fork
 
 // The first segment of an event name is also the filter chip it belongs to.
 export const auditCat = ev => String(ev || '').split('.')[0]
@@ -75,7 +76,8 @@ const LABELS = {
   // Photos and videos of custom exercises: "Reset everything" clearing a profile's files, and the
   // upload or clean-up throttle pausing a profile (`msg` says which).
   'media.sweep': 'Cleared unused photos and videos',
-  'media.throttled': 'Too many photo or video requests'
+  'media.throttled': 'Too many photo or video requests',
+  ...COACHING_AUDIT_LABELS // trainer-fork
 }
 // An unknown event is shown raw rather than dropped or rendered as "undefined": a dashboard
 // that is one version behind the server should still say *something* truthful.

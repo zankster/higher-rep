@@ -69,6 +69,11 @@ Each step ends with its tests passing and is one commit.
     or password) instead of email and password fields; "Download my documents and chat" joins the
     End coaching sheet in 2e; "Resend" is "Send new invite" (a fresh link) until email exists (2c).
   - Coaching copy is English only, through `ct()` in `lib/coaching.js`, until Mike picks languages.
+  - Added after the build: a "Make trainer" switch in a user's Admin card, for the owner only
+    (`components/TrainerRoleButton.jsx`); plain labels for the coaching events in the Admin
+    activity log (`lib/coaching-audit.js`); and `scripts/trainer/test-copy.mjs`, which runs a
+    local test copy (password sign-in on, the first account is the owner, data in the system temp
+    folder; `--fresh` starts over).
 
 ### 2c. Email (Resend)
 - `api/coaching/email.js` calls Resend's HTTP API with plain `fetch` (no new dependency).
