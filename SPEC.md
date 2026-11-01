@@ -13,7 +13,7 @@ Inspired by Everfit, Trainerize, FitPros, QuickCoach, Hevy Coach, Kahunas and Co
 - Only the trainer can assign or change a client's program. The client can still log or skip exercises during a workout, and swap only within the limits the trainer set (the listed alternates, or any exercise if the trainer allows it).
 - The trainer's private notes and tags on a client are never visible to that client.
 - The trainer can log a workout on a client's behalf during a live session. It's saved to the client's history and marked "Logged by Mike".
-- Intake answers, the health questionnaire and the signed waiver are visible to the client and their trainer only, and are kept after the client is removed (liability record).
+- Intake answers, the health questionnaire and the signed waiver are visible to the client and their trainer only, and are kept after the client is removed or deletes their account (liability record; see "Account deletion and record keeping").
 - A chat thread is visible only to its trainer and that client (and, for a client under 18, their guardian; see Safety).
 - Clients can never find, see or message other clients. Nothing in the app is public.
 - Messages are never silently deleted. An edit shows "edited" and the original is kept. Either side can export the full thread.
@@ -21,6 +21,24 @@ Inspired by Everfit, Trainerize, FitPros, QuickCoach, Hevy Coach, Kahunas and Co
 - A client can end the coaching link at any time. That works as a block: the trainer loses access, and neither side can message the other.
 - Removing a client ends the trainer's access. The client keeps their own data.
 - Server admin (Mike) keeps openGym's admin tools: invites, disable or delete accounts, activity log.
+
+## Account deletion and record keeping
+Decided 2026-10-31. The privacy policy says exactly this.
+- **Delete my account** is in Settings, inside the app (Apple and Google both require it). Google Play also needs a web page where someone can ask for deletion without the app (on higherrep.com).
+- **30-day grace period.** Deleting locks the account at once: the client can't use it, and Mike no longer sees it in the app. Signing in within 30 days asks "Restore your account?" and brings everything back. After 30 days the deletion happens.
+- **Deleted after 30 days:** the account, sign-in details, the client's own training data (workouts they logged themselves, measurements, habits), progress photos and check-in photos, check-in answers, voice notes and media, and push subscriptions.
+- **Kept as Mike's liability record:**
+  - PAR-Q+, waivers and any other signed paperwork;
+  - intake answers;
+  - pain and injury reports;
+  - programs Mike assigned and workouts he logged ("Logged by Mike");
+  - the chat history.
+- **How long:** at least 5 years after coaching ends (the client's last session, or the day they leave or delete their account, whichever is later). When that time is up, the app reminds Mike, and each client's record is deleted only when he decides. Nothing is deleted while it's needed for a claim or dispute.
+- **Kept records are locked:** read-only, visible only to Mike, never used for coaching or anything else. Mike may move them out of the app to separate secure storage later (undecided).
+- **The client gets a copy:** before deleting, the app offers a download of their signed paperwork and their chat. Their training data has openGym's export.
+- **Backups:** deleted data can stay in encrypted backups until they roll over (at most 30 days).
+- **Under 18:** the record is kept until at least 5 years after they turn 18 (claims by minors can usually be brought later; confirm with the lawyer or insurer).
+- **Removing a client** (Mike ends coaching) follows the same rule: their record is kept, and the client keeps their account and their own data.
 
 ## Safety and appropriate content
 No automatic word or image filters: they would flag legitimate progress photos and injury talk ("groin strain", slang), and scanning would send private photos to a third party. Safety comes from design, consent and a record.
