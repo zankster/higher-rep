@@ -111,6 +111,23 @@ Each step ends with its tests passing and is one commit.
   openGym's media cleanup, each file readable only by the people its row allows.
 - Higher Rep ships no third-party forms. Mike adds his ACE PAR-Q and the waiver (marked DRAFT until
   the lawyer has reviewed it).
+- **Built 2026-11-01**, mock-ups approved the same day (inline in chat; screens 4 to 6, the
+  new-version and send screens, were new).
+  - API: migration 3 (`documents`, `document_versions`, `files`, `requests`); `api/coaching/
+    documents.js` (library, draft autosave, discard, publish, packet order, delete, recipients,
+    send, PDF upload and read), `doc-body.js` (what a body may hold, when it can be published),
+    `files.js` (the file store). Tests: `api/test/coaching-documents.test.js`.
+  - `requests` is every time a client is asked for a document: the packet (2e), "Send to clients"
+    and "ask current clients to do the new version". Open requests move to a new version when it
+    is published. 2e marks them done when the client completes them.
+  - App: `views/Documents.jsx` (Settings › Documents, packet reordered with openGym's own drag
+    handles), `views/DocumentEdit.jsx` (autosaving editors for the three kinds, the form builder,
+    packet switch, versions), `components/DocumentSheets.jsx` (Publish, Send, Preview). Test:
+    `views/Documents.test.jsx`.
+  - Different from the mock-ups: a document joins or leaves the packet with a switch on its own
+    page rather than by dragging between the two lists; dragging reorders the packet. The
+    client's home to-do (screen 6) comes with signing in 2e.
+  - Only a never-published document can be deleted. Uploaded PDFs are capped at 10 MB.
 
 ### 2e. Sign-up packet (client)
 - About you: date of birth on a neutral screen. Under 13: no account, nothing saved, not even the

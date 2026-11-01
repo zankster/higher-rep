@@ -22,6 +22,70 @@ export const revokeInvite = id => post('/api/coaching/invites/revoke', { id })
 export const renewInvite = id => post('/api/coaching/invites/renew', { id }).then(withEmailed)
 export const emailInvite = id => post('/api/coaching/invites/email', { id })
 export const forgotPassword = email => post('/api/coaching/password/forgot', { email })
+
+/* ---------- the document library (Phase 2d) ---------- */
+export const listDocuments = () => api('/api/coaching/documents').then(r => r.documents || [])
+export const getDocument = id => api('/api/coaching/document?id=' + encodeURIComponent(id)).then(r => r.document)
+export const newDocument = ({ title, kind, rights }) => post('/api/coaching/documents/new', { title, kind, rights }).then(r => r.document)
+export const saveDraft = (id, { title, body }) => post('/api/coaching/document/draft', { id, title, body }).then(r => r.draft)
+export const discardDraft = id => post('/api/coaching/document/discard', { id }).then(r => r.document)
+export const publishDocument = (id, askCurrent) => post('/api/coaching/document/publish', { id, askCurrent: !!askCurrent })
+export const setPacket = ids => post('/api/coaching/documents/packet', { ids }).then(r => r.documents || [])
+export const deleteDocument = id => post('/api/coaching/document/delete', { id })
+export const documentRecipients = id => api('/api/coaching/document/recipients?id=' + encodeURIComponent(id))
+export const sendDocument = (id, clients, due) => post('/api/coaching/document/send', { id, clients, due: due ?? null })
+// The raw PDF, not JSON: the server checks the bytes start like a PDF and caps it at 10 MB.
+export const uploadPdf = file => api('/api/coaching/files', { method: 'POST', body: file, headers: { 'Content-Type': 'application/pdf' }, timeout: 120000 })
+export const fileUrl = hash => './api/coaching/file?hash=' + encodeURIComponent(hash)
+export const MAX_PDF_MB = 10
+
+export const KIND_LABEL = { sign: () => ct('Document to sign'), form: () => ct('Form to answer'), pdf_return: () => ct('PDF to fill and return') }
+export const KIND_SHORT = { sign: () => ct('To sign'), form: () => ct('Form'), pdf_return: () => ct('PDF to fill and return') }
+export const KIND_ICON = { sign: 'pencil', form: 'list', pdf_return: 'download' }
+export const QUESTION_TYPES = [
+  ['yes_no', () => ct('Yes / no')], ['short_text', () => ct('Short text')], ['long_text', () => ct('Long text')],
+  ['choice', () => ct('Choice')], ['date', () => ct('Date')], ['number', () => ct('Number')], ['signature', () => ct('Signature')],
+]
+export const questionTypeLabel = type => (QUESTION_TYPES.find(([k]) => k === type)?.[1] || (() => type))()
+
+let seq = 0
+/** A new question for the form builder. Ids only need to be unique within the form. */
+export function newQuestion(type = 'yes_no') {
+  const id = 'q' + Date.now().toString(36) + (seq++).toString(36)
+  const q = { id, type, text: '', required: true }
+  if (type === 'choice') Object.assign(q, { options: ['', ''], multi: false })
+  if (type === 'yes_no') Object.assign(q, { flagYes: false, followUp: null })
+  return q
+}
+/** The same question as another type, keeping its wording. */
+export function retypeQuestion(q, type) {
+  const next = { id: q.id, type, text: q.text, required: q.required !== false }
+  if (type === 'choice') Object.assign(next, { options: q.options?.length ? q.options : ['', ''], multi: !!q.multi })
+  if (type === 'yes_no') Object.assign(next, { flagYes: !!q.flagYes, followUp: q.followUp || null })
+  return next
+}
+
+/** "Draft", "Version 2", or "Version 2 · draft of 3" for a library row. */
+export function versionLine(d) {
+  if (d.version == null) return ct('Draft')
+  return d.hasDraft ? ct('Version {0} · draft of {1}', d.version, d.version + 1) : ct('Version {0}', d.version)
+}
+
+/** Why a draft cannot be published yet, in words. */
+export function publishError(e) {
+  const n = e?.data?.index != null ? e.data.index + 1 : null
+  switch (e?.data?.code) {
+    case 'no-questions': return ct('Add at least one question.')
+    case 'question-text': return ct('Question {0} has no wording yet.', n)
+    case 'choice-options': return ct('Question {0} needs at least two choices.', n)
+    case 'follow-up-text': return ct('The follow-up of question {0} has no wording yet.', n)
+    case 'empty': return ct('Add the text or a PDF first.')
+    case 'no-file': return ct('Upload the PDF first.')
+    case 'too-large': return ct('That file is larger than {0} MB.', MAX_PDF_MB)
+    case 'type': return ct('Only PDF files can be uploaded.')
+    default: return coachingError(e)
+  }
+}
 export const invitePage = code => api('/api/coaching/invite?code=' + encodeURIComponent(code))
 export const acceptInvite = code => post('/api/coaching/invites/accept', { code })
 export const pauseClient = (id, paused) => post('/api/coaching/client/pause', { id, paused }).then(r => r.client)

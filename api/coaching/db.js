@@ -61,7 +61,58 @@ export const MIGRATIONS = [
      client_id TEXT,
      link_id INTEGER REFERENCES links (id)
    );
-   CREATE INDEX invites_trainer ON invites (trainer_id, status);`
+   CREATE INDEX invites_trainer ON invites (trainer_id, status);`,
+  // 3. Phase 2d: the trainer's document library. A document has at most one draft and any number
+  // of published versions; a published version is never changed. `requests` is every time a
+  // client is asked for a document (the sign-up packet in 2e, "Send to clients", "sign the new
+  // version"), and is marked done when they complete it. Files are stored by their SHA-256 under
+  // DATA_DIR/coaching-files and are read only through the routes that check who may.
+  `CREATE TABLE documents (
+     id INTEGER PRIMARY KEY,
+     trainer_id TEXT NOT NULL,
+     kind TEXT NOT NULL CHECK (kind IN ('sign', 'form', 'pdf_return')),
+     title TEXT NOT NULL,
+     in_packet INTEGER NOT NULL DEFAULT 0,
+     packet_order INTEGER,
+     rights_confirmed_at INTEGER NOT NULL,
+     created_at INTEGER NOT NULL
+   );
+   CREATE INDEX documents_trainer ON documents (trainer_id);
+   CREATE TABLE document_versions (
+     id INTEGER PRIMARY KEY,
+     document_id INTEGER NOT NULL REFERENCES documents (id),
+     version INTEGER,
+     status TEXT NOT NULL CHECK (status IN ('draft', 'published')),
+     title TEXT NOT NULL,
+     body TEXT NOT NULL DEFAULT '{}',
+     created_at INTEGER NOT NULL,
+     updated_at INTEGER NOT NULL,
+     published_at INTEGER
+   );
+   CREATE UNIQUE INDEX document_one_draft ON document_versions (document_id) WHERE status = 'draft';
+   CREATE UNIQUE INDEX document_version_number ON document_versions (document_id, version) WHERE status = 'published';
+   CREATE TABLE files (
+     hash TEXT NOT NULL,
+     owner_id TEXT NOT NULL,
+     size INTEGER NOT NULL,
+     type TEXT NOT NULL,
+     created_at INTEGER NOT NULL,
+     PRIMARY KEY (hash, owner_id)
+   );
+   CREATE TABLE requests (
+     id INTEGER PRIMARY KEY,
+     trainer_id TEXT NOT NULL,
+     client_id TEXT NOT NULL,
+     document_id INTEGER NOT NULL REFERENCES documents (id),
+     version_id INTEGER NOT NULL REFERENCES document_versions (id),
+     reason TEXT NOT NULL CHECK (reason IN ('packet', 'sent', 'new_version')),
+     status TEXT NOT NULL CHECK (status IN ('open', 'done', 'cancelled')),
+     due_at INTEGER,
+     created_at INTEGER NOT NULL,
+     done_at INTEGER
+   );
+   CREATE INDEX requests_client ON requests (client_id, status);
+   CREATE INDEX requests_document ON requests (document_id, status);`
 ];
 
 export function openCoachingDb(dataDir, { file = 'coaching.sqlite' } = {}) {

@@ -84,6 +84,8 @@ const Clients = lazyView(() => import('./views/Clients.jsx'))
 const Coaching = lazyView(() => import('./views/Coaching.jsx'))
 const JoinInvite = lazyView(() => import('./views/JoinInvite.jsx'))
 const ResetPassword = lazyView(() => import('./views/ResetPassword.jsx'))
+const Documents = lazyView(() => import('./views/Documents.jsx'))
+const DocumentEdit = lazyView(() => import('./views/DocumentEdit.jsx'))
 let viewsPrefetched = false
 const prefetchViews = () => {
   if (viewsPrefetched) return
@@ -326,6 +328,8 @@ function Shell() {
       <Route path="/coaching" element={<Coaching />} />
       <Route path="/join/:code" element={<JoinInvite code={joinCode(l.pathname)} signedIn />} />
       <Route path="/reset/:code" element={<ResetPassword code={resetLinkCode(l.pathname)} />} />
+      <Route path="/documents" element={<Documents />} />
+      <Route path="/documents/:id" element={<DocumentEdit />} />
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   ))

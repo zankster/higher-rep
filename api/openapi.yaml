@@ -3570,8 +3570,7 @@ paths:
                 properties:
                   invite: { $ref: '#/components/schemas/CoachingInvite' }
                   emailed:
-                    type: boolean
-                    nullable: true
+                    type: [boolean, 'null']
                     description: true when the invite was emailed (or logged, without RESEND_API_KEY), false when sending failed, null when it has no email address.
         '400':
           description: No first name (`missing`) or an address that does not look right (`email`).
@@ -3610,6 +3609,411 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
+  /api/coaching/documents:
+    get:
+      tags: [coaching]
+      operationId: coachingDocuments
+      summary: 'Trainer: the document library'
+      description: >-
+        Your documents, the sign-up packet first in its order.
+      responses:
+        '200':
+          description: The library.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documents: { type: array, items: { $ref: '#/components/schemas/CoachingDocumentSummary' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/coaching/documents/new:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentNew
+      summary: 'Trainer: create a document'
+      description: >-
+        Starts a document as an empty draft. rights must be true ("I wrote this document or have permission to use it"), stored with the time.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, kind, rights]
+              properties:
+                title: { type: string, maxLength: 120 }
+                kind: { type: string, enum: [sign, form, pdf_return] }
+                rights: { type: boolean, const: true }
+      responses:
+        '200':
+          description: The new document.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document: { $ref: '#/components/schemas/CoachingDocument' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: Missing title (code title), unknown kind (code kind) or rights not confirmed (code rights).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document:
+    get:
+      tags: [coaching]
+      operationId: coachingDocument
+      summary: 'Trainer: one document'
+      description: >-
+        The draft, the latest published version, the version list, and how many current clients finished a published version (completedEarlier).
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: The document.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document: { $ref: '#/components/schemas/CoachingDocument' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not one of your documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document/draft:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentDraft
+      summary: 'Trainer: save the draft'
+      description: >-
+        Autosave. Creates the draft from the latest version when there is none; a published version is never changed. The body is cleaned per kind (api/coaching/doc-body.js).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+                title: { type: string }
+                body: { type: object }
+      responses:
+        '200':
+          description: The saved draft.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  draft: { $ref: '#/components/schemas/CoachingDocumentVersion' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: A file you may not use (code file).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Not one of your documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document/discard:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentDiscard
+      summary: 'Trainer: drop the draft'
+      description: >-
+        Keeps the published version as it is.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+      responses:
+        '200':
+          description: The document.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document: { $ref: '#/components/schemas/CoachingDocument' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not one of your documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Never published, delete it instead (code never-published).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document/publish:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentPublish
+      summary: 'Trainer: publish the draft'
+      description: >-
+        Freezes the draft as the next version. Open requests move to it. With askCurrent, current clients who finished a published version and have nothing open are asked to do this one.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+                askCurrent: { type: boolean }
+      responses:
+        '200':
+          description: Published.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document: { $ref: '#/components/schemas/CoachingDocument' }
+                  version: { type: integer }
+                  asked: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: Not ready (code no-questions, question-text, choice-options, follow-up-text, empty or no-file; index names a form question).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Not one of your documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: No draft to publish (code no-draft).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/documents/packet:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentsPacket
+      summary: 'Trainer: set the sign-up packet'
+      description: >-
+        The packet, in order. Documents left out of the list leave it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids: { type: array, items: { type: integer }, maxItems: 50 }
+      responses:
+        '200':
+          description: The library.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documents: { type: array, items: { $ref: '#/components/schemas/CoachingDocumentSummary' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: Not a list of distinct ids (code ids).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Not one of your documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document/delete:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentDelete
+      summary: 'Trainer: delete a document'
+      description: >-
+        Only a document never published; a published one stays in your records.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+      responses:
+        '200':
+          description: Deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not one of your documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Published (code published).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document/recipients:
+    get:
+      tags: [coaching]
+      operationId: coachingDocumentRecipients
+      summary: 'Trainer: who has this document'
+      description: >-
+        Your current clients and where each stands with the latest version (done, open, done_earlier or none).
+      parameters:
+        - { name: id, in: query, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: The clients.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version: { type: [integer, 'null'] }
+                  clients: { type: array, items: { type: object, properties: { id: { type: string }, name: { type: [string, 'null'] }, paused: { type: boolean }, state: { type: string, enum: [done, open, done_earlier, none] } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not one of your documents.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/document/send:
+    post:
+      tags: [coaching]
+      operationId: coachingDocumentSend
+      summary: 'Trainer: send a document to clients'
+      description: >-
+        Asks the chosen current clients (or all) for the latest version, with an optional due date. Anyone who has it open or finished it is skipped.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, clients]
+              properties:
+                id: { type: integer }
+                clients: { oneOf: [ { type: array, items: { type: string } }, { type: string, const: all } ] }
+                due: { type: [integer, 'null'], description: UTC milliseconds }
+      responses:
+        '200':
+          description: Sent.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sent: { type: integer }
+                  skipped: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: No clients chosen (code clients) or a date that has passed (code due).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Not one of your documents, or not one of your current clients.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Not published yet (code unpublished).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/files:
+    post:
+      tags: [coaching]
+      operationId: coachingFileUpload
+      summary: 'Trainer: upload a PDF'
+      description: >-
+        The raw bytes with Content-Type application/pdf, up to 10 MB. Stored once by SHA-256
+        under DATA_DIR/coaching-files; use the hash in a document body.
+      requestBody:
+        required: true
+        content:
+          application/pdf:
+            schema: { type: string, format: binary }
+      responses:
+        '200':
+          description: Stored.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hash: { type: string }
+                  size: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: Not a PDF (code type).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '413':
+          description: Larger than 10 MB (code too-large).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '415':
+          description: Not sent as application/pdf (code type).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/file:
+    get:
+      tags: [coaching]
+      operationId: coachingFile
+      summary: 'Trainer: read a PDF of yours'
+      description: >-
+        A file you uploaded or one in your documents. Clients read theirs from 2e.
+      parameters:
+        - { name: hash, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The PDF.
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: No such file, or not yours.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
   /api/coaching/invites/email:
     post:
       tags: [coaching]
@@ -3719,8 +4123,7 @@ paths:
                 properties:
                   invite: { $ref: '#/components/schemas/CoachingInvite' }
                   emailed:
-                    type: boolean
-                    nullable: true
+                    type: [boolean, 'null']
                     description: true when the invite was emailed (or logged, without RESEND_API_KEY), false when sending failed, null when it has no email address.
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -3975,6 +4378,36 @@ components:
         status: { type: string, enum: [pending, expired] }
         code: { type: string, description: Only while pending. }
         url: { type: string, description: 'The link to send, `<ORIGIN>/#/join/<code>`. Only while pending.' }
+    CoachingDocumentSummary:   # trainer-fork
+      type: object
+      properties:
+        id: { type: integer }
+        kind: { type: string, enum: [sign, form, pdf_return] }
+        title: { type: string }
+        inPacket: { type: boolean }
+        order: { type: [integer, 'null'] }
+        version: { type: [integer, 'null'], description: The latest published version, null before the first. }
+        hasDraft: { type: boolean }
+        updated: { type: integer }
+    CoachingDocumentVersion:   # trainer-fork
+      type: [object, 'null']
+      properties:
+        version: { type: [integer, 'null'], description: Null for the draft. }
+        title: { type: string }
+        body: { type: object, description: 'Per kind: sign { text } or { file }, form { intro, questions }, pdf_return { file, instructions }.' }
+        updated: { type: integer }
+        published: { type: [integer, 'null'] }
+    CoachingDocument:   # trainer-fork
+      allOf:
+        - { $ref: '#/components/schemas/CoachingDocumentSummary' }
+        - type: object
+          properties:
+            rightsConfirmed: { type: integer }
+            draft: { $ref: '#/components/schemas/CoachingDocumentVersion' }
+            published: { $ref: '#/components/schemas/CoachingDocumentVersion' }
+            versions: { type: array, items: { type: object, properties: { version: { type: integer }, published: { type: integer } } } }
+            completedEarlier: { type: integer }
+            open: { type: integer }
     Error:
       type: object
       required: [error]

@@ -2920,7 +2920,7 @@ const routes = {
   ...coachRoutes({ json, readBody, readSession, requireAdmin }),
 
   // trainer-fork: trainer and client routes, coaching/routes.js.
-  ...coachingRoutes({ sql: coachingSql, users: () => db.users, invites: () => db.invites, saveDb, json, readBody, readSession, requireOwner, audit, origin: ORIGIN, passwordLogin: PASSWORD_LOGIN }),
+  ...coachingRoutes({ sql: coachingSql, users: () => db.users, invites: () => db.invites, saveDb, json, readBody, readSession, requireOwner, audit, origin: ORIGIN, passwordLogin: PASSWORD_LOGIN, dataDir: DATA }),
 
   /* ---------- photos & videos ---------- */
   // Absent, not refusing, when MEDIA_UPLOADS=0: a 404 is what a server from before the feature

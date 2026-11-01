@@ -3,12 +3,13 @@ import fs from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { auditLabel } from './audit.js'
 
-const routes = fs.readFileSync(new URL('../../../api/coaching/routes.js', import.meta.url), 'utf8')
+const routes = ['routes.js', 'documents.js'].map(f => fs.readFileSync(new URL('../../../api/coaching/' + f, import.meta.url), 'utf8')).join('\n')
 const events = [...new Set([...routes.matchAll(/'((?:admin\.trainer|coaching)\.[a-z.]+)'/g)].map(m => m[1]))]
 
 describe('coaching activity log labels', () => {
   it('finds the events in the routes', () => {
     expect(events).toContain('coaching.end')
+    expect(events).toContain('coaching.document.publish')
     expect(events.length).toBeGreaterThanOrEqual(10)
   })
   it.each(events)('%s has a label', ev => {

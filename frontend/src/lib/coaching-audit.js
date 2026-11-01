@@ -13,4 +13,8 @@ export const COACHING_AUDIT_LABELS = {
   'coaching.client.resume': 'Resumed coaching',
   'coaching.client.remove': 'Removed a client',
   'coaching.end': 'Ended coaching with their trainer',
+  'coaching.document.create': 'Created a document',
+  'coaching.document.publish': 'Published a document version',
+  'coaching.document.send': 'Sent a document to clients',
+  'coaching.document.delete': 'Deleted a draft document',
 }

@@ -11,6 +11,7 @@ import { tx } from './db.js';
 import { makeMailer, inviteEmail, resetEmail, looksLikeEmail } from './email.js';
 import { makeResetCode, hashResetCode, normalizeEmail } from '../password.js';
 import { createWindow } from '../rate-limit.js';
+import { documentRoutes } from './documents.js';
 
 export const INVITE_DAYS = 14;
 // An expired invite stays on the roster this long, with "Send new", then drops off.
@@ -27,7 +28,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function coachingRoutes({
   sql, users, invites, saveDb, json, readBody, readSession, requireOwner, audit, origin = '', now = Date.now,
-  passwordLogin = false, env = process.env,
+  passwordLogin = false, env = process.env, dataDir = '',
   mailer = makeMailer({ apiKey: env.RESEND_API_KEY || '', from: env.MAIL_FROM || undefined, product: env.MAIL_NAME || undefined }),
 }) {
   const access = makeAccess({ sql, users, json, readSession });
@@ -123,6 +124,8 @@ export function coachingRoutes({
   ).run(status, status === 'ended' || status === 'blocked' ? now() : null, status === 'ended' || status === 'blocked' ? by : null, link.id);
 
   return {
+    ...documentRoutes({ sql, access, json, readBody, audit, dataDir, now }),
+
     // Appoint or remove a trainer. Owner only, like appointing an admin. Removing is refused while
     // the trainer still has clients: their clients would be left linked to nobody.
     'POST /api/admin/user/trainer': async (req, res) => {
