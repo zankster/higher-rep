@@ -116,11 +116,17 @@ mock-ups are in [`mockups/`](mockups/).
 - The footnote says where the load comes from (% of the client's 1RM) and whether the progression is
   a rule or set by hand.
 
+## v1 picks (2026-11-01)
+
+- Agenda (My schedule), Day (All clients), Month and Block (One client) are all in v1.
+- Appointments repeat weekly: chosen days and a time, an end date, edit one or all.
+- Phone versions in v1: My schedule (with Agenda). The program builder stays desktop-first.
+
 ## Open (not decided yet)
 
-- Agenda, Day, Month and Block views.
-- The New and Edit appointment form, and whether appointments repeat.
+- Mock-ups of the Agenda, Day, Month and Block views (show before building).
+- The New and Edit appointment form, with the weekly repeat.
 - The "Selected weeks" picker, the "Copy week to…" dialog, and the Review changes screen.
-- Phone versions.
+- Phone layout of My schedule.
 - What the client sees of each item, which depends on the client visibility settings still to be
   mocked.

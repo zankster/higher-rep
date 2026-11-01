@@ -54,7 +54,7 @@ Rows:
 
 ## Open
 
-- **v1 or later:** SPEC.md lists the periodization view after v1. Most of its data (blocks, week
-  targets, compliance) is needed in v1 anyway. Mike decides when v1 is picked.
+- **v1 or later (decided 2026-11-01):** the data above is built in v1 (Phase 3); the timeline
+  screen comes first after v1.
 - **Pinned lifts:** suggested two or three per program, picked by the trainer.
 - **Event kinds:** the four above; competitions or a "phase review" check-in may be added.

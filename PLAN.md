@@ -163,7 +163,12 @@ openGym ships fixes often. Keep merges cheap:
    - **Approved 2026-11-01:** client analytics (desktop) and coaching additions to openGym's own client screens (runner, finish, Stats, history), with ideas from Hevy. We reuse openGym's screens and its real body map rather than build new client screens. Hard set = every completed set not marked warm-up; compliance and % of plan count sets; kg volume shows everywhere but is only compared like for like. Spec: `docs/trainer/desktop/SPEC-analytics.md`, mock-ups `mockups/client-analytics.html` and `mockups/phone-coaching.html`.
    - **Decided 2026-11-01:** live PR banner in the runner; planned sets per muscle worked out from the program (openGym's way, trainer target ranges maybe later); the trainer's analytics shows the body map beside the muscle table; a coached client's week streak counts only fully done weeks; set types are openGym's.
    - **Approved 2026-11-01:** the periodization view (13-week timeline: blocks, week types, weekly hard sets, intensity, main lifts, done vs plan, events; block panel). Spec: `docs/trainer/desktop/SPEC-periodization.md`, mock-up `mockups/periodization.html`.
-   - **All Phase 1b screens are mocked.** Left for Mike: pick what is v1 (including whether the periodization view moves into v1).
+   - **All Phase 1b screens are mocked.**
+   - **v1 picked (2026-11-01). Phase 1b is done.**
+     - Periodization: its data (blocks, week types, week targets, pinned lifts, events) is built in v1; the timeline screen comes right after v1.
+     - Calendar views in v1: the three week views plus One client Month and Block, My schedule Agenda, and All clients Day. The four new ones are not mocked yet: show them before building.
+     - Appointments repeat weekly in v1 (chosen days and time, an end date, edit one or all).
+     - Phone versions in v1 for the key trainer screens: dashboard, client profile, chat, live session and My schedule. The program builder, periodization and analytics stay desktop-first.
 2. Trainer and clients: trainer role, invite link, permissions, trainer document library (waivers, PAR-Q, intake and other forms, uploaded or built in the app) and the sign-up packet that uses it, email service (invites, resets, guardian links, signed copies), private notes and tags, date of birth and guardian link for under-18s, end-coaching (block)
 3. Programs: builder (weeks → days → exercises), circuits / AMRAP / EMOM / intervals, alternate exercises and swap limits, templates, assign to a client with a start date
 4. Logging and review: client logs with openGym's workout runner, effort rating; live session mode (Mike logs for a client); feed of completed workouts, comments, PRs and compliance
@@ -171,7 +176,7 @@ openGym ships fixes often. Keep merges cheap:
 6. Progress: measurements, photos (photo guide and pose outline, face blur, no camera roll, screenshot block or alert, view log, no photos for under-18s unless fully clothed), check-in forms, assessments and retests, habits, charts, weekly progress report to each client
 7. Ship: rename, icon, remove licensed media, privacy policy, terms of use and conduct, App Review notes on chat safety, TestFlight / Play internal, release
 
-After v1 (order to decide): booking and session packages, habit streaks and badges, wearables, periodization view, resource library, groups, import from other apps. Later: nutrition, Stripe payments, automations, AI-drafted programs. Details: `SPEC.md`.
+After v1 (order to decide): periodization view (first; its data is in v1), booking and session packages, habit streaks and badges, wearables, resource library, groups, import from other apps. Later: nutrition, Stripe payments, automations, AI-drafted programs. Details: `SPEC.md`.
 
 ## Commands
 - Run: `docker compose up -d` (prebuilt images). From source: `docker compose up -d --build`.
