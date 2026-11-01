@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Program builder · Higher Rep mock-up</title>
+<style>
+body{margin:0;background:#f2f2f7}
+a{color:#2457E6}a:hover{color:#1a44b8}
+.hr-btn{font:inherit;font-size:14px;border:1px solid #d1d1d6;background:#fff;color:#1c1c1e;border-radius:10px;padding:8px 14px;min-height:40px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.hr-primary{font:inherit;font-size:14px;font-weight:600;border:1px solid #2457E6;background:#2457E6;color:#fff;border-radius:10px;padding:8px 16px;min-height:40px;cursor:pointer}
+.hr-day{background:#fff;border:1px solid #e5e5ea;border-radius:12px;display:flex;flex-direction:column;min-height:330px;overflow:hidden}
+.hr-dh{padding:12px 14px 6px;font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.hr-wk{margin:0 10px 8px;padding:5px 9px;border-radius:8px;background:#f2f2f7;font-size:13px;font-weight:600}
+.hr-ex{display:block;padding:9px 14px;border-top:1px solid #e5e5ea;font-size:14px;line-height:1.3;text-decoration:none;color:#1c1c1e}
+.hr-ex small{display:block;font-size:13px;color:rgba(60,60,67,.82)}
+.hr-add{margin-top:auto;font:inherit;font-size:14px;color:#2457E6;background:#fff;border:0;border-top:1px solid #e5e5ea;padding:10px;min-height:44px;cursor:pointer}
+.hr-lib{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:14px;cursor:grab}
+.hr-pt{width:100%;border-collapse:collapse;table-layout:fixed;min-width:720px}
+.hr-pt th,.hr-pt td{padding:10px 12px;border-top:1px solid #e5e5ea;text-align:center;font-size:14px;font-weight:400}
+.hr-pt th{font-weight:600;background:#fafafc}
+.hr-pt th:first-child,.hr-pt td:first-child{text-align:left;color:rgba(60,60,67,.82)}
+.hr-cur{background:#f4f7fe}
+</style>
+</head>
+<body>
+<div style="min-height: 1100px; background: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1c1c1e">
+
+<header style="background: #fff; border-bottom: 1px solid #e5e5ea">
+<div style="max-width: 1440px; margin: 0 auto; padding: 0 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; min-height: 64px">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="12" width="5" height="9" rx="1" fill="#2457E6"></rect><rect x="8.5" y="7" width="5" height="14" rx="1" fill="#2457E6"></rect><rect x="16" y="2" width="5" height="19" rx="1" fill="#2457E6"></rect></svg>Higher Rep</span>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 4px; flex: 1">
+<a href="#" style="padding: 20px 12px; color: rgba(60,60,67,.82); text-decoration: none; font-size: 15px">Dashboard</a>
+<a href="#" style="padding: 20px 12px; color: rgba(60,60,67,.82); text-decoration: none; font-size: 15px">Clients</a>
+<a href="#" aria-current="page" style="padding: 20px 12px 17px; color: #2457E6; text-decoration: none; font-size: 15px; font-weight: 600; border-bottom: 3px solid #2457E6">Programs</a>
+<a href="my-schedule.html" style="padding: 20px 12px; color: rgba(60,60,67,.82); text-decoration: none; font-size: 15px">Calendar</a>
+<a href="#" style="padding: 20px 12px; color: rgba(60,60,67,.82); text-decoration: none; font-size: 15px">Messages <span style="background: #2457E6; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 12px">3</span></a>
+<a href="#" style="padding: 20px 12px; color: rgba(60,60,67,.82); text-decoration: none; font-size: 15px">Library</a>
+</nav>
+<span style="width: 36px; height: 36px; border-radius: 50%; background: #e8eefc; color: #2457E6; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px" aria-label="Mike, account">MZ</span>
+</div>
+</header>
+
+<main style="max-width: 1440px; margin: 0 auto; padding: 20px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<div style="flex: 1 1 360px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: rgba(60,60,67,.82)">Client<select style="font: inherit; font-size: 15px; font-weight: 600; border: 1px solid #d1d1d6; border-radius: 10px; padding: 8px 10px; background: #fff; color: #1c1c1e; min-width: 180px"><option>Ava Morgan</option><option>Ben Ortiz</option><option>Chloe Park</option><option>Dev Shah</option></select></label>
+<label style="display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: rgba(60,60,67,.82)">Program<select style="font: inherit; font-size: 15px; font-weight: 600; border: 1px solid #d1d1d6; border-radius: 10px; padding: 8px 10px; background: #fff; color: #1c1c1e; min-width: 200px"><option>Strength 2026</option></select></label>
+</div>
+<span style="display: flex; align-items: center; gap: 6px; font-size: 14px; color: rgba(60,60,67,.82)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E7B34" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg>All changes saved · <b style="color: #8a5300; font-weight: 600">3 not published</b></span>
+<button class="hr-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>Preview as Ava</button>
+<button class="hr-primary">Publish to Ava</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<aside aria-label="Library" style="flex: 1 1 250px; max-width: 280px; background: #fff; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<b style="font-size: 18px">Library</b>
+<label><span style="position: absolute; left: -9999px">Search exercises</span><input type="search" placeholder="Search exercises" style="font: inherit; font-size: 14px; width: 100%; box-sizing: border-box; border: 1px solid #d1d1d6; border-radius: 10px; padding: 9px 12px"></label>
+<div role="tablist" aria-label="Library" style="display: flex; gap: 4px; background: #e3e3e8; border-radius: 10px; padding: 3px">
+<button role="tab" aria-selected="true" style="font: inherit; font-size: 14px; flex: 1; border: 0; border-radius: 8px; padding: 7px; background: #fff; font-weight: 600">Exercises</button>
+<button role="tab" aria-selected="false" style="font: inherit; font-size: 14px; flex: 1; border: 0; border-radius: 8px; padding: 7px; background: transparent; color: rgba(60,60,67,.82)">Templates</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<button style="font: inherit; font-size: 13px; border: 1px solid #2457E6; background: #e8eefc; color: #1a3f9e; border-radius: 16px; padding: 5px 11px">Legs</button>
+<button style="font: inherit; font-size: 13px; border: 1px solid #d1d1d6; background: #fff; border-radius: 16px; padding: 5px 11px">Barbell</button>
+<button style="font: inherit; font-size: 13px; border: 1px solid #d1d1d6; background: #fff; border-radius: 16px; padding: 5px 11px">Mine</button>
+</div>
+<div style="display: flex; flex-direction: column">
+<span class="hr-lib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(60,60,67,.6)" stroke-width="2" aria-hidden="true"><circle cx="9" cy="6" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>Back squat</span>
+<span class="hr-lib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(60,60,67,.6)" stroke-width="2" aria-hidden="true"><circle cx="9" cy="6" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>Romanian deadlift</span>
+<span class="hr-lib" style="background: #e8eefc; box-shadow: 0 4px 12px rgba(36,87,230,.18)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2457E6" stroke-width="2" aria-hidden="true"><circle cx="9" cy="6" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>Split squat <span style="margin-left: auto; font-size: 12px; color: #2457E6">dragging</span></span>
+<span class="hr-lib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(60,60,67,.6)" stroke-width="2" aria-hidden="true"><circle cx="9" cy="6" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>Front squat</span>
+<span class="hr-lib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(60,60,67,.6)" stroke-width="2" aria-hidden="true"><circle cx="9" cy="6" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>Deadlift</span>
+<span class="hr-lib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(60,60,67,.6)" stroke-width="2" aria-hidden="true"><circle cx="9" cy="6" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>Walking lunge</span>
+</div>
+<span style="font-size: 13px; color: rgba(60,60,67,.82)">Drag onto a day. Drag a template onto a week to fill it.</span>
+</aside>
+
+<section aria-label="Program" style="flex: 999 1 700px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+
+<div style="display: grid; grid-template-columns: 4fr 4fr 1.4fr auto; gap: 8px">
+<a href="#" style="background: #fff; border: 1px solid #e5e5ea; border-radius: 12px; padding: 10px 14px; text-decoration: none; color: rgba(60,60,67,.82); font-size: 14px"><b style="color: #1c1c1e">Block 1 · Hypertrophy</b><br>Weeks 1–4 · done</a>
+<a href="#" aria-current="true" style="background: #2457E6; border: 1px solid #2457E6; border-radius: 12px; padding: 10px 14px; text-decoration: none; color: #fff; font-size: 14px"><b>Block 2 · Strength</b><br>Weeks 5–8 · now in week 6</a>
+<a href="#" style="background: #fff; border: 1px solid #e5e5ea; border-radius: 12px; padding: 10px 14px; text-decoration: none; color: rgba(60,60,67,.82); font-size: 14px"><b style="color: #1c1c1e">Deload</b><br>Week 9</a>
+<button class="hr-btn" style="color: #2457E6">+ Block</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<button class="hr-btn" aria-label="Previous week">‹</button>
+<span style="font-size: 16px; font-weight: 600">Week 6 · Nov 9–15, 2026</span>
+<button class="hr-btn" aria-label="Next week">›</button>
+<button class="hr-btn">Today</button>
+<span style="flex: 1"></span>
+<div style="display: flex; border: 1px solid #d1d1d6; border-radius: 10px; overflow: hidden">
+<button style="font: inherit; font-size: 14px; border: 0; background: #2457E6; color: #fff; padding: 8px 16px; min-height: 40px; font-weight: 600">Program</button>
+<a href="client-calendar.html" style="font-size: 14px; background: #fff; color: #1c1c1e; padding: 10px 16px; text-decoration: none">Calendar</a>
+</div>
+<button class="hr-btn">Copy week to…</button>
+</div>
+
+<div style="overflow-x: auto">
+<div style="display: grid; grid-template-columns: repeat(7, minmax(130px, 1fr)); gap: 10px; min-width: 980px">
+
+<div class="hr-day"><div class="hr-dh">Mon 9 <span style="font-size: 12px; color: #1E7B34; font-weight: 600">Done</span></div><div class="hr-wk">Lower A · 55 min</div>
+<a href="#" class="hr-ex" aria-current="true" style="background: #e8eefc; box-shadow: inset 3px 0 0 #2457E6">A · Back squat<small style="color: #1a3f9e">4×5 · 80% · RPE 8</small></a>
+<a href="#" class="hr-ex">B · Romanian deadlift<small>3×8 · RPE 7</small></a>
+<a href="#" class="hr-ex">C1 · Split squat<small>3×10 each</small></a>
+<a href="#" class="hr-ex">C2 · Plank<small>3×40 s</small></a>
+<button class="hr-add">+ Add</button></div>
+
+<div class="hr-day"><div class="hr-dh">Tue 10 <span style="font-size: 12px; color: #1E7B34; font-weight: 600">Done</span></div><div class="hr-wk">Upper A · 50 min</div>
+<a href="#" class="hr-ex">A · Bench press<small>4×6 · RPE 8</small></a>
+<a href="#" class="hr-ex">B · Pull-up<small>4×6</small></a>
+<a href="#" class="hr-ex">C · Cable row<small>3×10</small></a>
+<button class="hr-add">+ Add</button></div>
+
+<div class="hr-day" style="border-color: #2457E6"><div class="hr-dh" style="color: #2457E6">Wed 11 · Today</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(60,60,67,.82); font-size: 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"></path><circle cx="7" cy="11" r="2"></circle></svg>Rest</div>
+<button class="hr-add">+ Add</button></div>
+
+<div class="hr-day"><div class="hr-dh">Thu 12</div><div class="hr-wk">Lower B · 50 min</div>
+<a href="#" class="hr-ex">A · Deadlift<small>3×4 · 82%</small></a>
+<a href="#" class="hr-ex">B · Front squat<small>3×6 · RPE 7</small></a>
+<div style="margin: 6px 10px; border: 2px dashed #2457E6; border-radius: 10px; padding: 10px; text-align: center; font-size: 13px; color: #2457E6; background: #f4f7fe">Drop Split squat here</div>
+<button class="hr-add">+ Add</button></div>
+
+<div class="hr-day"><div class="hr-dh">Fri 13</div><div class="hr-wk">Upper B · 45 min</div>
+<a href="#" class="hr-ex">A · Overhead press<small>4×6 · RPE 8</small></a>
+<a href="#" class="hr-ex">B · Row<small>4×8</small></a>
+<a href="#" class="hr-ex">C · Conditioning<small>AMRAP 8 min</small></a>
+<button class="hr-add">+ Add</button></div>
+
+<div class="hr-day"><div class="hr-dh">Sat 14</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: rgba(60,60,67,.82); font-size: 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"></path><circle cx="7" cy="11" r="2"></circle></svg>Rest<span style="background: #fff4e0; color: #8a5300; border-radius: 8px; padding: 3px 8px; font-size: 13px">Weekly check-in</span></div>
+<button class="hr-add">+ Add</button></div>
+
+<div class="hr-day"><div class="hr-dh">Sun 15</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(60,60,67,.82); font-size: 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 18V8M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"></path><circle cx="7" cy="11" r="2"></circle></svg>Rest</div>
+<button class="hr-add">+ Add</button></div>
+
+</div>
+</div>
+
+<section aria-label="Back squat progression" style="background: #fff; border-radius: 14px; padding: 16px 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 10px">
+<div style="flex: 1 1 260px"><div style="font-size: 17px; font-weight: 600">Back squat · Block 2 progression</div><div style="font-size: 13px; color: rgba(60,60,67,.82)">Selected from Monday · Lower A</div></div>
+<span style="font-size: 14px; color: rgba(60,60,67,.82)">Edits apply to</span>
+<div style="display: flex; border: 1px solid #d1d1d6; border-radius: 10px; overflow: hidden">
+<button style="font: inherit; font-size: 14px; border: 0; background: #2457E6; color: #fff; padding: 8px 14px; min-height: 40px; font-weight: 600">This week</button>
+<button style="font: inherit; font-size: 14px; border: 0; border-left: 1px solid #d1d1d6; background: #fff; padding: 8px 14px; min-height: 40px">Selected weeks</button>
+<button style="font: inherit; font-size: 14px; border: 0; border-left: 1px solid #d1d1d6; background: #fff; padding: 8px 14px; min-height: 40px">Whole block</button>
+</div>
+<button class="hr-btn" style="color: #2457E6">Edit sets</button>
+</div>
+<div style="overflow-x: auto; border: 1px solid #e5e5ea; border-radius: 10px">
+<table class="hr-pt">
+<thead><tr><th style="width: 22%; border-top: 0">Prescription</th><th style="border-top: 0">W5</th><th class="hr-cur" style="border-top: 0; color: #2457E6">W6 · this week</th><th style="border-top: 0">W7</th><th style="border-top: 0">W8</th><th style="border-top: 0">Deload</th></tr></thead>
+<tbody>
+<tr><td>Sets × reps</td><td>4×5</td><td class="hr-cur">4×5</td><td>5×3</td><td>3×2</td><td>2×5</td></tr>
+<tr><td>Load · %1RM</td><td>77.5%</td><td class="hr-cur">80%</td><td>85%</td><td>90%</td><td>60%</td></tr>
+<tr><td>Effort · RPE</td><td>7</td><td class="hr-cur">8</td><td>8</td><td>9</td><td>6</td></tr>
+<tr><td style="font-weight: 600; color: #1c1c1e">Ava did</td><td>4×5 @ 100 kg<br><small style="color: rgba(60,60,67,.82)">RPE 7</small></td><td class="hr-cur">4×5 @ 102.5 kg<br><small style="color: #1E7B34">RPE 8 · on target</small></td><td style="color: rgba(60,60,67,.82)">–</td><td style="color: rgba(60,60,67,.82)">–</td><td style="color: rgba(60,60,67,.82)">–</td></tr>
+</tbody>
+</table>
+</div>
+<p style="margin: 10px 0 0; font-size: 13px; color: rgba(60,60,67,.82)">Load is worked out from Ava's 1RM (128 kg). Custom progression, set by hand.</p>
+</section>
+
+</section>
+</div>
+
+</main>
+</div>
+</body>
+</html>
