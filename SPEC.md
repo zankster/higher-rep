@@ -61,7 +61,11 @@ No automatic word or image filters: they would flag legitimate progress photos a
   - On openGym's body map (`lib/body-paths.js`), the client taps where it hurts, picks a pain level (0–10), what it feels like (sharp, dull, tight, swelling) and when it happens.
   - The report is saved to the client's injury log and shown on their profile and in the program builder.
   - Warning signs (chest pain, numbness or tingling, dizziness, pain above 7, sudden swelling) show "Please see a doctor or physio before training this area". The app never gives a diagnosis.
-- **Clients under 18:**
+- **No one under 13** (decided 2026-10-31; keeps the app out of COPPA and the stores' kids rules).
+  - Sign-up asks for date of birth on a neutral screen that doesn't hint at the cutoff.
+  - Under 13: no account is made and nothing is saved, including the date of birth. The screen says the app is for ages 13 and up.
+  - Store settings: Play target audience 13+ (not in the Families program); Apple age rating questionnaire answered to match. Terms of use state the minimum age.
+- **Clients 13 to 17:**
   - Date of birth is collected at sign-up.
   - A parent or guardian signs the waiver and PAR-Q+.
   - Progress photos are off by default, and only fully clothed photos are allowed.
