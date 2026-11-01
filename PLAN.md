@@ -6,7 +6,8 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 - **Phase 0 (fork and run): done.**
   - Cloned from `github.com/DuarteSantos8/openGym` (upstream `main` at `b6cfe2bb`).
   - It runs locally on Docker at http://localhost:8080.
-- **Phase 1 (design): in progress.** Palette, layouts and the name (Higher Rep) are chosen (see "Design" below). Photo compare and chat still need approval. Nothing is built until Mike says "build".
+- **Phase 1 (design): done (2026-10-31).** Palette, name (Higher Rep), hostnames and every screen below are approved. Mock-ups were inline in chat only (not saved in the repo). Next: Phase 2. Nothing is built until Mike says "build".
+- **Before Phase 2:** read openGym issue #119 (their trainer role, v1.4.10) and match its names and storage where possible.
 
 ## Decisions so far
 - **Base:** openGym (React 19 + Vite, Node API, JSON files, Capacitor apps). See the repo's own `CLAUDE.md` and `docs/ARCHITECTURE.md`.
@@ -96,12 +97,15 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
   - The message menu has Reply, Copy, Show original and Report message. Edit appears only on your own messages.
   - The thread menu has Report pain or injury, Export chat, Notifications, Report a message, and (for the client) End coaching.
   - Lock-screen notifications say only "New message from Mike", with no text or media preview.
-- **Still to mock up:**
-  - Live session mode (Mike runs a client's workout on his phone, saved as "Logged by Mike").
-  - Post-workout effort rating (1–10 plus a note).
-  - Intake form, PAR-Q+ and waiver signature at sign-up, with date of birth and a guardian sign-off path for under-18s.
-  - "Report pain or injury" on openGym's body map (where, pain 0–10, type, when), with the "Please see a doctor or physio" banner for warning signs.
-  - Client profile with private trainer notes, tags and assessment results over time.
+- **Approved 2026-10-31:**
+  - **Live session:** Mike's phone. The client's warning tags sit at the top, and the set grid shows target vs done (a different weight can be typed). Alternate and Swap sit under the card; rest timer with +30 s and Skip. An offline note explains that sets save on the phone and send later. "Finish session" saves to the client's history as "Logged by Mike".
+  - **Effort rating:** after every workout. Summary (sets, PRs, % of plan), then 1–10 with Easy / Max labels, an optional note, "Something hurt?" (opens the pain report), "Send to Mike" and "Skip for now". In a live session it shows on Mike's phone.
+  - **Pain report:** body map (front/back, more than one spot), pain 0–10, type chips (sharp, dull, tight, swelling), when chips (during lifts, after, at rest, all the time), and since when. Warning signs show the amber "Please see a doctor or physio before training this area" banner. Saved to the injury log, shown in the profile and program builder.
+  - **Sign-up in 4 steps:** About you (date of birth, with the 13+ gate), Goals and history (intake), PAR-Q+, Waiver; with a progress bar.
+    - PAR-Q+: yes/no rows; any yes leads to the official follow-up questions. **Use the official PAR-Q+ wording unchanged; check its terms of use before building.**
+    - Waiver: versioned text (lawyer's wording), "I've read the waiver and agree", typed full name, finger signature. The record keeps the text, version, time and device. **Open:** a copy by email (needs the email service) or in the app only.
+    - Ages 13 to 17: "A parent or guardian signs next", with name, email and relationship. It sends a signing link, or the guardian can sign on the same phone. The screen spells out what the guardian can do (sign, read the chat; photos off, fully clothed only).
+  - **Client profile (Mike):** avatar, age, start date, program; tags (warnings in amber) and "+ tag"; private notes with "Only you"; injury log; assessments with first → latest and the next retest; Records (waiver version, PAR-Q+ with its yes count, intake) with "Export record (ZIP)".
 
 ## Staying in sync with upstream openGym
 openGym ships fixes often. Keep merges cheap:
