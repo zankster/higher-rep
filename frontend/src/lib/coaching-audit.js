@@ -6,6 +6,8 @@ export const COACHING_AUDIT_LABELS = {
   'coaching.invite.create': 'Invited a client',
   'coaching.invite.revoke': 'Revoked a client invite',
   'coaching.invite.renew': 'Sent a new client invite',
+  'coaching.invite.email': 'Emailed a client invite again',
+  'coaching.password.forgot': 'Asked for a password reset link',
   'coaching.invite.accept': 'Joined a trainer',
   'coaching.client.pause': 'Paused coaching',
   'coaching.client.resume': 'Resumed coaching',

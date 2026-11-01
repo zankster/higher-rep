@@ -8,18 +8,32 @@
 import crypto from 'node:crypto';
 import { makeAccess } from './access.js';
 import { tx } from './db.js';
+import { makeMailer, inviteEmail, resetEmail, looksLikeEmail } from './email.js';
+import { makeResetCode, hashResetCode, normalizeEmail } from '../password.js';
+import { createWindow } from '../rate-limit.js';
 
 export const INVITE_DAYS = 14;
 // An expired invite stays on the roster this long, with "Send new", then drops off.
 const EXPIRED_SHOWN_DAYS = 30;
 const DAY = 86400000;
+// A self-serve reset link lives an hour; the same inbox gets one at most every 2 minutes.
+export const RESET_MINUTES = 60;
+const RESET_GAP_MS = 2 * 60000;
+// "Email again" for one invite at most every 10 minutes.
+const INVITE_EMAIL_GAP_MS = 10 * 60000;
 
 const str = (v, max) => typeof v === 'string' ? v.trim().slice(0, max) : '';
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function coachingRoutes({ sql, users, invites, saveDb, json, readBody, readSession, requireOwner, audit, origin = '', now = Date.now }) {
+export function coachingRoutes({
+  sql, users, invites, saveDb, json, readBody, readSession, requireOwner, audit, origin = '', now = Date.now,
+  passwordLogin = false, env = process.env,
+  mailer = makeMailer({ apiKey: env.RESEND_API_KEY || '', from: env.MAIL_FROM || undefined, product: env.MAIL_NAME || undefined }),
+}) {
   const access = makeAccess({ sql, users, json, readSession });
   const { userById, isTrainer, liveLinkOf, requireUser, requireTrainer, requireOwnClient } = access;
+  const forgotByAddress = createWindow({ max: 5, windowMs: 15 * 60000 });
+  const addressOf = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || '?';
   const query = (req, k) => new URL(req.url, 'http://x').searchParams.get(k);
 
   const clientRow = (link, u) => ({
@@ -31,6 +45,24 @@ export function coachingRoutes({ sql, users, invites, saveDb, json, readBody, re
     let b = {}; try { b = JSON.parse(row?.branding || '{}'); } catch { /* keep the default */ }
     return str(b.name, 60) || userById(id)?.name || null;
   };
+  // Who a trainer email comes from: the branding contact once 2g sets one, else their sign-in email.
+  const trainerInfo = id => {
+    const row = sql.prepare('SELECT branding FROM trainers WHERE user_id = ?').get(id);
+    let b = {}; try { b = JSON.parse(row?.branding || '{}'); } catch { /* keep the default */ }
+    const contact = [b.contactEmail, userById(id)?.email].find(looksLikeEmail) || null;
+    return { name: trainerName(id), contactEmail: contact, tagline: str(b.tagline, 60) || null };
+  };
+  const base = String(origin).replace(/\/$/, '');
+
+  const invitesEmailedAt = new Map();
+  async function emailInvite(inv) {
+    if (!inv.email) return null;
+    const trainer = trainerInfo(inv.trainer_id);
+    const mail = inviteEmail({ trainer, firstName: inv.first_name, note: inv.note, url: joinUrl(inv.code), expires: inv.expires_at, tz: env.TZ });
+    const r = await mailer.send({ to: inv.email, via: trainer.name, replyTo: trainer.contactEmail, ...mail });
+    if (r.ok) invitesEmailedAt.set(inv.id, now());
+    return r.ok;
+  }
 
   /* ---------- invites ---------- */
   const inviteState = inv => inv.status !== 'pending' ? inv.status : inv.expires_at <= now() ? 'expired' : 'pending';
@@ -44,7 +76,7 @@ export function coachingRoutes({ sql, users, invites, saveDb, json, readBody, re
     };
   };
   // The app is a hash router, so the join page is a fragment of the server's own address.
-  const joinUrl = code => String(origin).replace(/\/$/, '') + '/#/join/' + code;
+  const joinUrl = code => base + '/#/join/' + code;
   const ownInvite = (trainer, id) => sql.prepare('SELECT * FROM invites WHERE id = ? AND trainer_id = ?').get(Number(id), trainer.id) || null;
   const gymInvite = code => invites().find(i => i.code === code) || null;
 
@@ -190,7 +222,8 @@ export function coachingRoutes({ sql, users, invites, saveDb, json, readBody, re
       if (email && !EMAIL.test(email)) return json(res, 400, { error: 'that email address does not look right', code: 'email' });
       const inv = createInvite(trainer, { firstName, email, note: str(body.note, 200) });
       audit(req, 'coaching.invite.create', { user: trainer, msg: firstName });
-      json(res, 200, { invite: inviteRow(inv) });
+      // emailed: null without an address, false when the email could not be sent (the link still works).
+      json(res, 200, { invite: inviteRow(inv), emailed: await emailInvite(inv) });
     },
 
     'POST /api/coaching/invites/revoke': async (req, res) => {
@@ -215,7 +248,49 @@ export function coachingRoutes({ sql, users, invites, saveDb, json, readBody, re
       });
       sweepLapsed();
       audit(req, 'coaching.invite.renew', { user: trainer, msg: old.first_name });
-      json(res, 200, { invite: inviteRow(inv) });
+      json(res, 200, { invite: inviteRow(inv), emailed: await emailInvite(inv) });
+    },
+
+    // "Email again": the same link, sent again to the address on the invite.
+    'POST /api/coaching/invites/email': async (req, res) => {
+      const trainer = requireTrainer(req, res); if (!trainer) return;
+      const body = await readBody(req);
+      const inv = ownInvite(trainer, body.id);
+      if (!inv || inviteState(inv) !== 'pending') return json(res, 404, { error: 'no such invite' });
+      if (!inv.email) return json(res, 400, { error: 'this invite has no email address', code: 'no-email' });
+      const last = invitesEmailedAt.get(inv.id) || 0;
+      if (now() - last < INVITE_EMAIL_GAP_MS) return json(res, 429, { error: 'the email was sent a moment ago', code: 'too-soon', retryAfter: Math.ceil((last + INVITE_EMAIL_GAP_MS - now()) / 1000) });
+      const ok = await emailInvite(inv);
+      if (!ok) return json(res, 502, { error: 'the email could not be sent', code: 'not-sent' });
+      audit(req, 'coaching.invite.email', { user: trainer, msg: inv.first_name });
+      json(res, 200, { ok: true });
+    },
+
+    // Forgot password: a one-hour reset link to the sign-in email. It answers the same whether
+    // or not an account uses that address, so it tells nobody which addresses have accounts. The
+    // link carries openGym's own reset code, redeemed by POST /api/login/password-reset with the
+    // email; unlike an admin's reset, asking for one leaves the current password working.
+    'POST /api/coaching/password/forgot': async (req, res) => {
+      if (!passwordLogin) return json(res, 404, { error: 'not found' });
+      const body = await readBody(req);
+      const email = normalizeEmail(str(body.email, 254));
+      if (!email) return json(res, 400, { error: 'that email address does not look right', code: 'email' });
+      const wait = forgotByAddress.take(addressOf(req));
+      if (wait) return json(res, 429, { error: 'too many requests', code: 'locked', retryAfter: wait });
+      const done = () => json(res, 200, { ok: true });
+      const u = users().find(x => x.email === email);
+      if (!u || u.disabled) return done();
+      const held = u.pwReset && u.pwReset.exp > now();
+      // An admin's code is already out there and the old password is gone: leave it be.
+      if (held && u.pwReset.by !== 'self') return done();
+      if (held && now() - (u.pwReset.at || 0) < RESET_GAP_MS) return done();
+      const code = makeResetCode();
+      u.pwReset = { h: hashResetCode(code), exp: now() + RESET_MINUTES * 60000, by: 'self', at: now() };
+      saveDb();
+      const mail = resetEmail({ name: u.name, url: base + '/#/reset/' + code, minutes: RESET_MINUTES, product: env.MAIL_NAME || undefined });
+      await mailer.send({ to: email, ...mail });
+      audit(req, 'coaching.password.forgot', { user: u });
+      done();
     },
 
     // The invite page. No session needed: the code is the secret, and only its holder learns the

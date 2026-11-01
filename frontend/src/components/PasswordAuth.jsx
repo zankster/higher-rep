@@ -15,6 +15,7 @@ import { dateLocale } from '../lib/i18n-core.js'
 import { api, webauthnOK, passkeyAssertion, passwordLogin, passwordRegister, passwordResetRedeem } from '../lib/api.js'
 import { askAddDeviceData } from '../sheets.jsx'
 import { Row, Button } from './ui.jsx'
+import { ForgotLink } from './ForgotPassword.jsx' // trainer-fork
 
 // The server's floor (api/password.js MIN_LENGTH), checked here first so the common mistake is
 // answered without a round trip. The server still decides.
@@ -71,7 +72,7 @@ const dismissed = e => e?.name === 'NotAllowedError' || e?.name === 'AbortError'
 
 // Signed in: the same steps as a passkey sign-in (Login.jsx) — and the same account coming back
 // merges what this device kept for it (adoptProfile).
-async function signedIn(u, close) {
+export async function signedIn(u, close) { // trainer-fork: exported for views/ResetPassword.jsx
   const st = useStore.getState()
   st.setUser(u, { adopt: true })
   close()
@@ -144,6 +145,7 @@ export function PasswordSignInSheet({ close, onPasskey }) {
     <div style={{ height: 8 }} />
     <Button type="button" variant="ghost" className="dim" onClick={() => { setErr(null); setMode(reset ? 'signin' : 'reset') }}>
       {reset ? t('Sign in with password') : t('Have a reset code from your admin?')}</Button>
+    {!reset && <ForgotLink close={close} />}{/* trainer-fork: Forgot your password? (Phase 2c) */}
     {onPasskey && !reset && webauthnOK() && <>
       <div style={{ height: 8 }} />
       <Button type="button" icon="fingerprint" onClick={() => { close(); onPasskey() }}>{t('Sign in with passkey')}</Button>

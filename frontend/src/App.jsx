@@ -41,7 +41,7 @@ import { SeasonalLayer } from './components/Seasonal.jsx'
 import { openDeviceLinkRedeem } from './components/Passkeys.jsx'
 import { useAnimPacksBoot } from './components/Animations.jsx'
 import Login from './views/Login.jsx'
-import { joinCode } from './lib/coaching.js' // trainer-fork
+import { joinCode, resetLinkCode } from './lib/coaching.js' // trainer-fork
 import MobileOnboarding from './views/MobileOnboarding.jsx'
 import PermissionSteps from './views/PermissionSteps.jsx'
 import Home from './views/Home.jsx'
@@ -83,6 +83,7 @@ const SettingsRoute = lazyView(() => import('./views/Settings.jsx').then(m => ({
 const Clients = lazyView(() => import('./views/Clients.jsx'))
 const Coaching = lazyView(() => import('./views/Coaching.jsx'))
 const JoinInvite = lazyView(() => import('./views/JoinInvite.jsx'))
+const ResetPassword = lazyView(() => import('./views/ResetPassword.jsx'))
 let viewsPrefetched = false
 const prefetchViews = () => {
   if (viewsPrefetched) return
@@ -294,7 +295,7 @@ function Shell() {
   )
 
   // trainer-fork: an invite link opens its own page before sign-in, not the plain Login.
-  const view = l => (!authed ? (joinCode(l.pathname) ? <JoinInvite code={joinCode(l.pathname)} /> : <Login />) : needsMobileOnboarding ? <MobileOnboarding /> : permSteps ? <PermissionSteps /> : (
+  const view = l => (!authed ? (joinCode(l.pathname) ? <JoinInvite code={joinCode(l.pathname)} /> : resetLinkCode(l.pathname) ? <ResetPassword code={resetLinkCode(l.pathname)} /> : <Login />) : needsMobileOnboarding ? <MobileOnboarding /> : permSteps ? <PermissionSteps /> : (
     <Routes location={l}>
       <Route path="/home" element={<Home />} />
       {/* Gym check-in — switched off in Settings, the route falls through to the
@@ -324,6 +325,7 @@ function Shell() {
       <Route path="/clients" element={<Clients />} />
       <Route path="/coaching" element={<Coaching />} />
       <Route path="/join/:code" element={<JoinInvite code={joinCode(l.pathname)} signedIn />} />
+      <Route path="/reset/:code" element={<ResetPassword code={resetLinkCode(l.pathname)} />} />
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   ))

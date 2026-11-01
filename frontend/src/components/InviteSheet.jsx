@@ -40,7 +40,11 @@ export function InviteSheet({ close, onCreated }) {
 
   if (made) return <>
     <h3 style={{ marginBottom: 6 }}>{ct('Invite ready for {0}', made.firstName)}</h3>
-    <div className="muted small" style={{ marginBottom: 12 }}>{ct('The link works once and expires in 14 days. Send it to {0} by text, email or WhatsApp.', made.firstName)}</div>
+    {made.emailed === true && <div className="card small" role="status" style={{ marginBottom: 10 }}><Icon name="envelope" /> {ct('Emailed to {0}.', made.email)}</div>}
+    {made.emailed === false && <div className="small" role="alert" style={{ color: 'var(--red)', marginBottom: 10 }}><Icon name="warning" /> {ct('The email could not be sent. Share the link instead.')}</div>}
+    <div className="muted small" style={{ marginBottom: 12 }}>{made.emailed
+      ? ct('The link works once and expires in 14 days. You can also send it yourself.')
+      : ct('The link works once and expires in 14 days. Send it to {0} by text, email or WhatsApp.', made.firstName)}</div>
     <div className="card small" style={{ wordBreak: 'break-all', marginBottom: 12 }} data-testid="invite-url">{made.url}</div>
     <Button variant="primary" icon="share" onClick={() => shareInvite(made)}>{ct('Share link')}</Button>
     <div style={{ height: 8 }} />
@@ -60,7 +64,7 @@ export function InviteSheet({ close, onCreated }) {
     <TextArea placeholder={ct('Note (optional)')} aria-label={ct('Note')} maxLength={200} rows={2} value={note} onChange={e => setNote(e.target.value)} />
     {err && <div className="small" role="alert" style={{ color: 'var(--red)', marginTop: 8 }}><Icon name="warning" /> {err}</div>}
     <div style={{ height: 12 }} />
-    <Button variant="primary" onClick={send} disabled={busy}>{ct('Create invite')}</Button>
+    <Button variant="primary" onClick={send} disabled={busy}>{email.trim() ? ct('Send invite') : ct('Create invite')}</Button>
   </>
 }
 

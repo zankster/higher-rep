@@ -10,7 +10,7 @@ import Icon from '../components/Icon.jsx'
 import { menuSheet, confirmSheet } from '../sheets.jsx'
 import { openInviteSheet, copyInvite, shareInvite } from '../components/InviteSheet.jsx'
 import {
-  ct, listClients, listInvites, pauseClient, removeClient, revokeInvite, renewInvite,
+  ct, listClients, listInvites, pauseClient, removeClient, revokeInvite, renewInvite, emailInvite,
   coachingError, inviteLine, sinceLine, rosterFilter, coachingChanged, onCoachingChanged,
 } from '../lib/coaching.js'
 
@@ -51,14 +51,22 @@ export default function Clients() {
     ],
   })
 
+  // A fresh link goes out by email when the invite has an address, else through the share sheet.
+  const sendNew = inv => act(async () => {
+    const fresh = await renewInvite(inv.id)
+    if (fresh.emailed) toast(ct('New invite emailed to {0}', inv.firstName))
+    else await shareInvite(fresh)
+  })
+
   const inviteMenu = inv => menuSheet({
     title: inv.firstName, subtitle: inviteLine(inv),
     items: inv.status === 'expired' ? [
-      { icon: 'repeat', label: ct('Send new invite'), onClick: act(async () => { const fresh = await renewInvite(inv.id); await shareInvite(fresh) }) },
+      { icon: 'repeat', label: ct('Send new invite'), onClick: sendNew(inv) },
     ] : [
+      ...(inv.email ? [{ icon: 'envelope', label: ct('Email again'), sub: inv.email, onClick: act(async () => { await emailInvite(inv.id); toast(ct('Invite emailed to {0}', inv.firstName)) }) }] : []),
       { icon: 'copy', label: ct('Copy link'), onClick: () => copyInvite(inv) },
       { icon: 'share', label: ct('Share link'), onClick: () => shareInvite(inv) },
-      { icon: 'repeat', label: ct('Send new invite'), sub: ct('The old link stops working.'), onClick: act(async () => { const fresh = await renewInvite(inv.id); await shareInvite(fresh) }) },
+      { icon: 'repeat', label: ct('Send new invite'), sub: ct('The old link stops working.'), onClick: sendNew(inv) },
       { icon: 'xmark', label: ct('Revoke invite'), danger: true, onClick: act(async () => { await revokeInvite(inv.id); toast(ct('Invite revoked')) }) },
     ],
   })

@@ -3569,6 +3569,10 @@ paths:
                 type: object
                 properties:
                   invite: { $ref: '#/components/schemas/CoachingInvite' }
+                  emailed:
+                    type: boolean
+                    nullable: true
+                    description: true when the invite was emailed (or logged, without RESEND_API_KEY), false when sending failed, null when it has no email address.
         '400':
           description: No first name (`missing`) or an address that does not look right (`email`).
           content:
@@ -3606,6 +3610,90 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
+  /api/coaching/invites/email:
+    post:
+      tags: [coaching]
+      operationId: coachingInviteEmail
+      summary: 'Trainer: email an open invite again'
+      description: Sends the same link again to the address on the invite. At most once every 10 minutes per invite.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+      responses:
+        '200':
+          description: Sent.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ok' }
+        '400':
+          description: The invite has no email address (code no-email).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Not one of your open invites.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: Emailed less than 10 minutes ago (code too-soon, retryAfter in seconds).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '502':
+          description: The email could not be sent (code not-sent).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /api/coaching/password/forgot:
+    post:
+      tags: [coaching]
+      operationId: coachingPasswordForgot
+      summary: Email a password reset link
+      description: >-
+        Only while PASSWORD_LOGIN is on (404 otherwise). Emails a one-hour link to the sign-in
+        email, carrying a reset code that POST /api/login/password-reset redeems with that email.
+        The current password keeps working until then. Answers the same whether or not an account
+        uses the address. No session needed; 5 requests per address per 15 minutes.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: Done (sent only if an account uses that address).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ok' }
+        '400':
+          description: Not an email address (code email).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Password sign-in is off on this instance.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: Too many requests from this address (code locked, retryAfter in seconds).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
   /api/coaching/invites/renew:
     post:
       tags: [coaching]
@@ -3630,6 +3718,10 @@ paths:
                 type: object
                 properties:
                   invite: { $ref: '#/components/schemas/CoachingInvite' }
+                  emailed:
+                    type: boolean
+                    nullable: true
+                    description: true when the invite was emailed (or logged, without RESEND_API_KEY), false when sending failed, null when it has no email address.
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404':

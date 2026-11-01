@@ -83,6 +83,21 @@ Each step ends with its tests passing and is one commit.
   codes), guardian signing link, waiver copy (waiver only, never health answers).
 - The "from" name and the email look come from the trainer's branding.
 - **Mike's part:** create the Resend account and add its SPF / DKIM records at Porkbun.
+- **Built 2026-11-01**, mock-ups approved the same day (inline in chat).
+  - API: `api/coaching/email.js` (the sender and the four emails); in `routes.js` invites with an
+    address are emailed on Send and on Send new, `POST /api/coaching/invites/email` ("Email again",
+    once per 10 minutes) and `POST /api/coaching/password/forgot`. Tests:
+    `api/test/coaching-email.test.js`.
+  - Forgot password reuses openGym's own reset code: the email links to `#/reset/<code>`, where
+    the person types their email and a new password, and openGym's `POST /api/login/password-reset`
+    redeems it. Unlike an admin's reset, asking for one leaves the current password working; an
+    admin's pending code is never replaced. The link lives 1 hour; one per inbox per 2 minutes;
+    the route answers the same for unknown addresses. Only while `PASSWORD_LOGIN` is on.
+  - App: `components/ForgotPassword.jsx` (a marked line under "Sign in with password" in
+    `PasswordAuth.jsx`), `views/ResetPassword.jsx`, the invite sheet says "Emailed to …", the
+    roster has "Email again". Test: `views/CoachingEmail.test.jsx`.
+  - The guardian and waiver emails are written and tested; they are sent from the sign-up packet
+    in 2e. Email settings are in `.env.example` (`RESEND_API_KEY`, `MAIL_FROM`, `MAIL_NAME`).
 
 ### 2d. Document library (Settings › Documents)
 - Per trainer. Three kinds: document to sign (pasted text or an uploaded PDF), form to answer

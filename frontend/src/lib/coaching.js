@@ -15,9 +15,13 @@ const post = (path, body) => api(path, { method: 'POST', body: JSON.stringify(bo
 export const coachingMe = () => api('/api/coaching/me')
 export const listClients = () => api('/api/coaching/clients').then(r => r.clients || [])
 export const listInvites = () => api('/api/coaching/invites').then(r => r.invites || [])
-export const newInvite = ({ firstName, email, note }) => post('/api/coaching/invites/new', { firstName, email, note }).then(r => r.invite)
+// `emailed` rides on the invite: true sent, false the email failed, null no address.
+const withEmailed = r => ({ ...r.invite, emailed: r.emailed ?? null })
+export const newInvite = ({ firstName, email, note }) => post('/api/coaching/invites/new', { firstName, email, note }).then(withEmailed)
 export const revokeInvite = id => post('/api/coaching/invites/revoke', { id })
-export const renewInvite = id => post('/api/coaching/invites/renew', { id }).then(r => r.invite)
+export const renewInvite = id => post('/api/coaching/invites/renew', { id }).then(withEmailed)
+export const emailInvite = id => post('/api/coaching/invites/email', { id })
+export const forgotPassword = email => post('/api/coaching/password/forgot', { email })
 export const invitePage = code => api('/api/coaching/invite?code=' + encodeURIComponent(code))
 export const acceptInvite = code => post('/api/coaching/invites/accept', { code })
 export const pauseClient = (id, paused) => post('/api/coaching/client/pause', { id, paused }).then(r => r.client)
@@ -38,6 +42,12 @@ export function onCoachingChanged(fn) {
 /** The invite code in a /join/<code> path, or null. */
 export function joinCode(pathname) {
   const m = /^\/join\/([0-9A-Za-z]{4,40})\/?$/.exec(String(pathname || ''))
+  return m ? m[1].toUpperCase() : null
+}
+
+/** The reset code in a /reset/<code> path (the forgot-password email's link), or null. */
+export function resetLinkCode(pathname) {
+  const m = /^\/reset\/([0-9A-Za-z-]{8,40})\/?$/.exec(String(pathname || ''))
   return m ? m[1].toUpperCase() : null
 }
 
@@ -73,6 +83,9 @@ export function coachingError(e, trainerName) {
     case 'other': return ct('You already have a trainer. End that coaching in Settings first.')
     case 'missing': return ct('Enter a first name')
     case 'email': return ct('That email address does not look right')
+    case 'no-email': return ct('This invite has no email address. Share the link instead.')
+    case 'too-soon': return ct('The email was sent a few minutes ago. Give it a little time.')
+    case 'not-sent': return ct('The email could not be sent. Share the link instead.')
     default: return e?.message || ct('Something went wrong. Try again.')
   }
 }
