@@ -35,6 +35,12 @@ Decided 2026-10-31. The privacy policy says exactly this.
   - the chat history.
 - **How long:** at least 5 years after coaching ends (the client's last session, or the day they leave or delete their account, whichever is later). When that time is up, the app reminds Mike, and each client's record is deleted only when he decides. Nothing is deleted while it's needed for a claim or dispute.
 - **Kept records are locked:** read-only, visible only to Mike, never used for coaching or anything else. Mike may move them out of the app to separate secure storage later (undecided).
+- **Mike can export a client's record** at any time, for current, former and deleted clients alike: one client, or all records at once (for moving them to separate storage).
+  - What it includes: PAR-Q+, waivers and other signed paperwork, the intake form, pain and injury reports, programs he assigned and workouts he logged, and the chat history.
+  - Format: one ZIP per client. Readable PDFs (signed documents show the exact text signed, the signature, date and time, and device) plus the same data as CSV/JSON. A manifest lists every file with a checksum, so the copy can be shown to be unaltered.
+  - Progress photos are never in an export (see Permissions). A photo the client shared in chat appears as "Progress photo shared on <date> (not exportable)".
+  - Every export is recorded in the activity log (who, when, which clients).
+  - The export holds health information: keep it encrypted (for example an encrypted drive or password-protected archive).
 - **The client gets a copy:** before deleting, the app offers a download of their signed paperwork and their chat. Their training data has openGym's export.
 - **Backups:** deleted data can stay in encrypted backups until they roll over (at most 30 days).
 - **Under 18:** the record is kept until at least 5 years after they turn 18 (claims by minors can usually be brought later; confirm with the lawyer or insurer).
