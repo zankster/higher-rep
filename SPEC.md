@@ -14,9 +14,36 @@ Inspired by Everfit, Trainerize, FitPros, QuickCoach, Hevy Coach, Kahunas and Co
 - The trainer's private notes and tags on a client are never visible to that client.
 - The trainer can log a workout on a client's behalf during a live session. It's saved to the client's history and marked "Logged by Mike".
 - Intake answers, the health questionnaire and the signed waiver are visible to the client and their trainer only, and are kept after the client is removed (liability record).
-- A chat thread is visible only to its trainer and that client.
+- A chat thread is visible only to its trainer and that client (and, for a client under 18, their guardian; see Safety).
+- Clients can never find, see or message other clients. Nothing in the app is public.
+- Messages are never silently deleted. An edit shows "edited" and the original is kept. Either side can export the full thread.
+- The trainer can't download or export a client's progress photos. Every time the trainer views a shared photo is logged, and the client can see that log.
+- A client can end the coaching link at any time. That works as a block: the trainer loses access, and neither side can message the other.
 - Removing a client ends the trainer's access. The client keeps their own data.
 - Server admin (Mike) keeps openGym's admin tools: invites, disable or delete accounts, activity log.
+
+## Safety and appropriate content
+No automatic word or image filters: they would flag legitimate progress photos and injury talk ("groin strain", slang), and scanning would send private photos to a third party. Safety comes from design, consent and a record.
+- **Who can talk:** invite-only. Chat is only ever one client with their trainer.
+- **Progress photos:**
+  - The camera screen shows a photo guide ("fitted workout clothes: shorts and a sports bra or tank top, same spot, same light") and a pose outline for front, side and back.
+  - Optional face blur or crop before sharing.
+  - Photos stay inside the app: never saved to the phone's camera roll, never shown in notifications or lock-screen previews.
+  - Android blocks screenshots on photo screens. iPhone detects a screenshot and tells the client.
+  - Stopping sharing or deleting a photo removes it from the trainer's view immediately.
+- **Notifications** never show message text or images. They say only "New message from Mike" or "New message from <client>".
+- **Report a message:** both sides can report one. The reporter gets a copy of the thread by email, so a client's report doesn't depend on the trainer, who is also the admin.
+- **Report pain or injury:** a structured form, available in chat and after a workout.
+  - On openGym's body map (`lib/body-paths.js`), the client taps where it hurts, picks a pain level (0–10), what it feels like (sharp, dull, tight, swelling) and when it happens.
+  - The report is saved to the client's injury log and shown on their profile and in the program builder.
+  - Warning signs (chest pain, numbness or tingling, dizziness, pain above 7, sudden swelling) show "Please see a doctor or physio before training this area". The app never gives a diagnosis.
+- **Clients under 18:**
+  - Date of birth is collected at sign-up.
+  - A parent or guardian signs the waiver and PAR-Q+.
+  - Progress photos are off by default, and only fully clothed photos are allowed.
+  - The guardian is linked to the account and can read the chat (or receives copies), so there's no private one-to-one messaging with a minor.
+- **Terms of use and conduct:** zero tolerance for abusive or sexual content. Mike's contact details are in Settings. All coaching communication stays in the app.
+- **App store notes:** App Review notes explain that chat is invite-only and trainer-to-client only, and show where reporting and blocking are.
 
 ## V1 features
 **Programs and logging**
