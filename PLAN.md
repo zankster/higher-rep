@@ -138,8 +138,22 @@ openGym ships fixes often. Keep merges cheap:
 - **Upstream trainer role:** their roadmap lists one for v1.4.10 (about February). When it lands, compare it with ours and decide whether to adopt, keep ours, or merge the two.
 
 ## Phases (one per session)
+**Usefulness over speed (Mike, 2026-11-01):** build a very useful app even if it takes longer. Think ahead, so choices in the early phases don't limit later features. The data models in Phases 2 and 3 must already support:
+- per-trainer data (see "Ready for more trainers");
+- programs dated on a calendar, organized as blocks or phases (periodization), with targets that change week to week;
+- per-client visibility settings (what the client sees ahead, loads, notes) and autonomy settings (swaps, editing, extra sessions, moving days);
+- analytics computed from logged sets (volume, intensity, compliance), with nothing locked inside one screen.
+
 0. Fork and run ✅
-1. Design: mock-ups, name and brand
+1. Design: mock-ups, name and brand ✅
+1b. Trainer desktop design: the trainer's screens laid out for a desktop browser first (same React app at app.higherrep.com, no second app), with phone versions kept. Mock-ups of:
+   - the program builder (exercise library beside the program, drag and drop, a whole week visible);
+   - calendar views (one client's month, all clients' week, Mike's own schedule);
+   - client analytics;
+   - client settings (visibility and autonomy);
+   - planning and periodization.
+
+   Mike picks what is v1. Started 2026-11-01. Done before Phase 3, and it may also change Phase 2's data model.
 2. Trainer and clients: trainer role, invite link, permissions, trainer document library (waivers, PAR-Q, intake and other forms, uploaded or built in the app) and the sign-up packet that uses it, email service (invites, resets, guardian links, signed copies), private notes and tags, date of birth and guardian link for under-18s, end-coaching (block)
 3. Programs: builder (weeks → days → exercises), circuits / AMRAP / EMOM / intervals, alternate exercises and swap limits, templates, assign to a client with a start date
 4. Logging and review: client logs with openGym's workout runner, effort rating; live session mode (Mike logs for a client); feed of completed workouts, comments, PRs and compliance
