@@ -236,6 +236,22 @@ Mock-ups shown 2026-11-01 (seven screens). Mike's answers are below. Built 2026-
 - Trainer: Branding (name, logo, accent colour, contact details, email "from" name), read through
   one helper with Higher Rep's look as the default. Default client-settings preset.
 - Everyone: "Source code" link to the public fork (AGPL).
+- **Mock-ups shown 2026-11-01** (inline in chat: trainer Settings, Branding, Branding preview, New
+  client defaults, client Settings, Coaching, Privacy; then the per-client phone switch). Mike's answers:
+  - **Accent colour** shows only on the invite page, the emails and the trainer card. The rest of the
+    app keeps Higher Rep's Coach blue.
+  - **Six swatches** only, each with white text at 4.5:1 or better. No custom colour.
+  - **Business name:** Mike wasn't sure. Built as an optional field: when it's empty, clients see the
+    trainer's own name everywhere. Can be filled in later without anything else changing.
+  - **Phone number:** the trainer decides per client. A "Show my phone number" switch on each client's
+    profile (section "What <name> sees of you"), off for every new client. Branding shows "Shown to
+    N of M clients". Email is shown to every client. Stored on the link (`link_settings`), checked
+    by the server; a client with the switch off never receives the number.
+  - **Preset descriptions** (Hands-on, Balanced, Independent) as mocked: OK.
+  - **Source code** links to `github.com/zankster/higher-rep`: OK. The repository must be public
+    before clients use the app; pushing still needs Mike's OK.
+  - Privacy is a placeholder that lists only what is true now (signed documents and answers).
+  - Waiting on Mike's "build 2g".
 
 ## Data model (SQLite, `coaching.sqlite`)
 
@@ -268,8 +284,6 @@ and per-client summaries. Each gets its own tables with `trainer_id` in its phas
 - Roster screen with invite status.
 - End coaching confirms (client side and trainer side).
 - The four emails (invite, reset, guardian link, waiver copy).
-- Trainer Settings › Branding.
-- Client Settings › My documents.
 - Sending a document to existing clients, and asking them to sign a new version (already noted in
   PLAN.md as "show it before building").
 
