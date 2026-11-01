@@ -7,7 +7,12 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
   - Cloned from `github.com/DuarteSantos8/openGym` (upstream `main` at `b6cfe2bb`).
   - It runs locally on Docker at http://localhost:8080.
 - **Phase 1 (design): done (2026-10-31).** Palette, name (Higher Rep), hostnames and every screen below are approved. Mock-ups were inline in chat only (not saved in the repo). Next: Phase 2. Nothing is built until Mike says "build".
-- **Before Phase 2:** read openGym issue #119 (their trainer role, v1.4.10) and match its names and storage where possible.
+- **Issue #119 read (2026-11-01).** It is still a proposal: no MR on GitHub, milestone v1.4.10 (due 2027-02-07), and two competing shapes. The role is named **trainer**, stored as a flag on the user like `admin`. Links and pending plans are kept out of `state-<uid>.json`, because `/api/data` is last-write-wins. Upstream says "student" or "athlete"; we say "client" in the UI only. hcke's "send a plan, client taps Apply or Discard" is an option to weigh in Phase 3.
+- **Phase 2 plan:** proposed 2026-11-01, waiting for Mike's OK.
+- **Open before release:**
+  - **Lawyer review of the waiver text** (Mike arranges it). Until then the waiver is marked DRAFT and never shown to real clients.
+  - **Health questionnaire source (decided 2026-11-01):** Each trainer adds their own documents (see "Ready for more trainers"). Mike will add the PAR-Q his ACE certification provides, or later his own template. Before release, check the copyright line on the ACE form. If it says "PAR-Q+ Collaboration", putting it in an app still needs their written permission (eparmedx@gmail.com, possibly a fee). The questionnaire step is built from data, so any of these versions drops in.
+  - **Waiver copy (decided 2026-11-01):** kept in the app with "Download PDF", plus an automatic email copy to the client (waiver only, never health answers). Set up the email service in Phase 2 for this, invites, password resets and guardian links. Account and provider: Mike's OK.
 
 ## Decisions so far
 - **Base:** openGym (React 19 + Vite, Node API, JSON files, Capacitor apps). See the repo's own `CLAUDE.md` and `docs/ARCHITECTURE.md`.
@@ -37,6 +42,13 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
 - **Live session offline:** the workout queues on Mike's phone (`lib/queue.js`) and sends when back online.
 - **Waivers:** stored unchanged with the time, the exact waiver text that was signed, and the device. Never editable.
 - **Tests:** a permission test for every coaching route (client A can't read client B; a trainer can't read a non-client), plus the sync-survival tests above.
+- **Ready for more trainers (decided 2026-11-01).** v1 has one trainer (Mike), but later other trainers may sign up, each with their own clients, documents and branding. So from Phase 2:
+  - Every coaching row carries `trainer_id`, and every permission check is "this trainer's own clients", never "the admin".
+  - A trainer is a role on any user, separate from server admin.
+  - Documents (waivers, questionnaires, intake forms, policies) belong to a trainer: a per-trainer library, versioned. Higher Rep ships no third-party forms; each trainer uploads or builds their own and confirms they have the right to use them.
+  - Branding (name, logo, accent colour, contact details, the email "from" name) is per-trainer settings, read through one helper, with Higher Rep's look as the default.
+  - Invite links, emails and the client's sign-up flow all name the trainer they come from.
+  - Not in v1: trainer self-sign-up, trainer billing, one client with several trainers, and a trainer directory.
 - **Revisit** if past a few hundred clients, or when upstream ships its trainer role (v1.4.10, about February).
 
 ### Design (Phase 1)
@@ -102,10 +114,17 @@ Mike (a certified personal trainer) needs a coaching app to replace Everfit, Tra
   - **Effort rating:** after every workout. Summary (sets, PRs, % of plan), then 1–10 with Easy / Max labels, an optional note, "Something hurt?" (opens the pain report), "Send to Mike" and "Skip for now". In a live session it shows on Mike's phone.
   - **Pain report:** body map (front/back, more than one spot), pain 0–10, type chips (sharp, dull, tight, swelling), when chips (during lifts, after, at rest, all the time), and since when. Warning signs show the amber "Please see a doctor or physio before training this area" banner. Saved to the injury log, shown in the profile and program builder.
   - **Sign-up in 4 steps:** About you (date of birth, with the 13+ gate), Goals and history (intake), PAR-Q+, Waiver; with a progress bar.
-    - PAR-Q+: yes/no rows; any yes leads to the official follow-up questions. **Use the official PAR-Q+ wording unchanged; check its terms of use before building.**
-    - Waiver: versioned text (lawyer's wording), "I've read the waiver and agree", typed full name, finger signature. The record keeps the text, version, time and device. **Open:** a copy by email (needs the email service) or in the app only.
+    - PAR-Q+: yes/no rows; any yes leads to the official follow-up questions. **Use the chosen form's wording unchanged (ACE's PAR-Q, or Mike's own template later; see "Open before release"). Build the step from data so the text drops in.**
+    - Waiver: versioned text (lawyer's wording), "I've read the waiver and agree", typed full name, finger signature. The record keeps the text, version, time and device. The client gets the copy in the app (PDF download) and by automatic email.
     - Ages 13 to 17: "A parent or guardian signs next", with name, email and relationship. It sends a signing link, or the guardian can sign on the same phone. The screen spells out what the guardian can do (sign, read the chat; photos off, fully clothed only).
   - **Client profile (Mike):** avatar, age, start date, program; tags (warnings in amber) and "+ tag"; private notes with "Only you"; injury log; assessments with first → latest and the next retest; Records (waiver version, PAR-Q+ with its yes count, intake) with "Export record (ZIP)".
+- **Document library. Approved 2026-11-01** (mock-ups inline in chat only):
+  - **Library (Settings › Documents):** each trainer's own documents. The "Sign-up packet" holds the documents a new client completes, in the order the trainer drags them into; others sit under "Not in the packet". A trainer can add any number of documents at any time.
+  - **Three kinds:** document to sign (pasted text, or an uploaded PDF), form to answer (built in the app), PDF to fill and return. Each new document needs "I wrote this document or have permission to use it" ticked.
+  - **Drafts and versions:** Drafts are never shown to clients. Publishing makes a new version, and each signed record keeps the exact version.
+  - **Form builder:** question types yes/no, short text, long text, choice, date, number and signature. A question can flag a "yes" and can have an "if yes" follow-up question. Wording is kept exactly as typed. Autosaves, with Preview and Publish.
+  - **Client side:** a step bar with "from <trainer>". After a "yes" on a flagged question, a notice says the trainer will see it before the first session. Signing: "I've read and agree", full name and finger signature. On "You're all set": a waiver copy is emailed, there's a PDF download, and everything is listed in Settings › My documents. Health answers are never emailed.
+  - **Later documents:** sending one to existing clients puts it on their home as a to-do. Publishing a new version of a signed document lets the trainer ask current clients to sign again. Not mocked yet; show it before building.
 
 ## Staying in sync with upstream openGym
 openGym ships fixes often. Keep merges cheap:
@@ -121,7 +140,7 @@ openGym ships fixes often. Keep merges cheap:
 ## Phases (one per session)
 0. Fork and run ✅
 1. Design: mock-ups, name and brand
-2. Trainer and clients: trainer role, invite link, permissions, intake form, PAR-Q+ and waiver, private notes and tags, date of birth and guardian link for under-18s, end-coaching (block)
+2. Trainer and clients: trainer role, invite link, permissions, trainer document library (waivers, PAR-Q, intake and other forms, uploaded or built in the app) and the sign-up packet that uses it, email service (invites, resets, guardian links, signed copies), private notes and tags, date of birth and guardian link for under-18s, end-coaching (block)
 3. Programs: builder (weeks → days → exercises), circuits / AMRAP / EMOM / intervals, alternate exercises and swap limits, templates, assign to a client with a start date
 4. Logging and review: client logs with openGym's workout runner, effort rating; live session mode (Mike logs for a client); feed of completed workouts, comments, PRs and compliance
 5. Chat: thread per client, photos, voice notes, form-check videos, push, scheduled messages, dashboard alerts, kept edit history and export, report a message, private notification previews, "Report pain or injury" form
