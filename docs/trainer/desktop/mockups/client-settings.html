@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ava Morgan settings · Higher Rep mock-up</title>
+<style>
+body{margin:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1c1c1e}
+main{max-width:1200px;margin:0 auto;padding:20px 32px 40px;box-sizing:border-box}
+.card{background:#fff;border:1px solid #e5e5ea;border-radius:12px;padding:14px 18px;margin-bottom:16px}
+.row{padding:12px 0;border-top:1px solid #efeff4}
+.row:first-of-type{border-top:0}
+.lbl{font-size:15px;font-weight:600;margin:0 0 2px}
+.hint{font-size:13px;color:rgba(60,60,67,.82);margin:0 0 8px;line-height:1.4}
+.seg{display:flex;flex-wrap:wrap;border:1px solid #d1d1d6;border-radius:10px;overflow:hidden}
+.seg button{flex:1 1 auto;font:inherit;font-size:14px;border:0;border-left:1px solid #d1d1d6;background:#fff;color:#1c1c1e;padding:8px 12px;min-height:40px;cursor:pointer}
+.seg button:first-child{border-left:0}
+.seg button.on{background:#2457E6;color:#fff;font-weight:600}
+.hr-btn{font:inherit;font-size:14px;border:1px solid #d1d1d6;background:#fff;color:#1c1c1e;border-radius:10px;padding:8px 14px;min-height:40px;cursor:pointer}
+.tag{font-size:12px;border-radius:6px;padding:2px 6px;background:#e8eefc;color:#1a44b8}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px}
+@media (max-width:760px){main{padding:16px}.grid{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+<span style="width:40px;height:40px;border-radius:50%;background:#e8eefc;color:#2457E6;display:flex;align-items:center;justify-content:center;font-weight:600">AM</span>
+<div style="flex:1;min-width:200px"><div style="font-size:26px;font-weight:700">Ava Morgan</div>
+<nav aria-label="Client" style="font-size:14px;color:rgba(60,60,67,.82)">Overview · Calendar · Analytics · <span aria-current="page" style="color:#2457E6;font-weight:600;border-bottom:2px solid #2457E6">Settings</span> · Notes</nav></div>
+<label style="font-size:14px;color:rgba(60,60,67,.82)">Preset <select id="preset" style="font:inherit;font-size:14px;min-height:40px;border-radius:10px"><option>Hands-on</option><option selected>Balanced</option><option>Independent</option><option>Custom</option></select></label>
+</div>
+<div class="grid">
+<div>
+<div class="card">
+<div style="font-size:17px;font-weight:600;margin-bottom:4px">What Ava sees</div>
+<div class="row"><p class="lbl">Plan ahead</p><p class="hint">How far into the program she can look.</p><div class="seg" data-k="ahead"><button>Next workout</button><button class="on">This week</button><button>Whole block</button><button>Everything</button></div></div>
+<div class="row"><p class="lbl">Loads</p><p class="hint">Weights are worked out from her 1RM (128 kg squat).</p><div class="seg" data-k="load"><button class="on">Weight in kg</button><button>% and RPE</button><button>RPE only</button></div></div>
+<div class="row"><p class="lbl">Your exercise notes</p><p class="hint">Coaching cues on each exercise. Private client notes are never shown.</p><div class="seg" data-k="notes"><button class="on">Show</button><button>Hide</button></div></div>
+<div class="row"><p class="lbl">Block names and deloads</p><div class="seg" data-k="blocks"><button class="on">Show</button><button>Hide</button></div></div>
+</div>
+<div class="card">
+<div style="font-size:17px;font-weight:600;margin-bottom:4px">What Ava can change</div>
+<div class="row"><p class="lbl">Swap exercises</p><div class="seg" data-k="swap"><button>No swaps</button><button class="on">Listed alternates</button><button>Any exercise</button></div></div>
+<div class="row"><p class="lbl">Move workouts</p><div class="seg" data-k="move"><button>Not allowed</button><button class="on">Within the week</button><button>Any date</button></div></div>
+<div class="row"><p class="lbl">Extra sessions</p><p class="hint">Her own workouts, logged as "Extra". They never count against compliance.</p><div class="seg" data-k="extra"><button>Not allowed</button><button class="on">Allowed</button></div></div>
+<div class="row"><p class="lbl">Change targets</p><p class="hint">She can always log what she really did. This is about editing the plan itself.</p><div class="seg" data-k="edit"><button class="on">Not allowed</button><button>Sets and reps</button><button>Anything</button></div></div>
+<div class="row"><p class="lbl">Tell me when she</p><div style="display:flex;flex-wrap:wrap;gap:16px;font-size:14px"><label><input type="checkbox" checked> swaps</label><label><input type="checkbox" checked> moves a day</label><label><input type="checkbox"> adds a session</label><label><input type="checkbox" checked> skips</label></div></div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="hr-btn">Copy to other clients…</button><button class="hr-btn">Make Balanced my default</button></div>
+</div>
+<div>
+<div style="font-size:13px;color:rgba(60,60,67,.82);margin:0 0 8px">Preview on Ava's phone</div>
+<div style="background:#fff;border:1px solid #d1d1d6;border-radius:28px;padding:16px;max-width:340px">
+<div style="font-size:12px;color:rgba(60,60,67,.82)" id="pBlock"></div>
+<div style="font-size:17px;font-weight:600;margin:2px 0 10px">Today · Lower A</div>
+<div style="border-top:1px solid #efeff4;padding:10px 0;font-size:14px"><div style="font-weight:600">A · Back squat</div><div id="pLoad" style="color:rgba(60,60,67,.82)"></div><div id="pNote" style="font-size:13px;color:#1a44b8;margin-top:2px">Mike: brace, then sit back</div><div id="pSwap" style="font-size:13px;margin-top:4px"></div></div>
+<div style="border-top:1px solid #efeff4;padding:10px 0;font-size:14px"><div style="font-weight:600">B · Romanian deadlift</div><div id="pLoad2" style="color:rgba(60,60,67,.82)"></div></div>
+<div id="pAhead" style="border-top:1px solid #efeff4;padding:10px 0 0;font-size:13px;color:rgba(60,60,67,.82)"></div>
+<div id="pMove" style="font-size:13px;color:#2457E6;margin-top:10px"></div>
+<div id="pExtra" style="font-size:13px;color:#2457E6;margin-top:6px">+ Log an extra session</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+const pick={ahead:1,load:0,notes:0,blocks:0,swap:1,move:1,extra:1,edit:0};
+const $=id=>document.getElementById(id);
+function render(){
+$('pLoad').textContent=['4 × 5 · 102.5 kg','4 × 5 · 80% · RPE 8','4 × 5 · RPE 8'][pick.load];
+$('pLoad2').textContent=['3 × 8 · 70 kg','3 × 8 · 60% · RPE 7','3 × 8 · RPE 7'][pick.load];
+$('pNote').style.display=pick.notes?'none':'block';
+$('pBlock').textContent=pick.blocks?'Week 6':'Block 2 · Strength · week 6 of 9';
+$('pSwap').innerHTML=['','<span class="tag">Swap: Safety bar squat</span>','<span class="tag">Swap exercise…</span>'][pick.swap];
+$('pAhead').textContent=["Next: you'll see it once this one is done",'This week: Fri Upper B · Sat Lower B','Block 2: weeks 6 to 9, deload in week 9','Whole program: Block 2, then Block 3 · Peak'][pick.ahead];
+$('pMove').style.display=pick.move?'block':'none';
+$('pMove').textContent=pick.move===2?'Move to another date':'Move to another day this week';
+$('pExtra').style.display=pick.extra?'block':'none';
+}
+document.querySelectorAll('.seg').forEach(seg=>{
+[...seg.children].forEach((b,i)=>b.addEventListener('click',()=>{
+[...seg.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');pick[seg.dataset.k]=i;$('preset').value='Custom';render();}));
+});
+render();
+</script>
+</body>
+</html>

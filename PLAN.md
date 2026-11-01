@@ -159,7 +159,9 @@ openGym ships fixes often. Keep merges cheap:
      - Features and decisions: `docs/trainer/desktop/DECISIONS-calendars.md`.
      - Mock-ups: `docs/trainer/desktop/mockups/`.
    - **Decided:** edits to a program a client already follows wait for "Publish to <client>". Appointments and tasks are in v1, entered by the trainer; clients booking times themselves stays after v1.
-   - **Still to mock:** client analytics, client settings (visibility and autonomy), and the full periodization view.
+   - **Approved 2026-11-01:** client settings (visibility and autonomy, presets, phone preview). Spec: `docs/trainer/desktop/SPEC-client-settings.md`, mock-up `mockups/client-settings.html`.
+   - **Approved 2026-11-01:** client analytics (desktop) and the client progress phone screens (workout runner with Last time / Target / Done and live PRs, exercise detail, muscles this week, finish screen, workout history), with ideas from Hevy. Hard set = every completed set not marked warm-up; compliance and % of plan count sets; kg volume shows everywhere but is only compared like for like. Spec: `docs/trainer/desktop/SPEC-analytics.md`, mock-ups `mockups/client-analytics.html` and `mockups/phone-progress.html`.
+   - **Still to mock:** the full periodization view.
 2. Trainer and clients: trainer role, invite link, permissions, trainer document library (waivers, PAR-Q, intake and other forms, uploaded or built in the app) and the sign-up packet that uses it, email service (invites, resets, guardian links, signed copies), private notes and tags, date of birth and guardian link for under-18s, end-coaching (block)
 3. Programs: builder (weeks → days → exercises), circuits / AMRAP / EMOM / intervals, alternate exercises and swap limits, templates, assign to a client with a start date
 4. Logging and review: client logs with openGym's workout runner, effort rating; live session mode (Mike logs for a client); feed of completed workouts, comments, PRs and compliance

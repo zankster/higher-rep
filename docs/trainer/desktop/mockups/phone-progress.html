@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client progress screens · Higher Rep mock-up</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+body{margin:0;background:#e9e9ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1c1c1e}
+main{max-width:1500px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-wrap:wrap;gap:20px;justify-content:center}
+section{width:320px}
+.cap{font-size:13px;color:rgba(60,60,67,.82);margin:0 0 8px 6px}
+.ph{background:#f2f2f7;border:1px solid #d1d1d6;border-radius:30px;padding:14px 12px;min-height:600px}
+.c{background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.m{color:rgba(60,60,67,.82)}.b{color:#2457E6}.ok{color:#1E7B34}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+td,th{padding:6px 2px;text-align:left}
+th{font-size:11px;font-weight:600;color:rgba(60,60,67,.82)}
+.chip{display:inline-block;font-size:12px;padding:5px 9px;border-radius:14px;border:1px solid #d1d1d6;background:#fff;margin:0 4px 4px 0}
+.chip.on{background:#2457E6;border-color:#2457E6;color:#fff}
+.tile{background:#fff;border-radius:10px;padding:8px 10px}
+.tile .l{font-size:11px;color:rgba(60,60,67,.82)}.tile .n{font-size:17px;font-weight:600}.tile .d{font-size:11px}
+.title{text-align:center;font-size:15px;font-weight:600;margin-bottom:10px}
+.row1{border-top:1px solid #f2f2f7}
+</style>
+</head>
+<body>
+<main>
+
+<section>
+<p class="cap">Workout runner (Live session uses the same grid)</p>
+<div class="ph">
+<div class="c" id="hdr" style="cursor:pointer">
+<div style="display:flex;align-items:center;font-size:14px"><b style="flex:1">Lower A</b><span style="background:#2457E6;color:#fff;border-radius:8px;padding:4px 10px;font-size:13px">Finish</span></div>
+<div style="display:flex;gap:6px;margin-top:8px;font-size:13px" id="hrow">
+<div style="flex:1"><div class="m" style="font-size:11px">Time</div><b>24:10</b></div>
+<div style="flex:1" id="hs"><div class="m" style="font-size:11px">Sets</div><b>7 of 14</b></div>
+<div style="flex:1" id="hk"><div class="m" style="font-size:11px">Volume</div><b>3,840 kg</b></div>
+</div>
+<div style="height:3px;background:#e5e5ea;border-radius:2px;margin-top:8px"><div style="width:50%;height:3px;background:#2457E6;border-radius:2px"></div></div>
+</div>
+<div style="background:#fff;border:1px solid #f0c36d;border-radius:12px;padding:8px 12px;margin-bottom:10px;display:flex;gap:10px;align-items:center;font-size:13px"><i class="ti ti-medal" style="font-size:22px;color:#8a5300" aria-hidden="true"></i><div><b>New PR · Back squat</b><div style="color:#8a5300">Heaviest weight · 105 kg × 5</div></div></div>
+<div class="c">
+<div style="font-size:15px;font-weight:600" class="b">A · Back squat</div>
+<div style="font-size:12px;color:#1a44b8">Mike: brace, then sit back</div>
+<div style="font-size:12px" class="b"><i class="ti ti-clock" aria-hidden="true"></i> Rest 3 min</div>
+<table>
+<tr><th style="width:12%">Set</th><th style="width:26%">Last time</th><th style="width:26%">Target</th><th>Done</th><th style="width:10%"></th></tr>
+<tr style="background:#eef7f0"><td>1</td><td class="m">100 × 5</td><td>102.5 × 5</td><td>102.5 × 5</td><td class="ok"><i class="ti ti-circle-check" aria-label="Done"></i></td></tr>
+<tr style="background:#eef7f0"><td>2</td><td class="m">100 × 5</td><td>102.5 × 5</td><td>102.5 × 5</td><td class="ok"><i class="ti ti-circle-check" aria-label="Done"></i></td></tr>
+<tr style="background:#fff4e0"><td style="color:#8a5300"><i class="ti ti-medal" aria-label="PR"></i></td><td class="m">100 × 5</td><td>102.5 × 5</td><td><b>105 × 5</b></td><td class="ok"><i class="ti ti-circle-check" aria-label="Done"></i></td></tr>
+<tr><td>4</td><td class="m">100 × 4</td><td>102.5 × 5</td><td><span style="border:1px solid #2457E6;border-radius:6px;padding:1px 4px">102.5</span> × <span style="border:1px solid #d1d1d6;border-radius:6px;padding:1px 4px">5</span></td><td class="m"><i class="ti ti-circle" aria-label="Not done"></i></td></tr>
+</table>
+<div style="font-size:11px;margin-top:4px" class="m">RPE 8 target · last time Oct 28 (week 5, Lower A)</div>
+</div>
+<div class="c" style="font-size:13px"><b class="b">B · Romanian deadlift</b> <span class="m">· 3 × 8</span></div>
+<div style="background:#fff;border-radius:12px;padding:8px 12px;border-top:3px solid #2457E6">
+<div style="display:flex;align-items:center;font-size:13px"><span class="m" style="flex:1">Rest</span><span style="font-size:24px;font-weight:600">2:14</span><span style="flex:1"></span></div>
+<div style="display:flex;gap:6px;margin-top:6px"><span class="chip" style="flex:1;text-align:center">−15</span><span class="chip" style="flex:1;text-align:center">+15</span><span class="chip on" style="flex:1;text-align:center">Skip</span></div>
+</div>
+<p class="m" style="font-size:11px;text-align:center" id="htip">Tap the header to show kg first</p>
+</div>
+</section>
+
+<section>
+<p class="cap">Exercise detail</p>
+<div class="ph">
+<div class="title">Back squat</div>
+<div style="display:flex;font-size:13px;margin-bottom:10px;text-align:center"><span style="flex:1;border-bottom:2px solid #2457E6" class="b">Summary</span><span style="flex:1;border-bottom:1px solid #d1d1d6" class="m">History</span><span style="flex:1;border-bottom:1px solid #d1d1d6" class="m">How to</span></div>
+<div class="c">
+<div style="display:flex;align-items:baseline;font-size:13px"><b style="font-size:19px">128 kg</b><span class="m" style="margin-left:6px;flex:1">est. 1RM · Nov 11</span><span class="b" style="font-size:12px">12 weeks <i class="ti ti-chevron-down" aria-hidden="true"></i></span></div>
+<svg viewBox="0 0 260 90" width="100%" role="img" aria-label="Estimated 1RM rising from 112 to 128 kg over 12 weeks">
+<line x1="0" y1="80" x2="260" y2="80" stroke="#e5e5ea"/><line x1="0" y1="45" x2="260" y2="45" stroke="#f2f2f7"/><line x1="0" y1="10" x2="260" y2="10" stroke="#f2f2f7"/>
+<polyline fill="none" stroke="#2457E6" stroke-width="2" points="5,70 28,68 51,64 74,62 97,63 120,55 143,52 166,52 189,44 212,40 235,30 255,22"/>
+<circle cx="235" cy="30" r="3" fill="#2457E6"/><circle cx="255" cy="22" r="3.5" fill="#2457E6"/>
+<line x1="180" y1="0" x2="180" y2="80" stroke="#c7c7cc" stroke-dasharray="2 2"/><text x="183" y="8" font-size="8" fill="#6c6c70">Block 2</text>
+</svg>
+<div><span class="chip">Heaviest</span><span class="chip on">Est. 1RM</span><span class="chip">Best set</span><span class="chip">Session vol.</span></div>
+</div>
+<div class="c" style="font-size:13px">
+<div style="font-weight:600;margin-bottom:4px"><i class="ti ti-medal" style="color:#8a5300" aria-hidden="true"></i> Records</div>
+<div style="display:flex;padding:4px 0"><span style="flex:1">Heaviest weight</span><span class="b">105 kg ›</span></div>
+<div class="row1" style="display:flex;padding:4px 0"><span style="flex:1">Best est. 1RM</span><span class="b">128 kg ›</span></div>
+<div class="row1" style="display:flex;padding:4px 0"><span style="flex:1">Best session volume</span><span class="b">2,550 kg ›</span></div>
+</div>
+<div class="c">
+<div style="font-weight:600;margin-bottom:2px;font-size:13px">Best weight for each rep count</div>
+<table><tr><th>Reps</th><th>Best</th><th>When</th></tr>
+<tr><td>3</td><td>110 kg</td><td class="m">Oct 2</td></tr>
+<tr class="row1"><td>5</td><td><b>105 kg</b> <span style="color:#8a5300;font-size:11px">new</span></td><td class="m">Today</td></tr>
+<tr class="row1"><td>8</td><td>92.5 kg</td><td class="m">Sep 18</td></tr>
+<tr class="row1"><td>10</td><td>85 kg</td><td class="m">Sep 4</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<section>
+<p class="cap">Muscles this week</p>
+<div class="ph">
+<div class="title">Muscles this week</div>
+<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span class="b">‹</span><span>Nov 9–15 · 3 of 4 workouts</span><span class="b">›</span></div>
+<div class="c">
+<svg viewBox="0 0 260 150" width="100%" role="img" aria-label="Front and back body figures. Quads and glutes shaded darkest, hamstrings and back medium, chest light.">
+<g fill="#e5e5ea"><circle cx="65" cy="14" r="10"/><circle cx="195" cy="14" r="10"/><rect x="60" y="24" width="10" height="6"/><rect x="190" y="24" width="10" height="6"/></g>
+<rect x="40" y="30" width="16" height="12" rx="6" fill="#b9cbf5"/><rect x="74" y="30" width="16" height="12" rx="6" fill="#b9cbf5"/>
+<rect x="50" y="32" width="30" height="20" rx="4" fill="#dbe5fb"/><rect x="54" y="54" width="22" height="26" rx="4" fill="#b9cbf5"/>
+<rect x="36" y="44" width="10" height="34" rx="5" fill="#dbe5fb"/><rect x="84" y="44" width="10" height="34" rx="5" fill="#dbe5fb"/>
+<rect x="50" y="84" width="13" height="38" rx="6" fill="#2457E6"/><rect x="67" y="84" width="13" height="38" rx="6" fill="#2457E6"/>
+<rect x="52" y="124" width="10" height="22" rx="5" fill="#e5e5ea"/><rect x="68" y="124" width="10" height="22" rx="5" fill="#e5e5ea"/>
+<rect x="170" y="30" width="16" height="12" rx="6" fill="#b9cbf5"/><rect x="204" y="30" width="16" height="12" rx="6" fill="#b9cbf5"/>
+<rect x="180" y="32" width="30" height="46" rx="4" fill="#7d9ff0"/>
+<rect x="166" y="44" width="10" height="34" rx="5" fill="#dbe5fb"/><rect x="214" y="44" width="10" height="34" rx="5" fill="#dbe5fb"/>
+<rect x="180" y="80" width="30" height="14" rx="6" fill="#2457E6"/>
+<rect x="180" y="96" width="13" height="28" rx="6" fill="#7d9ff0"/><rect x="197" y="96" width="13" height="28" rx="6" fill="#7d9ff0"/>
+<rect x="182" y="126" width="10" height="20" rx="5" fill="#dbe5fb"/><rect x="198" y="126" width="10" height="20" rx="5" fill="#dbe5fb"/>
+<text x="65" y="149" font-size="9" fill="#6c6c70" text-anchor="middle">Front</text><text x="232" y="149" font-size="9" fill="#6c6c70" text-anchor="middle">Back</text>
+</svg>
+<div style="display:flex;align-items:center;gap:4px;font-size:11px" class="m">Fewer <span style="width:16px;height:9px;background:#e5e5ea"></span><span style="width:16px;height:9px;background:#dbe5fb"></span><span style="width:16px;height:9px;background:#b9cbf5"></span><span style="width:16px;height:9px;background:#7d9ff0"></span><span style="width:16px;height:9px;background:#2457E6"></span> More sets</div>
+<p class="m" style="font-size:11px;margin:6px 0 0">Simplified here; the real figure reuses the pain report's body map.</p>
+</div>
+<div class="c">
+<table><tr><th>Muscle</th><th style="width:18%">Sets</th><th style="width:44%">Plan</th></tr>
+<tr><td>Quads</td><td>9</td><td class="b"><i class="ti ti-calendar" aria-hidden="true"></i> 12–14 · Sat</td></tr>
+<tr class="row1"><td>Glutes</td><td>9</td><td class="ok"><i class="ti ti-circle-check" aria-hidden="true"></i> 8–10 · in range</td></tr>
+<tr class="row1"><td>Back</td><td>8</td><td class="b"><i class="ti ti-calendar" aria-hidden="true"></i> 12–14 · Fri</td></tr>
+<tr class="row1"><td>Hamstrings</td><td>6</td><td class="b"><i class="ti ti-calendar" aria-hidden="true"></i> 8–10 · Sat</td></tr>
+<tr class="row1"><td>Chest</td><td>4</td><td style="color:#b3261e"><i class="ti ti-alert-triangle" aria-hidden="true"></i> 10–12 · Mon missed</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<section>
+<p class="cap">Finish screen</p>
+<div class="ph">
+<div class="title">Lower A · done</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px">
+<div class="tile"><div class="l">Sets</div><div class="n">14 of 14</div><div class="d ok"><i class="ti ti-circle-check" aria-hidden="true"></i> 100% of plan</div></div>
+<div class="tile"><div class="l">Volume</div><div class="n">6,180 kg</div><div class="d ok">▲ 240 vs last Lower A</div></div>
+<div class="tile"><div class="l">Duration</div><div class="n">52 min</div><div class="d m">plan 55</div></div>
+<div class="tile"><div class="l">PRs</div><div class="n" style="color:#8a5300"><i class="ti ti-medal" aria-hidden="true"></i> 2</div><div class="d m">Squat 105 × 5, RDL</div></div>
+</div>
+<div class="c">
+<div style="font-size:14px;font-weight:600;margin-bottom:8px">How hard was it?</div>
+<div style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px">
+<span class="chip" style="margin:0;padding:5px 0;text-align:center">1</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">2</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">3</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">4</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">5</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">6</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">7</span><span class="chip on" style="margin:0;padding:5px 0;text-align:center">8</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">9</span><span class="chip" style="margin:0;padding:5px 0;text-align:center">10</span>
+</div>
+<div style="display:flex;font-size:11px;margin-top:3px" class="m"><span style="flex:1">Easy</span><span>Max</span></div>
+<div style="margin-top:10px;border:1px solid #d1d1d6;border-radius:8px;padding:8px;font-size:13px" class="m">Add a note for Mike</div>
+<div style="font-size:13px;margin-top:10px" class="b"><i class="ti ti-first-aid-kit" aria-hidden="true"></i> Something hurt?</div>
+</div>
+<div style="font-size:12px;margin-bottom:10px" class="m">Thu Nov 12, 6:02 PM <span class="b">Edit</span></div>
+<div style="background:#2457E6;color:#fff;text-align:center;border-radius:10px;padding:11px;font-size:15px;font-weight:600">Send to Mike</div>
+<div style="text-align:center;font-size:14px;margin-top:8px" class="b">Skip for now</div>
+</div>
+</section>
+
+<section>
+<p class="cap">Workout history</p>
+<div class="ph">
+<div class="title">History</div>
+<div class="c" style="font-size:13px">
+<div style="display:flex"><b style="flex:1">Lower A</b><span class="ok"><i class="ti ti-circle-check" aria-hidden="true"></i> Done</span></div>
+<div class="m" style="font-size:12px">Today · Block 2, week 6</div>
+<div style="display:flex;gap:6px;margin-top:6px"><span style="flex:1">52 min</span><span style="flex:1">6,180 kg</span><span style="flex:1">14 sets</span></div>
+<div style="font-size:12px;margin-top:4px;color:#8a5300"><i class="ti ti-medal" aria-hidden="true"></i> 2 PRs · effort 8</div>
+</div>
+<div class="c" style="font-size:13px">
+<div style="display:flex"><b style="flex:1">Upper A</b><span class="ok"><i class="ti ti-circle-check" aria-hidden="true"></i> Done</span></div>
+<div class="m" style="font-size:12px">Mon Nov 9 · Live with Mike</div>
+<div style="display:flex;gap:6px;margin-top:6px"><span style="flex:1">58 min</span><span style="flex:1">4,920 kg</span><span style="flex:1">16 sets</span></div>
+<div style="font-size:12px;margin-top:4px" class="m">effort 7</div>
+</div>
+<div class="c" style="font-size:13px">
+<div style="display:flex"><b style="flex:1">Lower B</b><span class="ok"><i class="ti ti-circle-check" aria-hidden="true"></i> Done</span></div>
+<div class="m" style="font-size:12px">Sat Nov 7</div>
+<div style="display:flex;gap:6px;margin-top:6px"><span style="flex:1">49 min</span><span style="flex:1">5,640 kg</span><span style="flex:1">13 sets</span></div>
+</div>
+<div class="c" style="font-size:13px">
+<div style="display:flex"><b style="flex:1">Easy bike</b><span class="m">Extra</span></div>
+<div class="m" style="font-size:12px">Fri Nov 6 · her own session</div>
+<div style="display:flex;gap:6px;margin-top:6px"><span style="flex:1">30 min</span><span style="flex:1">–</span><span style="flex:1">–</span></div>
+</div>
+</div>
+</section>
+
+</main>
+<script>
+let kgFirst=false;
+document.getElementById('hdr').addEventListener('click',()=>{
+kgFirst=!kgFirst;const row=document.getElementById('hrow'),s=document.getElementById('hs'),k=document.getElementById('hk');
+if(kgFirst){row.insertBefore(k,s)}else{row.insertBefore(s,k)}
+document.getElementById('htip').textContent=kgFirst?'Tap the header to show sets first':'Tap the header to show kg first';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ava Morgan analytics · Higher Rep mock-up</title>
+<style>
+body{margin:0;background:#f2f2f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1c1c1e}
+main{max-width:1200px;margin:0 auto;padding:20px 32px 40px;box-sizing:border-box}
+.card{background:#fff;border:1px solid #e5e5ea;border-radius:12px;padding:14px 18px}
+.k{font-size:13px;color:rgba(60,60,67,.82);margin:0}
+.v{font-size:26px;font-weight:700;margin:2px 0 0}
+.s{font-size:13px;margin:2px 0 0}
+.h{font-size:16px;font-weight:600;margin:0 0 2px}
+.seg{display:flex;border:1px solid #d1d1d6;border-radius:10px;overflow:hidden}
+.seg span{font-size:14px;padding:8px 14px;border-left:1px solid #d1d1d6;cursor:pointer;background:#fff;min-height:24px}
+.seg span:first-child{border-left:0}
+.seg .on{background:#2457E6;color:#fff;font-weight:600}
+.up{color:#1E7B34}.m{color:rgba(60,60,67,.82)}
+td{padding:7px 4px;border-top:1px solid #efeff4}
+a{color:#2457E6;text-decoration:none}
+.hr-btn{font:inherit;font-size:14px;border:1px solid #d1d1d6;background:#fff;color:#1c1c1e;border-radius:10px;padding:8px 14px;min-height:40px;cursor:pointer}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+@media (max-width:760px){main{padding:16px}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g2{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+<div style="flex:1;min-width:200px"><div style="font-size:26px;font-weight:700">Ava Morgan</div><nav aria-label="Client" style="font-size:14px" class="m">Overview · Calendar · <span aria-current="page" style="color:#2457E6;font-weight:600;border-bottom:2px solid #2457E6">Analytics</span> · Settings · Notes</nav></div>
+<div class="seg" role="group" aria-label="Period"><span>4 weeks</span><span class="on">Program so far</span><span>Block 2</span><span>12 weeks</span></div>
+<button class="hr-btn">Export CSV</button>
+</div>
+
+<div class="g4" style="margin-bottom:6px">
+<div class="card"><p class="k">Compliance</p><p class="v">82%</p><p class="s m">23 of 28 done</p><p class="s up">▲ 6 pts</p></div>
+<div class="card"><p class="k">Hard sets / week</p><p class="v">61</p><p class="s m">≈ 17,900 kg / week</p><p class="s up">▲ 8 sets</p></div>
+<div class="card"><p class="k">RPE vs plan</p><p class="v">+0.3</p><p class="s m">8.1 logged vs 7.8 set</p><p class="s m">▲ 0.1 · session effort 7.6</p></div>
+<div class="card"><p class="k">PRs</p><p class="v">5</p><p class="s m">2 this week</p><p class="s up">▲ 3</p></div>
+</div>
+<p class="k" style="margin:0 0 14px 2px">Arrows compare Block 2 so far with Block 1, week for week.</p>
+
+<div class="g2" style="margin-bottom:12px">
+<div class="card">
+<div style="display:flex;align-items:center;gap:8px"><p class="h" style="flex:1">Volume by week</p><div class="seg" id="vs" role="group" aria-label="Volume measure"><span class="on" data-v="sets">Hard sets</span><span data-v="kg">kg</span></div></div>
+<p class="k" style="margin:6px 0 8px" id="vcap">Bars: hard sets done (outline = planned). Dot: % of workouts done.</p>
+<svg viewBox="0 0 300 150" width="100%" role="img" aria-label="Weekly volume and compliance, weeks 1 to 6">
+<line x1="30" y1="120" x2="296" y2="120" stroke="#d1d1d6"/><line x1="30" y1="40" x2="296" y2="40" stroke="#efeff4"/>
+<text x="26" y="123" font-size="10" text-anchor="end" fill="#6c6c70">0</text><text x="26" y="43" font-size="10" text-anchor="end" fill="#6c6c70" id="ymax">70</text>
+<g id="gsets">
+<g fill="none" stroke="#9db4f2" stroke-dasharray="3 2"><rect x="36" y="56" width="30" height="64"/><rect x="80" y="51" width="30" height="69"/><rect x="124" y="47" width="30" height="73"/><rect x="168" y="85" width="30" height="35"/><rect x="212" y="54" width="30" height="66"/><rect x="256" y="54" width="30" height="66"/></g>
+<g fill="#2457E6"><rect x="36" y="60" width="30" height="60"/><rect x="80" y="51" width="30" height="69"/><rect x="124" y="63" width="30" height="57"/><rect x="168" y="87" width="30" height="33"/><rect x="212" y="58" width="30" height="62"/></g>
+<rect x="256" y="95" width="30" height="25" fill="#9db4f2"/>
+</g>
+<g id="gkg" style="display:none">
+<g fill="#2457E6"><rect x="36" y="55" width="30" height="65"/><rect x="80" y="50" width="30" height="70"/><rect x="124" y="60" width="30" height="60"/><rect x="168" y="84" width="30" height="36"/><rect x="212" y="46" width="30" height="74"/></g>
+<rect x="256" y="82" width="30" height="38" fill="#9db4f2"/>
+<g font-size="9" fill="#6c6c70" text-anchor="middle"><text x="51" y="52">16.2k</text><text x="95" y="47">17.5k</text><text x="139" y="57">15.1k</text><text x="183" y="81">8.9k</text><text x="227" y="43">18.4k</text><text x="271" y="79">9.6k</text></g>
+</g>
+<g fill="#1E7B34"><circle cx="51" cy="30" r="3.5"/><circle cx="95" cy="22" r="3.5"/><circle cx="183" cy="22" r="3.5"/><circle cx="227" cy="26" r="3.5"/></g>
+<circle cx="139" cy="40" r="3.5" fill="#b3261e"/>
+<line x1="206" y1="40" x2="206" y2="138" stroke="#c7c7cc"/>
+<g font-size="10" fill="#6c6c70" text-anchor="middle"><text x="51" y="134">W1</text><text x="95" y="134">W2</text><text x="139" y="134">W3</text><text x="183" y="134">W4 dl</text><text x="227" y="134">W5</text><text x="271" y="134">W6 now</text><text x="120" y="146">Block 1 · Hypertrophy</text><text x="250" y="146">Block 2 · Strength</text></g>
+</svg>
+<p class="s" style="color:#b3261e">▲ Week 3: 67%, missed 1 of 3 workouts</p>
+</div>
+<div class="card">
+<p class="h">Estimated 1RM</p>
+<p class="k" style="margin-bottom:8px">From logged sets. Dots mark PRs. Click a lift for its detail.</p>
+<svg viewBox="0 0 300 150" width="100%" role="img" aria-label="Estimated 1RM for squat, deadlift and bench over weeks 1 to 6">
+<line x1="24" y1="120" x2="296" y2="120" stroke="#d1d1d6"/>
+<g font-size="10" fill="#6c6c70" text-anchor="end"><text x="20" y="123">40</text><text x="20" y="73">100</text><text x="20" y="23">160</text></g>
+<line x1="24" y1="70" x2="296" y2="70" stroke="#efeff4"/><line x1="24" y1="20" x2="296" y2="20" stroke="#efeff4"/>
+<polyline fill="none" stroke="#2457E6" stroke-width="2" points="47,50 92,47 137,46 182,46 227,42 272,39"/>
+<polyline fill="none" stroke="#8a5300" stroke-width="2" points="47,38 92,35 137,33 182,33 227,30 272,30"/>
+<polyline fill="none" stroke="#5f5e5a" stroke-width="2" stroke-dasharray="4 2" points="47,91 92,90 137,88 182,88 227,86 272,85"/>
+<g fill="#2457E6"><circle cx="227" cy="42" r="3.5"/><circle cx="272" cy="39" r="3.5"/></g><circle cx="227" cy="30" r="3.5" fill="#8a5300"/>
+<g font-size="10" fill="#6c6c70" text-anchor="middle"><text x="47" y="134">W1</text><text x="92" y="134">W2</text><text x="137" y="134">W3</text><text x="182" y="134">W4</text><text x="227" y="134">W5</text><text x="272" y="134">W6</text></g>
+</svg>
+<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:14px"><a href="phone-progress.html">— Back squat 128 kg ›</a><a href="#" style="color:#8a5300">— Deadlift 141 kg ›</a><a href="#" style="color:#5f5e5a">- - Bench 70 kg ›</a></div>
+</div>
+</div>
+
+<div class="g2">
+<div class="card">
+<p class="h">Sets per muscle group</p>
+<p class="k" style="margin-bottom:6px">This week so far, against the planned range.</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px">
+<tr class="m"><td style="border:0">Muscle</td><td style="border:0">Done</td><td style="border:0">Plan</td><td style="border:0">Status</td></tr>
+<tr><td>Quads</td><td>9</td><td>12–14</td><td style="color:#2457E6">Planned · Sat</td></tr>
+<tr><td>Glutes</td><td>9</td><td>8–10</td><td style="color:#1E7B34">✓ In range</td></tr>
+<tr><td>Hamstrings</td><td>6</td><td>8–10</td><td style="color:#2457E6">Planned · Sat</td></tr>
+<tr><td>Chest</td><td>4</td><td>10–12</td><td style="color:#b3261e">▲ Behind · Mon missed</td></tr>
+<tr><td>Back</td><td>8</td><td>12–14</td><td style="color:#2457E6">Planned · Fri</td></tr>
+</table>
+</div>
+<div class="card">
+<p class="h">Ava's changes</p>
+<p class="k" style="margin-bottom:8px">Program so far, within her settings.</p>
+<div style="font-size:15px;line-height:2">
+<div>Swaps <b style="float:right">4</b></div>
+<div style="font-size:13px;margin-top:-8px" class="m">3 × Back squat → Safety bar squat</div>
+<div>Moved days <b style="float:right">2</b></div>
+<div>Skipped <b style="float:right">3</b></div>
+<div>Extra sessions <b style="float:right">1</b></div>
+</div>
+<button class="hr-btn" style="width:100%;margin-top:8px">Message Ava about swaps</button>
+</div>
+</div>
+</main>
+<script>
+document.querySelectorAll('#vs span').forEach(s=>s.addEventListener('click',()=>{
+document.querySelectorAll('#vs span').forEach(x=>x.classList.remove('on'));s.classList.add('on');
+const kg=s.dataset.v==='kg';
+document.getElementById('gsets').style.display=kg?'none':'';
+document.getElementById('gkg').style.display=kg?'':'none';
+document.getElementById('ymax').textContent=kg?'20k':'70';
+document.getElementById('vcap').textContent=kg?'Bars: total kg lifted (weight × reps, warm-ups left out). Dot: % of workouts done.':'Bars: hard sets done (outline = planned). Dot: % of workouts done.';
+}));
+</script>
+</body>
+</html>

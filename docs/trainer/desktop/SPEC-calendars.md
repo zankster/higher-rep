@@ -13,8 +13,9 @@ Feature and decision list: [`DECISIONS-calendars.md`](DECISIONS-calendars.md).
   wraps, and wide grids scroll sideways inside their own box.
 - They cover four screens: **My schedule**, **All clients**, **One client** (client calendar), and the
   **Program builder**.
-- Not covered yet: the client's own phone screens for these, analytics, client settings, and the
-  full periodization view. Those are the remaining parts of Phase 1b.
+- Not covered yet: the client's own phone screens for these, and the full periodization view (the
+  rest of Phase 1b). Client settings and analytics have their own specs:
+  [`SPEC-client-settings.md`](SPEC-client-settings.md), [`SPEC-analytics.md`](SPEC-analytics.md).
 
 ## Shared look (all four screens)
 
